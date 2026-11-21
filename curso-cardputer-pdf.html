@@ -690,10 +690,971 @@ void loop() {}</div>
   <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>22</span></div>
 </div>
 
-<!-- As paginas M10 a P3 seguem o mesmo padrao. Por questao de tamanho do plano, -->
-<!-- insira cada modulo como uma <div class="page ph2"> ou <div class="page ph3"> -->
-<!-- copiando a estrutura de M9 acima com o conteudo especifico de cada modulo. -->
-<!-- O codigo completo de cada modulo esta disponivel no arquivo curso-cardputer.html. -->
+<div class="page ph2">
+  <div class="mod-header"><span class="mod-badge">M10</span><div><h1>HTTP e APIs REST</h1><p class="mod-sub">GET, POST, parsing JSON e consumo de APIs REST</p></div><span class="mod-phase">Fase 2 · Intermediario</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Conceito</h2><p>HTTPClient abstrai conexoes TCP para requisicoes HTTP. Instale a biblioteca "ArduinoJson" pelo Library Manager (versao 7.x) para fazer parse de respostas JSON. O fluxo e: http.begin(url) → http.GET() → verificar codigo (200=OK) → http.getString() → deserializeJson().</p>
+      <div class="warn-box"><div class="label">Aviso</div><p>Instale "ArduinoJson" versao 7.x pelo Library Manager, nao a 5.x ou 6.x. Na 7.x use JsonDocument em vez de DynamicJsonDocument ou StaticJsonDocument.</p></div>
+      <div class="exr-box"><div class="label">Exercicio</div><p>Consuma a API https://catfact.ninja/fact (retorna um fato sobre gatos em JSON, campo "fact"). Exiba o fato no display com quebra de linha automatica usando display.setTextWrap(true).</p></div>
+    </div>
+    <div><div class="hw-box"><div class="hw-chip">HTTP<br>REST</div><h3>Bibliotecas necessarias</h3><div class="hw-tags"><span class="hw-tag">HTTPClient.h</span><span class="hw-tag">ArduinoJson</span><span class="hw-tag">WiFiClient</span></div></div></div>
+  </div>
+  <div class="content" style="margin-top:4mm"><h2>Codigo</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+#include &lt;WiFi.h&gt;
+#include &lt;HTTPClient.h&gt;
+#include &lt;ArduinoJson.h&gt;
+
+const char* SSID = "SUA_REDE";
+const char* PASS = "SUA_SENHA";
+
+void setup() {
+  auto cfg = M5.config();
+  M5Cardputer.begin(cfg, true);
+  auto&amp; d = M5Cardputer.Display;
+  d.fillScreen(BLACK); d.setTextColor(WHITE); d.setTextSize(1);
+
+  WiFi.begin(SSID, PASS);
+  while (WiFi.status() != WL_CONNECTED) delay(500);
+  d.println("WiFi OK! Buscando hora...\n");
+
+  HTTPClient http;
+  // API publica de horario (sem autenticacao)
+  http.begin("http://worldtimeapi.org/api/timezone/America/Sao_Paulo");
+  int code = http.GET();
+
+  if (code == 200) {
+    String body = http.getString();
+    JsonDocument doc;
+    deserializeJson(doc, body);
+
+    String dt = doc["datetime"].as&lt;String&gt;();
+    int offset = doc["utc_offset"].as&lt;int&gt;();
+
+    d.setTextColor(CYAN); d.setTextSize(2);
+    d.setCursor(5, 30);
+    d.println(dt.substring(11, 19)); // HH:MM:SS
+    d.setTextColor(WHITE); d.setTextSize(1);
+    d.setCursor(5, 65);
+    d.println(dt.substring(0, 10)); // YYYY-MM-DD
+    d.printf("Fuso: UTC%+d\n", offset/3600);
+  } else {
+    d.printf("Erro HTTP: %d", code);
+  }
+  http.end();
+}
+void loop() {}</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>24</span></div>
+</div>
+<div class="page ph2">
+  <div class="mod-header"><span class="mod-badge">M11</span><div><h1>MQTT e IoT</h1><p class="mod-sub">Protocolo MQTT, broker, publish/subscribe e dashboard IoT</p></div><span class="mod-phase">Fase 2 · Intermediario</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Conceito</h2><p>MQTT (Message Queuing Telemetry Transport) e um protocolo leve de publicacao/subscricao ideal para IoT. Um broker central (ex: HiveMQ) roteia mensagens entre dispositivos via topicos. O Cardputer publica dados (bateria, sensores) e recebe comandos remotamente. Instale "PubSubClient" pelo Library Manager.</p>
+      <div class="warn-box"><div class="label">Dica</div><p>Use o app MQTT Explorer (gratuito) no PC para monitorar os topicos em tempo real. Conecte ao broker.hivemq.com:1883 e assine "cardputer/#" para ver todas as mensagens do seu Cardputer.</p></div>
+      <div class="exr-box"><div class="label">Exercicio</div><p>Adicione ao codigo a capacidade de receber um comando "beep" pelo topico "cardputer/cmd". Quando receber essa mensagem, o Cardputer deve tocar um beep e exibir "Beep recebido!" no display.</p></div>
+    </div>
+    <div><div class="hw-box"><div class="hw-chip">MQTT<br>IoT</div><h3>Bibliotecas necessarias</h3><div class="hw-tags"><span class="hw-tag">PubSubClient</span><span class="hw-tag">WiFiClient</span><span class="hw-tag">broker.hivemq.com</span></div></div></div>
+  </div>
+  <div class="content" style="margin-top:4mm"><h2>Codigo</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+#include &lt;WiFi.h&gt;
+#include &lt;PubSubClient.h&gt;
+
+const char* SSID="SUA_REDE", *PASS="SUA_SENHA";
+const char* HOST="broker.hivemq.com";
+const char* PUB="cardputer/status", *SUB="cardputer/cmd";
+
+WiFiClient wc; PubSubClient mqtt(wc);
+
+void onMsg(char* topic, byte* payload, unsigned int len) {
+  String msg = "";
+  for (uint i=0;i&lt;len;i++) msg += (char)payload[i];
+  M5Cardputer.Display.fillRect(0,100,135,40,BLACK);
+  M5Cardputer.Display.setTextColor(GREEN);
+  M5Cardputer.Display.setCursor(0,102);
+  M5Cardputer.Display.printf("CMD: %s", msg.c_str());
+}
+
+void setup() {
+  auto cfg=M5.config(); M5Cardputer.begin(cfg,true);
+  auto&amp; d=M5Cardputer.Display;
+  d.fillScreen(BLACK); d.setTextColor(WHITE); d.setTextSize(1);
+
+  WiFi.begin(SSID,PASS);
+  while(WiFi.status()!=WL_CONNECTED)delay(500);
+
+  mqtt.setServer(HOST,1883);
+  mqtt.setCallback(onMsg);
+  while(!mqtt.connect("cardputer-001")) delay(1000);
+  mqtt.subscribe(SUB);
+
+  d.println("MQTT OK!");
+  d.printf("Sub: %s\n", SUB);
+  d.printf("Pub: %s\n", PUB);
+  d.println("\nPublicando bat a cada 5s");
+}
+
+void loop() {
+  mqtt.loop(); // OBRIGATORIO: processa mensagens
+  static unsigned long last=0;
+  if(millis()-last>5000) {
+    last=millis();
+    char msg[48];
+    snprintf(msg,sizeof(msg),"{\"bat\":%d,\"rssi\":%d}",
+      M5Cardputer.Power.getBatteryLevel(), WiFi.RSSI());
+    mqtt.publish(PUB, msg);
+  }
+}</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>26</span></div>
+</div>
+<div class="page ph2">
+  <div class="mod-header"><span class="mod-badge">M12</span><div><h1>Infravermelho (IR)</h1><p class="mod-sub">Transmitir, receber e fazer replay de codigos IR</p></div><span class="mod-phase">Fase 2 · Intermediario</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Conceito</h2><p>O Cardputer tem um emissor IR de 940nm no GPIO44. Para controlar, instale "IRremoteESP8266" pelo Library Manager. Os principais protocolos sao NEC (32 bits, usado por LG/Samsung), Sony (12 bits) e RC5 (12 bits, Philips). Cada aparelho tem codigos especificos — bases de dados online (IRDB) listam codigos por marca e modelo.</p>
+      <div class="warn-box"><div class="label">Dica — Encontrar codigos IR</div><p>Use o site irdb.tk ou o app "IR Remote" no smartphone para encontrar os codigos NEC/Sony do seu aparelho. Tambem e possivel capturar codigos de um controle remoto real usando IRrecv com um receptor IR de 38kHz.</p></div>
+      <div class="exr-box"><div class="label">Exercicio</div><p>Crie um menu de controle remoto para uma TV especifica. Mapeie pelo menos 6 funcoes (power, vol+, vol-, ch+, ch-, mute) para teclas do teclado e exiba o menu visualmente.</p></div>
+    </div>
+    <div><div class="hw-box"><div class="hw-chip">IR<br>940nm</div><h3>Hardware neste modulo</h3><div class="hw-tags"><span class="hw-tag">IR LED 940nm</span><span class="hw-tag">GPIO44 (TX)</span><span class="hw-tag">IRremoteESP8266</span><span class="hw-tag">NEC/Sony/RC5</span></div></div></div>
+  </div>
+  <div class="content" style="margin-top:4mm"><h2>Codigo</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+#include &lt;IRremoteESP8266.h&gt;
+#include &lt;IRsend.h&gt;
+
+const uint16_t IR_PIN = 44; // pino IR do Cardputer
+IRsend irsend(IR_PIN);
+
+void setup() {
+  auto cfg=M5.config(); M5Cardputer.begin(cfg,true);
+  irsend.begin();
+
+  auto&amp; d=M5Cardputer.Display;
+  d.fillScreen(BLACK); d.setTextColor(WHITE); d.setTextSize(1);
+  d.println("IR Transmitter");
+  d.println("1 = NEC Power (Samsung)");
+  d.println("2 = Sony Power (TV)");
+  d.println("3 = NEC Vol+ (LG)");
+}
+
+void loop() {
+  M5Cardputer.update();
+  if(M5Cardputer.Keyboard.isChange()&amp;&amp;M5Cardputer.Keyboard.isPressed()) {
+    Keyboard_Class::KeysState st=M5Cardputer.Keyboard.keysState();
+    for(auto c:st.word) {
+      String sent = "";
+      if(c=='1') { irsend.sendNEC(0x07E0E21D,32); sent="NEC Power Samsung"; }
+      if(c=='2') { irsend.sendSony(0xA90,12); sent="Sony Power TV"; }
+      if(c=='3') { irsend.sendNEC(0x20DF40BF,32); sent="NEC Vol+ LG"; }
+      if(sent.length()>0) {
+        M5Cardputer.Display.fillRect(0,60,135,12,BLACK);
+        M5Cardputer.Display.setTextColor(GREEN);
+        M5Cardputer.Display.setCursor(0,60);
+        M5Cardputer.Display.print("Enviado: "+sent);
+        M5Cardputer.Speaker.tone(1200,30);
+      }
+    }
+  }
+}</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>28</span></div>
+</div>
+<div class="page ph2">
+  <div class="mod-header"><span class="mod-badge">M13</span><div><h1>Armazenamento SPIFFS</h1><p class="mod-sub">Ler e gravar arquivos, configuracoes persistentes</p></div><span class="mod-phase">Fase 2 · Intermediario</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Conceito</h2><p>O ESP32-S3 tem 8MB de flash, dos quais parte e reservada para o sistema de arquivos SPIFFS (ou LittleFS). E ideal para armazenar configuracoes (SSID, senha, volume), logs e pequenos arquivos. SPIFFS.begin(true) formata automaticamente se necessario. Arquivos sao acessados como no POSIX: open, read, write, close.</p>
+      <div class="warn-box"><div class="label">Dica — NVS para preferencias simples</div><p>Para guardar apenas pares chave-valor (SSID, tokens), use Preferences.h (NVS) em vez de SPIFFS. E mais simples: prefs.begin("app"); prefs.putString("ssid", "rede"); prefs.getString("ssid", "default");</p></div>
+      <div class="exr-box"><div class="label">Exercicio</div><p>Crie um sistema que salva o volume do speaker (0-255) no SPIFFS. Ao iniciar, leia o volume salvo. Teclas + e - no teclado ajustam o volume e salvam automaticamente o novo valor.</p></div>
+    </div>
+    <div><div class="hw-box"><div class="hw-chip">FS<br>8MB</div><h3>Hardware neste modulo</h3><div class="hw-tags"><span class="hw-tag">Flash 8MB</span><span class="hw-tag">SPIFFS</span><span class="hw-tag">LittleFS</span><span class="hw-tag">NVS</span></div></div></div>
+  </div>
+  <div class="content" style="margin-top:4mm"><h2>Codigo</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+#include &lt;SPIFFS.h&gt;
+
+void saveConfig(String ssid, String pass) {
+  File f = SPIFFS.open("/config.txt", "w");
+  if (!f) return;
+  f.printf("ssid=%s\n", ssid.c_str());
+  f.printf("pass=%s\n", pass.c_str());
+  f.printf("vol=128\n");
+  f.close();
+}
+
+String readConfig(String key) {
+  File f = SPIFFS.open("/config.txt", "r");
+  if (!f) return "";
+  while (f.available()) {
+    String line = f.readStringUntil('\n');
+    line.trim();
+    if (line.startsWith(key+"="))
+      return line.substring(key.length()+1);
+  }
+  f.close();
+  return "";
+}
+
+void setup() {
+  auto cfg=M5.config(); M5Cardputer.begin(cfg,true);
+  auto&amp; d=M5Cardputer.Display;
+  d.fillScreen(BLACK); d.setTextColor(WHITE); d.setTextSize(1);
+
+  if (!SPIFFS.begin(true)) { d.println("SPIFFS falhou!"); return; }
+
+  // Grava configuracao
+  saveConfig("MinhaRede", "senha123");
+  d.println("Config gravada!");
+
+  // Le de volta
+  String ssid = readConfig("ssid");
+  String vol  = readConfig("vol");
+  d.printf("SSID: %s\nVol: %s\n", ssid.c_str(), vol.c_str());
+
+  // Info do FS
+  d.printf("\nTotal: %dKB\nUsado: %dKB\n",
+    SPIFFS.totalBytes()/1024, SPIFFS.usedBytes()/1024);
+}
+void loop() {}</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>30</span></div>
+</div>
+<div class="page ph2">
+  <div class="mod-header"><span class="mod-badge">M14</span><div><h1>Display UI Avancada</h1><p class="mod-sub">Menus navegaveis, widgets e animacoes suaves</p></div><span class="mod-phase">Fase 2 · Intermediario</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Conceito</h2><p>Uma boa UI para o Cardputer tem 3 camadas: header fixo (titulo, status), area de conteudo scrollavel e footer com instrucoes de navegacao. Use uma maquina de estados simples (enum AppState) para gerenciar as telas. Sprites evitam flickering ao redesenhar.</p>
+      <div class="exr-box"><div class="label">Exercicio</div><p>Adicione uma segunda tela (AppState) que e mostrada ao pressionar ENTER em um item do menu. A tela deve mostrar o nome do item selecionado em grande e um botao "Voltar". Implemente com enum AppState { STATE_MENU, STATE_DETAIL }.</p></div>
+    </div>
+    <div><div class="hw-box"><div class="hw-chip">UI<br>UX</div><h3>Tecnicas neste modulo</h3><div class="hw-tags"><span class="hw-tag">Menu scrollavel</span><span class="hw-tag">Sprites</span><span class="hw-tag">State machine</span><span class="hw-tag">Focus/Select</span></div></div></div>
+  </div>
+  <div class="content" style="margin-top:4mm"><h2>Codigo</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+
+struct Item { const char* label; uint16_t icon_color; };
+Item items[] = {
+  {"WiFi Scanner", TFT_CYAN},
+  {"IR Blaster",   TFT_ORANGE},
+  {"Calculadora",  TFT_GREEN},
+  {"Configuracoes",TFT_WHITE},
+  {"Info Sistema", TFT_YELLOW},
+  {"Sobre",        TFT_LIGHTGREY}
+};
+const int N = 6;
+int sel = 0, scroll = 0;
+const int VISIBLE = 4; // itens visiveis por vez
+
+void draw() {
+  auto&amp; d = M5Cardputer.Display;
+  d.fillScreen(0x040A14);
+  // Header
+  d.fillRect(0,0,135,18,0x0D1F3A);
+  d.setTextColor(TFT_CYAN); d.setTextSize(1);
+  d.setCursor(5,5); d.print("Cardputer ADV");
+  d.setTextColor(TFT_DARKGREY);
+  d.setCursor(100,5); d.printf("%d%%",M5Cardputer.Power.getBatteryLevel());
+  // Itens do menu
+  for(int i=0;i&lt;VISIBLE&amp;&amp;(scroll+i)&lt;N;i++) {
+    int idx=scroll+i, y=22+i*24;
+    bool s=(idx==sel);
+    if(s){ d.fillRoundRect(3,y,129,21,3,0x0E2A4A); d.drawRoundRect(3,y,129,21,3,items[idx].icon_color); }
+    d.fillCircle(16,y+10,5,s?items[idx].icon_color:0x1A2A3A);
+    d.setTextColor(s?TFT_WHITE:TFT_DARKGREY);
+    d.setCursor(26,y+6); d.print(items[idx].label);
+  }
+  // Footer
+  d.drawLine(0,120,135,120,0x1A2A3A);
+  d.setTextColor(0x2A3A4A); d.setCursor(3,123);
+  d.print("TAB=nav  ENTER=abre  FN=sair");
+}
+
+void setup() {
+  auto cfg=M5.config(); M5Cardputer.begin(cfg,true);
+  draw();
+}
+void loop() {
+  M5Cardputer.update();
+  if(M5Cardputer.Keyboard.isChange()&amp;&amp;M5Cardputer.Keyboard.isPressed()) {
+    auto st=M5Cardputer.Keyboard.keysState();
+    if(st.tab) {
+      sel=(sel+1)%N;
+      if(sel>=scroll+VISIBLE) scroll++;
+      if(sel&lt;scroll) scroll=sel;
+    }
+    if(st.enter) { /* executar items[sel] */ }
+    draw();
+  }
+}</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>32</span></div>
+</div>
+<div class="page ph2">
+  <div class="mod-header"><span class="mod-badge">M15</span><div><h1>Deep Sleep Avancado</h1><p class="mod-sub">Wake-up sources multiplos e gerenciamento de energia</p></div><span class="mod-phase">Fase 2 · Intermediario</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Conceito</h2><p>No M7 usamos deep sleep basico. Aqui aprofundamos: multiplas fontes de acordar (timer + tecla simultaneamente), RTC_DATA_ATTR para persistir dados, e como identificar o motivo do acordar para executar codigo diferente. O consumo em deep sleep e ~10 microamperes.</p>
+      <div class="exr-box"><div class="label">Exercicio</div><p>Implemente um "data logger": a cada 30 segundos o Cardputer acorda via timer, le a bateria, salva no historico (RTC_DATA_ATTR), e volta a dormir. Apos 10 amostras, exibe o grafico completo antes de dormir novamente.</p></div>
+    </div>
+    <div><div class="hw-box"><div class="hw-chip">ZZZ<br>ULP</div><h3>Hardware neste modulo</h3><div class="hw-tags"><span class="hw-tag">AXP2101</span><span class="hw-tag">RTC Memory</span><span class="hw-tag">ext0/ext1</span><span class="hw-tag">Timer wakeup</span><span class="hw-tag">~10uA sleep</span></div></div></div>
+  </div>
+  <div class="content" style="margin-top:4mm"><h2>Codigo</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+#include &lt;esp_sleep.h&gt;
+
+RTC_DATA_ATTR int boots = 0;
+RTC_DATA_ATTR int batHistory[10];
+RTC_DATA_ATTR int histIdx = 0;
+
+const char* wakeReason() {
+  switch(esp_sleep_get_wakeup_cause()) {
+    case ESP_SLEEP_WAKEUP_TIMER: return "Timer";
+    case ESP_SLEEP_WAKEUP_EXT0:  return "Tecla";
+    case ESP_SLEEP_WAKEUP_EXT1:  return "GPIO Ext";
+    default: return "Power-on";
+  }
+}
+
+void setup() {
+  auto cfg=M5.config(); M5Cardputer.begin(cfg,true);
+  boots++;
+
+  // Registra bateria no historico circular
+  batHistory[histIdx%10] = M5Cardputer.Power.getBatteryLevel();
+  histIdx++;
+
+  auto&amp; d=M5Cardputer.Display;
+  d.fillScreen(BLACK); d.setTextColor(WHITE); d.setTextSize(1);
+  d.printf("Boot #%d | %s\n", boots, wakeReason());
+
+  // Grafico do historico de bateria
+  int count=min(histIdx,10);
+  for(int i=0;i&lt;count;i++){
+    int h=map(batHistory[i],0,100,0,40);
+    uint16_t c=batHistory[i]>50?TFT_GREEN:batHistory[i]>20?TFT_YELLOW:TFT_RED;
+    d.fillRect(5+i*13,60-h,10,h,c);
+    d.drawRect(5+i*13,20,10,40,0x1A2A3A);
+  }
+  d.setCursor(0,70);
+  d.printf("Bat atual: %d%%\nSleep em 3s...",
+    M5Cardputer.Power.getBatteryLevel());
+
+  delay(3000);
+  esp_sleep_enable_ext0_wakeup((gpio_num_t)0,0);
+  esp_sleep_enable_timer_wakeup(60*1000000ULL); // 60s
+  d.fillScreen(BLACK);
+  esp_deep_sleep_start();
+}
+void loop() {}</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>34</span></div>
+</div>
+<div class="page proj">
+  <div class="mod-header"><span class="mod-badge">PROJETO 2</span><div><h1>Terminal WiFi</h1><p class="mod-sub">Projeto final Fase 2 — terminal grafico com WiFi</p></div><span class="mod-phase">Fase 2 · Projeto Final</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Descricao</h2><p>Um terminal interativo que se conecta ao WiFi e aceita comandos via teclado. Comandos disponiveis: ip (mostra IP), rssi (forca do sinal), bat (bateria), scan (escaneia redes), get [url] (faz GET HTTP e exibe status). Log scrollavel na tela.</p>
+      <div class="warn-box"><div class="label">Desafio Extra</div><p>Adicione o comando "ping [ip]" que tenta conectar na porta 80 do IP e reporta se esta acessivel (use WiFiClient.connect(ip, 80, 1000)). Adicione "time" que busca o horario pela worldtimeapi.</p></div>
+    </div>
+    <div><div class="hw-box"><div class="hw-chip">TERM<br>&gt;_</div><h3>Objetivos do Projeto</h3><div class="hw-tags"><span class="hw-tag">Interface terminal</span><span class="hw-tag">WiFi conectado</span><span class="hw-tag">HTTP requests</span><span class="hw-tag">Comandos interativos</span></div></div></div>
+  </div>
+  <div class="content" style="margin-top:4mm"><h2>Codigo Completo</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+#include &lt;WiFi.h&gt;
+#include &lt;HTTPClient.h&gt;
+
+const char* SSID="SUA_REDE", *PASS="SUA_SENHA";
+String log_buf="", cmd="";
+int logLines=0;
+const int MAX_LOG=7;
+
+void addLog(String line) {
+  log_buf += line+"\n"; logLines++;
+  if(logLines>MAX_LOG){ log_buf=log_buf.substring(log_buf.indexOf('\n')+1); logLines--; }
+  draw();
+}
+void draw() {
+  auto&amp; d=M5Cardputer.Display;
+  d.fillScreen(BLACK);
+  d.fillRect(0,0,135,14,0x0D3A6E);
+  d.setTextColor(CYAN); d.setTextSize(1);
+  d.setCursor(2,3);
+  d.print(WiFi.isConnected()?WiFi.localIP().toString():"desconectado");
+  d.setTextColor(WHITE); d.setCursor(2,16);
+  d.print(log_buf);
+  d.drawLine(0,115,135,115,CYAN);
+  d.setTextColor(GREEN); d.setCursor(2,118);
+  d.print("> "+cmd);
+}
+void exec(String c) {
+  c.trim();
+  if(c=="ip")   addLog("IP: "+WiFi.localIP().toString());
+  else if(c=="rssi") addLog("RSSI: "+String(WiFi.RSSI())+"dBm");
+  else if(c=="bat")  addLog("Bat: "+String(M5Cardputer.Power.getBatteryLevel())+"%");
+  else if(c=="scan") {
+    int n=WiFi.scanNetworks(false,true);
+    for(int i=0;i&lt;min(n,3);i++) addLog(WiFi.SSID(i)+" "+WiFi.RSSI(i));
+    addLog(String(n)+" redes");
+  }
+  else if(c.startsWith("get ")) {
+    HTTPClient h; h.begin(c.substring(4));
+    int code=h.GET(); addLog("HTTP "+String(code));
+    if(code==200) addLog(h.getString().substring(0,40));
+    h.end();
+  }
+  else addLog("? "+c+" (ip rssi bat scan get)");
+}
+void setup() {
+  auto cfg=M5.config(); M5Cardputer.begin(cfg,true);
+  addLog("Conectando...");
+  WiFi.begin(SSID,PASS); int t=0;
+  while(WiFi.status()!=WL_CONNECTED&amp;&amp;t++&lt;20)delay(500);
+  addLog(WiFi.isConnected()?"OK! "+WiFi.localIP().toString():"FALHA");
+  addLog("cmds: ip rssi bat scan get");
+}
+void loop() {
+  M5Cardputer.update();
+  if(M5Cardputer.Keyboard.isChange()&amp;&amp;M5Cardputer.Keyboard.isPressed()) {
+    auto st=M5Cardputer.Keyboard.keysState();
+    for(auto c:st.word) cmd+=c;
+    if(st.del&amp;&amp;cmd.length()>0) cmd.remove(cmd.length()-1);
+    if(st.enter) { exec(cmd); cmd=""; }
+    if(st.fn) { cmd=""; log_buf=""; logLines=0; }
+    draw();
+  }
+}</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>36</span></div>
+</div>
+<div class="page ph3">
+  <div class="mod-header"><span class="mod-badge">M17</span><div><h1>BLE e Bluetooth</h1><p class="mod-sub">Scanner BLE, HID keyboard emulation e BLE UART</p></div><span class="mod-phase">Fase 3 · Avancado</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Conceito</h2><p>O ESP32-S3 tem BLE 5.0 integrado. As classes BLEDevice, BLEScan e BLEAdvertisedDevice fazem o scan. Para HID (emular teclado/mouse Bluetooth), use a biblioteca "ESP32 BLE Keyboard" do Arduino Library Manager — o Cardputer pode se conectar ao PC/celular e digitar texto remotamente.</p>
+      <div class="warn-box"><div class="label">Dica — BLE HID Keyboard</div><p>Instale "ESP32 BLE Keyboard" pelo Library Manager. Com ela: BleKeyboard kb("Cardputer"); kb.begin(); e depois kb.print("Texto digitado pelo Cardputer!"). O dispositivo aparece como teclado Bluetooth no PC/celular.</p></div>
+      <div class="exr-box"><div class="label">Exercicio</div><p>Usando a biblioteca BleKeyboard, crie um "macro pad": o Cardputer se conecta como teclado Bluetooth ao PC. Teclas 1-5 no teclado fisico enviam macros pre-definidas ao computador (ex: tecla 1 digita seu email, tecla 2 digita uma senha comum).</p></div>
+    </div>
+    <div><div class="hw-box"><div class="hw-chip">BLE<br>5.0</div><h3>Hardware neste modulo</h3><div class="hw-tags"><span class="hw-tag">ESP32-S3 BLE 5.0</span><span class="hw-tag">BLEDevice.h</span><span class="hw-tag">BLEScan</span><span class="hw-tag">BLE HID</span></div></div></div>
+  </div>
+  <div class="content" style="margin-top:4mm"><h2>Codigo</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+#include &lt;BLEDevice.h&gt;
+#include &lt;BLEAdvertisedDevice.h&gt;
+#include &lt;BLEScan.h&gt;
+
+BLEScan* scanner;
+int count = 0;
+
+class ScanCB : public BLEAdvertisedDeviceCallbacks {
+  void onResult(BLEAdvertisedDevice dev) override {
+    if(count++ >= 5) return; // limita a 5 itens na tela
+    String name = dev.getName().length()&gt;0 ? dev.getName().c_str() : "[?]";
+    uint16_t col = dev.getRSSI()&gt;-60?TFT_GREEN:dev.getRSSI()&gt;-80?TFT_YELLOW:TFT_DARKGREY;
+    M5Cardputer.Display.setTextColor(col);
+    M5Cardputer.Display.printf("%-16s %ddBm\n", name.substring(0,14).c_str(), dev.getRSSI());
+  }
+};
+
+void setup() {
+  auto cfg=M5.config(); M5Cardputer.begin(cfg,true);
+  auto&amp; d=M5Cardputer.Display;
+  d.fillScreen(BLACK); d.setTextColor(CYAN); d.setTextSize(1);
+  d.println("BLE Scanner (5s)...\n");
+
+  BLEDevice::init("Cardputer");
+  scanner = BLEDevice::getScan();
+  scanner-&gt;setAdvertisedDeviceCallbacks(new ScanCB());
+  scanner-&gt;setActiveScan(true);
+  scanner-&gt;setInterval(100);
+  scanner-&gt;setWindow(99);
+
+  d.setTextColor(WHITE);
+  BLEScanResults res = scanner-&gt;start(5, false);
+  d.printf("\nTotal: %d dispositivos", res.getCount());
+  scanner-&gt;clearResults();
+}
+void loop() {}</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>40</span></div>
+</div>
+<div class="page ph3">
+  <div class="mod-header"><span class="mod-badge">M18</span><div><h1>Scanner WiFi Avancado</h1><p class="mod-sub">RSSI, canais, redes ocultas e wardriving basico</p></div><span class="mod-phase">Fase 3 · Avancado</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Conceito</h2><p>WiFi.scanNetworks(async, show_hidden) com show_hidden=true lista tambem redes que nao divulgam SSID. WiFi.channel(i) e WiFi.encryptionType(i) dao informacoes de seguranca. O modo promiscuo (esp_wifi_set_promiscuous) permite capturar todos os frames 802.11 do ar — base do wardriving.</p>
+      <div class="warn-box"><div class="label">Aviso Legal</div><p>Scanner passivo (receber frames) e legal. Deauth, injecao de pacotes ou qualquer interferencia ativa em redes alheias e ilegal em todos os paises. Use apenas em redes proprias ou com autorizacao explicita por escrito.</p></div>
+      <div class="exr-box"><div class="label">Exercicio</div><p>Adicione um modo "historico de canais": exiba um grafico de barras com a contagem de redes por canal (1-13). Isso mostra visualmente quais canais estao congestionados na sua area.</p></div>
+    </div>
+    <div><div class="hw-box"><div class="hw-chip">RF<br>SCAN</div><h3>Hardware neste modulo</h3><div class="hw-tags"><span class="hw-tag">ESP32 WiFi</span><span class="hw-tag">Promiscuous mode</span><span class="hw-tag">RSSI</span><span class="hw-tag">Redes ocultas</span></div></div></div>
+  </div>
+  <div class="content" style="margin-top:4mm"><h2>Codigo</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+#include &lt;WiFi.h&gt;
+
+const char* encType(wifi_auth_mode_t t) {
+  switch(t){
+    case WIFI_AUTH_OPEN: return "OPEN";
+    case WIFI_AUTH_WEP: return "WEP";
+    case WIFI_AUTH_WPA_PSK: return "WPA";
+    case WIFI_AUTH_WPA2_PSK: return "WPA2";
+    case WIFI_AUTH_WPA3_PSK: return "WPA3";
+    default: return "???";
+  }
+}
+
+void setup() {
+  auto cfg=M5.config(); M5Cardputer.begin(cfg,true);
+  WiFi.mode(WIFI_STA); WiFi.disconnect(); delay(100);
+}
+
+void loop() {
+  auto&amp; d=M5Cardputer.Display;
+  d.fillScreen(BLACK);
+  d.fillRect(0,0,135,14,0x0D1526);
+  d.setTextColor(CYAN); d.setTextSize(1);
+  d.setCursor(3,3); d.print("WiFi Scanner Pro");
+
+  int n=WiFi.scanNetworks(false,true); // inclui redes ocultas
+  int y=16;
+  for(int i=0;i&lt;min(n,6)&amp;&amp;y&lt;115;i++){
+    int rssi=WiFi.RSSI(i);
+    int bars=constrain(map(rssi,-90,-30,0,5),0,5);
+    uint16_t col=rssi&gt;-50?TFT_GREEN:rssi&gt;-70?TFT_YELLOW:TFT_RED;
+    String ssid=WiFi.SSID(i).length()&gt;0?WiFi.SSID(i):"[oculta]";
+    d.setTextColor(col); d.setCursor(3,y);
+    d.printf("%-14s ch%02d %s\n",ssid.substring(0,12).c_str(),WiFi.channel(i),encType(WiFi.encryptionType(i)));
+    // Barra de sinal
+    for(int b=0;b&lt;5;b++) d.fillRect(115+b*4,y+2-b,3,b+1,b&lt;bars?col:0x1A2A3A);
+    y+=16;
+  }
+  d.setTextColor(0x2A3A4A); d.setCursor(3,120);
+  d.printf("%d redes. Aguardando 5s...", n);
+  delay(5000);
+}</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>42</span></div>
+</div>
+<div class="page ph3">
+  <div class="mod-header"><span class="mod-badge">M19</span><div><h1>IR Blaster Universal</h1><p class="mod-sub">Menu de controle remoto e banco de codigos</p></div><span class="mod-phase">Fase 3 · Avancado</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Conceito</h2><p>Este modulo expande o M12 com um menu completo e banco de codigos para multiplas marcas. A estrutura de dados usa arrays de structs com nome, codigo e protocolo. O menu permite selecionar marca e funcao. Este e o modulo mais proximo de um "controle remoto universal" real.</p>
+      <div class="exr-box"><div class="label">Exercicio</div><p>Adicione uma segunda "marca" (ex: Samsung) e implemente um seletor de marca com tecla 'B'. Ao pressionar B, alterna entre LG e Samsung e recarrega os codigos correspondentes. Dica: use um array bidimensional ou um indice de marca atual.</p></div>
+    </div>
+    <div><div class="hw-box"><div class="hw-chip">IR<br>UNIV</div><h3>Hardware neste modulo</h3><div class="hw-tags"><span class="hw-tag">IR LED GPIO44</span><span class="hw-tag">NEC/Sony/RC5</span><span class="hw-tag">IRsend</span><span class="hw-tag">Banco de codigos</span></div></div></div>
+  </div>
+  <div class="content" style="margin-top:4mm"><h2>Codigo</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+#include &lt;IRremoteESP8266.h&gt;
+#include &lt;IRsend.h&gt;
+
+IRsend irsend(44);
+
+struct IRCode { const char* name; uint32_t code; uint16_t bits; };
+IRCode TV[] = {
+  {"Power",0x20DF10EF,32},{"Vol+",0x20DF40BF,32},
+  {"Vol-",0x20DFC03F,32},{"Mute",0x20DF906F,32},
+  {"Ch+",0x20DF00FF,32},{"Ch-",0x20DF807F,32},
+  {"Fonte",0x20DFD02F,32},{"Menu",0x20DFC23D,32}
+};
+const int N=8; int sel=0;
+
+void draw(String msg="") {
+  auto&amp; d=M5Cardputer.Display;
+  d.fillScreen(BLACK);
+  d.fillRect(0,0,135,16,0x2A1000);
+  d.setTextColor(TFT_ORANGE); d.setTextSize(1);
+  d.setCursor(3,4); d.print("IR Blaster — TV LG");
+  for(int i=0;i&lt;min(N,6);i++) {
+    int y=20+i*18;
+    bool s=(i==sel);
+    if(s){d.fillRect(3,y,129,16,0x3A2000);d.drawRect(3,y,129,16,TFT_ORANGE);}
+    d.setTextColor(s?TFT_WHITE:TFT_LIGHTGREY);
+    d.setCursor(10,y+4); d.print(TV[i].name);
+  }
+  if(msg.length()&gt;0){d.setTextColor(TFT_GREEN);d.setCursor(3,126);d.print(msg);}
+  else{d.setTextColor(0x2A3A4A);d.setCursor(3,126);d.print("TAB=nav ENTER=enviar");}
+}
+
+void setup(){
+  auto cfg=M5.config(); M5Cardputer.begin(cfg,true); irsend.begin(); draw();
+}
+void loop(){
+  M5Cardputer.update();
+  if(M5Cardputer.Keyboard.isChange()&amp;&amp;M5Cardputer.Keyboard.isPressed()){
+    auto st=M5Cardputer.Keyboard.keysState();
+    if(st.tab){sel=(sel+1)%N; draw();}
+    if(st.enter){
+      irsend.sendNEC(TV[sel].code,TV[sel].bits);
+      M5Cardputer.Speaker.tone(1200,40);
+      draw("Enviado: "+String(TV[sel].name));
+    }
+  }
+}</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>44</span></div>
+</div>
+<div class="page ph3">
+  <div class="mod-header"><span class="mod-badge">M20</span><div><h1>OTA Updates</h1><p class="mod-sub">Over-the-Air firmware update via ArduinoOTA</p></div><span class="mod-phase">Fase 3 · Avancado</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Conceito</h2><p>OTA (Over-the-Air) permite atualizar o firmware sem cabo USB. O Cardputer se anuncia na rede local via mDNS como "cardputer.local". No Arduino IDE 2.x, apos o primeiro upload com cabo, o dispositivo aparece em Tools &gt; Port &gt; Network como "cardputer.local". Uploads subsequentes sao feitos pelo WiFi.</p>
+      <div class="exr-box"><div class="label">Exercicio</div><p>Adicione um Web Updater: um servidor HTTP simples (WebServer.h) que serve uma pagina HTML com formulario de upload de .bin. Acesse pelo IP do Cardputer no navegador do PC e faca upload de um novo firmware sem o Arduino IDE.</p></div>
+    </div>
+    <div><div class="hw-box"><div class="hw-chip">OTA<br>WiFi</div><h3>Bibliotecas necessarias</h3><div class="hw-tags"><span class="hw-tag">ArduinoOTA.h</span><span class="hw-tag">mDNS</span><span class="hw-tag">cardputer.local</span><span class="hw-tag">port 3232</span></div></div></div>
+  </div>
+  <div class="content" style="margin-top:4mm"><h2>Codigo</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+#include &lt;WiFi.h&gt;
+#include &lt;ArduinoOTA.h&gt;
+
+const char* SSID="SUA_REDE", *PASS="SUA_SENHA";
+
+void setup() {
+  auto cfg=M5.config(); M5Cardputer.begin(cfg,true);
+  auto&amp; d=M5Cardputer.Display;
+  d.fillScreen(BLACK); d.setTextColor(WHITE); d.setTextSize(1);
+
+  WiFi.begin(SSID,PASS);
+  while(WiFi.status()!=WL_CONNECTED){delay(500);d.print(".");}
+  d.println("\nWiFi OK!");
+
+  ArduinoOTA.setHostname("cardputer");    // cardputer.local
+  ArduinoOTA.setPassword("cardputer123"); // senha de upload
+
+  ArduinoOTA.onStart([](){
+    M5Cardputer.Display.fillScreen(0x001040);
+    M5Cardputer.Display.setTextColor(CYAN);
+    M5Cardputer.Display.setCursor(10,50);
+    M5Cardputer.Display.println("OTA: Recebendo...");
+  });
+  ArduinoOTA.onProgress([](unsigned int prog, unsigned int total){
+    int pct=prog*100/total;
+    int w=prog*120/total;
+    M5Cardputer.Display.fillRect(7,75,120,12,0x001040);
+    M5Cardputer.Display.fillRect(7,75,w,12,CYAN);
+    M5Cardputer.Display.drawRect(7,75,120,12,WHITE);
+    M5Cardputer.Display.setCursor(55,92);
+    M5Cardputer.Display.printf("%d%%",pct);
+  });
+  ArduinoOTA.onEnd([](){
+    M5Cardputer.Display.fillScreen(0x003300);
+    M5Cardputer.Display.setTextColor(GREEN);
+    M5Cardputer.Display.setCursor(20,60);
+    M5Cardputer.Display.println("OTA Concluido!");
+  });
+  ArduinoOTA.onError([](ota_error_t err){
+    M5Cardputer.Display.printf("Erro OTA[%d]",err);
+  });
+
+  ArduinoOTA.begin();
+  d.fillScreen(BLACK); d.setCursor(0,0);
+  d.setTextColor(GREEN); d.println("OTA Pronto!");
+  d.setTextColor(WHITE);
+  d.println(WiFi.localIP().toString());
+  d.println("Arduino IDE:");
+  d.setTextColor(CYAN);
+  d.println("Port > cardputer.local");
+}
+void loop() { ArduinoOTA.handle(); } // OBRIGATORIO no loop</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>46</span></div>
+</div>
+<div class="page ph3">
+  <div class="mod-header"><span class="mod-badge">M21</span><div><h1>Criptografia e TLS</h1><p class="mod-sub">HTTPS, certificados e mbedTLS no ESP32-S3</p></div><span class="mod-phase">Fase 3 · Avancado</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Conceito</h2><p>WiFiClientSecure permite conexoes HTTPS. Ha dois modos: client.setInsecure() (nao verifica certificado — apenas para desenvolvimento) e client.setCACert(cert) (verifica com certificado CA — para producao). O ESP32-S3 tem aceleracao hardware AES e SHA via mbedTLS, tornando criptografia viavel mesmo em microcontrolador.</p>
+      <div class="warn-box"><div class="label">Dica — NVS para guardar tokens com seguranca</div><p>Use Preferences.h (NVS — Non-Volatile Storage) para guardar tokens e senhas. O NVS e armazenado em particao separada da flash e nao pode ser lido por um simples dump do firmware.</p></div>
+      <div class="exr-box"><div class="label">Exercicio</div><p>Crie uma ferramenta de verificacao de integridade: o usuario digita uma mensagem pelo teclado, o Cardputer calcula o SHA-256 e exibe o hash. Ao digitar a mesma mensagem novamente, confirma que o hash bate.</p></div>
+    </div>
+    <div><div class="hw-box"><div class="hw-chip">TLS<br>SSL</div><h3>Bibliotecas neste modulo</h3><div class="hw-tags"><span class="hw-tag">WiFiClientSecure</span><span class="hw-tag">mbedTLS</span><span class="hw-tag">HTTPS</span><span class="hw-tag">SHA256</span></div></div></div>
+  </div>
+  <div class="content" style="margin-top:4mm"><h2>Codigo</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+#include &lt;WiFi.h&gt;
+#include &lt;WiFiClientSecure.h&gt;
+#include &lt;HTTPClient.h&gt;
+#include "mbedtls/sha256.h"
+
+const char* SSID="SUA_REDE", *PASS="SUA_SENHA";
+
+String sha256(String input) {
+  uint8_t hash[32];
+  mbedtls_sha256_context ctx;
+  mbedtls_sha256_init(&amp;ctx);
+  mbedtls_sha256_starts(&amp;ctx, 0);
+  mbedtls_sha256_update(&amp;ctx, (const uint8_t*)input.c_str(), input.length());
+  mbedtls_sha256_finish(&amp;ctx, hash);
+  mbedtls_sha256_free(&amp;ctx);
+  String hex="";
+  for(int i=0;i&lt;32;i++){char b[3]; sprintf(b,"%02x",hash[i]); hex+=b;}
+  return hex;
+}
+
+void setup() {
+  auto cfg=M5.config(); M5Cardputer.begin(cfg,true);
+  auto&amp; d=M5Cardputer.Display;
+  d.fillScreen(BLACK); d.setTextColor(WHITE); d.setTextSize(1);
+
+  // Demo SHA-256 local (sem WiFi)
+  String msg="Cardputer!";
+  String hash=sha256(msg);
+  d.println("SHA-256 local:");
+  d.println(msg);
+  d.setTextColor(CYAN);
+  d.println(hash.substring(0,16)+"...");
+
+  // HTTPS request
+  WiFi.begin(SSID,PASS);
+  while(WiFi.status()!=WL_CONNECTED)delay(500);
+  d.setTextColor(WHITE); d.println("\nWiFi OK! Testando HTTPS...");
+
+  WiFiClientSecure client;
+  client.setInsecure(); // nao verificar cert (apenas dev!)
+  HTTPClient https;
+  https.begin(client, "https://httpbin.org/get");
+  int code=https.GET();
+  d.printf("HTTPS GET: %d\n",code);
+  if(code==200){d.setTextColor(GREEN);d.println("TLS OK!");}
+  https.end();
+}
+void loop() {}</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>48</span></div>
+</div>
+<div class="page ph3">
+  <div class="mod-header"><span class="mod-badge">M22</span><div><h1>Microfone e Audio</h1><p class="mod-sub">Microfone PDM SPM1423 e visualizador de espectro</p></div><span class="mod-phase">Fase 3 · Avancado</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Conceito</h2><p>O microfone SPM1423 usa interface PDM (Pulse Density Modulation) convertida para I2S internamente pelo ESP32-S3. M5Cardputer.Mic.record(buffer, samples, rate) captura amostras de audio. Para visualizacao, calcula-se RMS (Root Mean Square) do buffer — representa o volume instantaneo.</p>
+      <div class="exr-box"><div class="label">Exercicio</div><p>Adicione deteccao de palmas (clap detection): quando o RMS ultrapassar um limiar (ex: 2000) por pelo menos 2 amostras consecutivas, conte como uma palma e exiba o contador na tela com um flash verde.</p></div>
+    </div>
+    <div><div class="hw-box"><div class="hw-chip">MIC<br>PDM</div><h3>Hardware neste modulo</h3><div class="hw-tags"><span class="hw-tag">SPM1423 PDM</span><span class="hw-tag">I2S</span><span class="hw-tag">16kHz</span><span class="hw-tag">M5Cardputer.Mic</span></div></div></div>
+  </div>
+  <div class="content" style="margin-top:4mm"><h2>Codigo</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+#include &lt;math.h&gt;
+
+const int RATE=16000, SAMPLES=256;
+int16_t buf[SAMPLES];
+// Historico de volumes para o grafico
+int hist[130] = {0};
+int histPos = 0;
+
+void setup() {
+  auto cfg=M5.config(); M5Cardputer.begin(cfg,true);
+  M5Cardputer.Mic.begin();
+  M5Cardputer.Display.fillScreen(BLACK);
+  M5Cardputer.Display.setTextColor(CYAN);
+  M5Cardputer.Display.setCursor(3,3);
+  M5Cardputer.Display.print("Mic SPM1423 — Osciloscópio");
+}
+
+void loop() {
+  if(!M5Cardputer.Mic.record(buf, SAMPLES, RATE)) return;
+
+  // Calcula RMS
+  long sum=0;
+  for(int i=0;i&lt;SAMPLES;i++) sum+=(long)buf[i]*buf[i];
+  int rms=(int)sqrt((double)sum/SAMPLES);
+  int vol=constrain(map(rms,0,4000,0,60),0,60);
+
+  // Adiciona ao historico
+  hist[histPos%130]=vol; histPos++;
+
+  // Redesenha grafico de forma de onda historica
+  M5Cardputer.Display.fillRect(0,15,135,100,BLACK);
+  for(int x=0;x&lt;130;x++) {
+    int idx=(histPos-130+x+130)%130;
+    int h=hist[idx];
+    uint16_t c=h&lt;20?TFT_GREEN:h&lt;40?TFT_YELLOW:TFT_RED;
+    M5Cardputer.Display.drawFastVLine(x+3,75-h,h,c);
+  }
+  // Nivel atual em texto
+  M5Cardputer.Display.fillRect(0,118,135,12,BLACK);
+  M5Cardputer.Display.setTextColor(WHITE);
+  M5Cardputer.Display.setCursor(3,118);
+  M5Cardputer.Display.printf("RMS:%d Vol:%d",rms,vol);
+}</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>50</span></div>
+</div>
+<div class="page ph3">
+  <div class="mod-header"><span class="mod-badge">M23</span><div><h1>FreeRTOS e Multitasking</h1><p class="mod-sub">Tasks, semaforos e comunicacao entre tasks</p></div><span class="mod-phase">Fase 3 · Avancado</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Conceito</h2><p>O ESP32-S3 tem dois cores (Core 0 e Core 1). O Arduino loop() roda no Core 1. Com FreeRTOS, crie tasks independentes em qualquer core. xQueueCreate/xQueueSend/xQueueReceive implementam comunicacao segura entre tasks (thread-safe). vTaskDelay(pdMS_TO_TICKS(ms)) e o delay correto dentro de tasks — libera o processador durante a espera.</p>
+      <div class="exr-box"><div class="label">Exercicio</div><p>Adicione uma terceira task (Core 0) que escaneia WiFi a cada 10 segundos e envia o numero de redes encontradas para a fila. A task de display deve mostrar as mensagens de sensor e WiFi em cores diferentes (branco para sensor, ciano para WiFi).</p></div>
+    </div>
+    <div><div class="hw-box"><div class="hw-chip">RTOS<br>dual</div><h3>Conceitos deste modulo</h3><div class="hw-tags"><span class="hw-tag">FreeRTOS</span><span class="hw-tag">xTaskCreate</span><span class="hw-tag">xQueueCreate</span><span class="hw-tag">vTaskDelay</span><span class="hw-tag">Dual-core</span></div></div></div>
+  </div>
+  <div class="content" style="margin-top:4mm"><h2>Codigo</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+#include &lt;WiFi.h&gt;
+
+const char* SSID="SUA_REDE", *PASS="SUA_SENHA";
+QueueHandle_t queue;
+
+// Task no Core 0: coleta dados a cada 2 segundos
+void taskSensor(void* p) {
+  while(true) {
+    char msg[48];
+    snprintf(msg,sizeof(msg),"BAT:%d%% RSSI:%ddBm",
+      M5Cardputer.Power.getBatteryLevel(), WiFi.RSSI());
+    xQueueSend(queue, msg, 0); // nao bloqueia se fila cheia
+    vTaskDelay(pdMS_TO_TICKS(2000));
+  }
+}
+
+// Task no Core 1: exibe no display quando recebe mensagem
+void taskDisplay(void* p) {
+  char msg[48];
+  int y=20;
+  while(true) {
+    if(xQueueReceive(queue, msg, portMAX_DELAY)) {
+      M5Cardputer.Display.setTextColor(WHITE, BLACK);
+      M5Cardputer.Display.setCursor(0,y);
+      M5Cardputer.Display.println(msg);
+      y+=12;
+      if(y&gt;120){y=20;M5Cardputer.Display.fillRect(0,20,135,100,BLACK);}
+    }
+  }
+}
+
+void setup() {
+  auto cfg=M5.config(); M5Cardputer.begin(cfg,true);
+  auto&amp; d=M5Cardputer.Display;
+  d.fillScreen(BLACK); d.setTextColor(CYAN); d.setTextSize(1);
+  d.setCursor(0,0); d.print("FreeRTOS Dual-Core");
+
+  WiFi.begin(SSID,PASS);
+  while(WiFi.status()!=WL_CONNECTED)delay(500);
+
+  // Fila de 5 mensagens de 48 bytes
+  queue = xQueueCreate(5, 48);
+
+  // xTaskCreatePinnedToCore(funcao, nome, stack, param, prioridade, handle, core)
+  xTaskCreatePinnedToCore(taskSensor,  "sensor", 4096, NULL, 1, NULL, 0);
+  xTaskCreatePinnedToCore(taskDisplay, "display",4096, NULL, 1, NULL, 1);
+}
+void loop() { vTaskDelay(pdMS_TO_TICKS(1000)); } // loop idle</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>52</span></div>
+</div>
+<div class="page ph3">
+  <div class="mod-header"><span class="mod-badge">PROJETO 3</span><div><h1>Swiss Army Knife</h1><p class="mod-sub">Projeto final — WiFi Scanner + BLE + IR + Terminal</p></div><span class="mod-phase">Fase 3 · Projeto Final</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Descricao</h2><p>O projeto final integra todas as 3 fases em uma unica aplicacao: menu principal com 4 modos, cada modo usa os modulos ensinados anteriormente. O menu usa a UI do M14, o WiFi scanner do M18, o BLE scanner do M17 e o IR blaster do M19.</p>
+      <div class="warn-box"><div class="label">Parabens! Voce concluiu o curso.</div><p>Voce agora domina o M5Stack Cardputer do hardware ao software avancado. Proximos passos: contribua com projetos open-source no GitHub, participe da comunidade M5Stack no Discord e construa suas proprias ferramentas.</p></div>
+    </div>
+    <div><div class="hw-box"><div class="hw-chip">SAK<br>v1.0</div><h3>Modulos integrados</h3><div class="hw-tags"><span class="hw-tag">WiFi (M9/M18)</span><span class="hw-tag">BLE (M17)</span><span class="hw-tag">IR (M12/M19)</span><span class="hw-tag">Terminal (P2)</span><span class="hw-tag">FreeRTOS (M23)</span></div></div></div>
+  </div>
+  <div class="content" style="margin-top:4mm"><h2>Codigo Completo</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+#include &lt;WiFi.h&gt;
+#include &lt;BLEDevice.h&gt;
+#include &lt;BLEScan.h&gt;
+#include &lt;IRremoteESP8266.h&gt;
+#include &lt;IRsend.h&gt;
+
+IRsend irsend(44);
+enum Mode { MENU, WIFI, BLE, IR, TERMINAL };
+Mode mode=MENU;
+int menuSel=0;
+
+const char* menuItems[]=
+  {"WiFi Scanner","BLE Scanner","IR Blaster","Terminal"};
+const uint16_t menuColors[]=
+  {TFT_CYAN,TFT_YELLOW,TFT_ORANGE,TFT_GREEN};
+
+void drawMenu() {
+  auto&amp; d=M5Cardputer.Display;
+  d.fillScreen(0x020A14);
+  d.fillRect(0,0,135,18,0x0D1F3A);
+  d.setTextColor(TFT_CYAN); d.setTextSize(1);
+  d.setCursor(3,5); d.print("Swiss Army Knife v1.0");
+  d.setTextColor(0x2A4A6A);
+  d.setCursor(105,5); d.printf("%d%%",M5Cardputer.Power.getBatteryLevel());
+  for(int i=0;i&lt;4;i++){
+    int y=24+i*26; bool s=(i==menuSel);
+    if(s){d.fillRoundRect(4,y,127,22,4,0x0E2A4A);d.drawRoundRect(4,y,127,22,4,menuColors[i]);}
+    d.fillCircle(16,y+11,5,s?menuColors[i]:0x1A2A3A);
+    d.setTextColor(s?TFT_WHITE:0x3A4A5A);
+    d.setCursor(26,y+7); d.print(menuItems[i]);
+  }
+  d.setTextColor(0x1A2A3A); d.setCursor(3,130);
+  d.print("TAB=nav ENTER=abre FN=sair");
+}
+
+void runWiFi() {
+  auto&amp; d=M5Cardputer.Display;
+  d.fillScreen(BLACK); d.setTextColor(CYAN); d.setTextSize(1);
+  d.println("WiFi Scanner...\n");
+  WiFi.mode(WIFI_STA); WiFi.disconnect(); delay(100);
+  int n=WiFi.scanNetworks(false,true);
+  d.setTextColor(WHITE);
+  for(int i=0;i&lt;min(n,7);i++)
+    d.printf("%-16s %d\n",WiFi.SSID(i).substring(0,14).c_str(),WiFi.RSSI(i));
+  d.setTextColor(YELLOW); d.printf("\n%d redes. FN=voltar",n);
+}
+
+void runBLE() {
+  auto&amp; d=M5Cardputer.Display;
+  d.fillScreen(BLACK); d.setTextColor(YELLOW); d.setTextSize(1);
+  d.println("BLE Scanner (5s)...\n");
+  BLEDevice::init("SAK");
+  BLEScan* s=BLEDevice::getScan();
+  s-&gt;setActiveScan(true);
+  BLEScanResults res=s-&gt;start(5,false);
+  d.setTextColor(WHITE);
+  for(int i=0;i&lt;min((int)res.getCount(),6);i++){
+    auto dev=res.getDevice(i);
+    d.printf("%-16s%d\n",dev.getName().length()&gt;0?dev.getName().c_str():"[?]",dev.getRSSI());
+  }
+  d.setTextColor(YELLOW); d.printf("\n%d devs. FN=voltar",res.getCount());
+  s-&gt;clearResults();
+}
+
+void setup() {
+  auto cfg=M5.config(); M5Cardputer.begin(cfg,true); irsend.begin();
+  drawMenu();
+}
+
+void loop() {
+  M5Cardputer.update();
+  if(M5Cardputer.Keyboard.isChange()&amp;&amp;M5Cardputer.Keyboard.isPressed()){
+    auto st=M5Cardputer.Keyboard.keysState();
+    if(mode==MENU){
+      if(st.tab){menuSel=(menuSel+1)%4; drawMenu();}
+      if(st.enter){
+        mode=(Mode)(menuSel+1);
+        if(mode==WIFI) runWiFi();
+        else if(mode==BLE) runBLE();
+        else if(mode==IR){
+          M5Cardputer.Display.fillScreen(BLACK);
+          M5Cardputer.Display.println("IR: 1=Power 2=Vol+ 3=Vol-");
+        }
+      }
+    } else {
+      if(st.fn){mode=MENU; drawMenu();} // ESC volta ao menu
+      if(mode==IR){
+        for(auto c:st.word){
+          if(c=='1'){irsend.sendNEC(0x20DF10EF,32);M5Cardputer.Speaker.tone(1200,30);}
+          if(c=='2'){irsend.sendNEC(0x20DF40BF,32);M5Cardputer.Speaker.tone(1200,30);}
+          if(c=='3'){irsend.sendNEC(0x20DFC03F,32);M5Cardputer.Speaker.tone(1200,30);}
+        }
+      }
+    }
+  }
+}</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>54</span></div>
+</div>
 
 <!-- FASE 3 DIVIDER -->
 <div class="phase-divider div-ph3 page">
