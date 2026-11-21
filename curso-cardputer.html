@@ -1326,6 +1326,294 @@ IRCode TV[] = {
         <div class="navbtns"><button class="btn-nav" onclick="go('m19')">← M19 — IR Blaster</button><button class="btn-nav nxt" onclick="go('m21')">M21 — TLS →</button></div>
       </section>
 
+      <!-- M21 -->
+      <section id="m21" class="mod">
+        <div class="bc"><span>Fase 3 — Avancado</span><span class="sep">›</span><span class="cur">Modulo 21</span></div>
+        <div class="mhdr"><span class="mbadge b3">M21</span><div><h1>Criptografia e TLS</h1><p class="sub">HTTPS, certificados, WiFiClientSecure e mbedTLS no ESP32-S3</p></div></div>
+        <div class="hwcard"><div class="hwico">TLS<br>SSL</div><div><h3>Bibliotecas neste modulo</h3><div class="tags"><span class="tag">WiFiClientSecure</span><span class="tag">mbedTLS</span><span class="tag">HTTPS</span><span class="tag">SHA256</span></div></div></div>
+        <div class="sec"><h2>Conceito</h2><p>WiFiClientSecure permite conexoes HTTPS. Ha dois modos: client.setInsecure() (nao verifica certificado — apenas para desenvolvimento) e client.setCACert(cert) (verifica com certificado CA — para producao). O ESP32-S3 tem aceleracao hardware AES e SHA via mbedTLS, tornando criptografia viavel mesmo em microcontrolador.</p></div>
+        <div class="sec"><h2>Codigo — HTTPS e Hash SHA-256</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;WiFi.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;WiFiClientSecure.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;HTTPClient.h&gt;</span>
+<span class="pp">#include</span> <span class="str">"mbedtls/sha256.h"</span>
+
+<span class="kw">const char</span>* SSID=<span class="str">"SUA_REDE"</span>, *PASS=<span class="str">"SUA_SENHA"</span>;
+
+<span class="cls">String</span> <span class="fn">sha256</span>(<span class="cls">String</span> input) {
+  <span class="kw">uint8_t</span> hash[<span class="num">32</span>];
+  mbedtls_sha256_context ctx;
+  mbedtls_sha256_init(&amp;ctx);
+  mbedtls_sha256_starts(&amp;ctx, <span class="num">0</span>);
+  mbedtls_sha256_update(&amp;ctx, (<span class="kw">const uint8_t</span>*)input.<span class="fn">c_str</span>(), input.<span class="fn">length</span>());
+  mbedtls_sha256_finish(&amp;ctx, hash);
+  mbedtls_sha256_free(&amp;ctx);
+  <span class="cls">String</span> hex=<span class="str">""</span>;
+  <span class="kw">for</span>(<span class="kw">int</span> i=<span class="num">0</span>;i&lt;<span class="num">32</span>;i++){<span class="kw">char</span> b[<span class="num">3</span>]; <span class="fn">sprintf</span>(b,<span class="str">"%02x"</span>,hash[i]); hex+=b;}
+  <span class="kw">return</span> hex;
+}
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="kw">auto</span> cfg=M5.<span class="fn">config</span>(); M5Cardputer.<span class="fn">begin</span>(cfg,<span class="kw">true</span>);
+  <span class="kw">auto</span>&amp; d=M5Cardputer.Display;
+  d.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>); d.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>); d.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+
+  <span class="cm">// Demo SHA-256 local (sem WiFi)</span>
+  <span class="cls">String</span> msg=<span class="str">"Cardputer!"</span>;
+  <span class="cls">String</span> hash=<span class="fn">sha256</span>(msg);
+  d.<span class="fn">println</span>(<span class="str">"SHA-256 local:"</span>);
+  d.<span class="fn">println</span>(msg);
+  d.<span class="fn">setTextColor</span>(<span class="cls">CYAN</span>);
+  d.<span class="fn">println</span>(hash.<span class="fn">substring</span>(<span class="num">0</span>,<span class="num">16</span>)+<span class="str">"..."</span>);
+
+  <span class="cm">// HTTPS request</span>
+  WiFi.<span class="fn">begin</span>(SSID,PASS);
+  <span class="kw">while</span>(WiFi.<span class="fn">status</span>()!=WL_CONNECTED)<span class="fn">delay</span>(<span class="num">500</span>);
+  d.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>); d.<span class="fn">println</span>(<span class="str">"\nWiFi OK! Testando HTTPS..."</span>);
+
+  WiFiClientSecure client;
+  client.<span class="fn">setInsecure</span>(); <span class="cm">// nao verificar cert (apenas dev!)</span>
+  HTTPClient https;
+  https.<span class="fn">begin</span>(client, <span class="str">"https://httpbin.org/get"</span>);
+  <span class="kw">int</span> code=https.<span class="fn">GET</span>();
+  d.<span class="fn">printf</span>(<span class="str">"HTTPS GET: %d\n"</span>,code);
+  <span class="kw">if</span>(code==<span class="num">200</span>){d.<span class="fn">setTextColor</span>(<span class="cls">GREEN</span>);d.<span class="fn">println</span>(<span class="str">"TLS OK!"</span>);}
+  https.<span class="fn">end</span>();
+}
+<span class="kw">void</span> <span class="fn">loop</span>() {}</div>
+        </div>
+        <div class="tip"><div class="tip-t">Dica — NVS para guardar tokens com seguranca</div><p>Use Preferences.h (NVS — Non-Volatile Storage) para guardar tokens e senhas. O NVS e armazenado em particao separada da flash e nao pode ser lido por um simples dump do firmware. Nao guarde segredos em SPIFFS ou em variaveis globais no codigo.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie uma ferramenta de verificacao de integridade: o usuario digita uma mensagem pelo teclado, o Cardputer calcula o SHA-256 e exibe o hash. Ao digitar a mesma mensagem novamente, confirma que o hash bate (verificacao de integridade).</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('m20')">← M20 — OTA</button><button class="btn-nav nxt" onclick="go('m22')">M22 — Microfone →</button></div>
+      </section>
+
+      <!-- M22 -->
+      <section id="m22" class="mod">
+        <div class="bc"><span>Fase 3 — Avancado</span><span class="sep">›</span><span class="cur">Modulo 22</span></div>
+        <div class="mhdr"><span class="mbadge b3">M22</span><div><h1>Microfone e Audio</h1><p class="sub">Microfone PDM SPM1423, captura de audio via I2S e visualizador de espectro</p></div></div>
+        <div class="hwcard"><div class="hwico">MIC<br>PDM</div><div><h3>Hardware neste modulo</h3><div class="tags"><span class="tag">SPM1423 PDM</span><span class="tag">I2S</span><span class="tag">16kHz</span><span class="tag">M5Cardputer.Mic</span></div></div></div>
+        <div class="sec"><h2>Conceito</h2><p>O microfone SPM1423 usa interface PDM (Pulse Density Modulation) convertida para I2S internamente pelo ESP32-S3. M5Cardputer.Mic.record(buffer, samples, rate) captura amostras de audio. Para visualizacao, calcula-se RMS (Root Mean Square) do buffer — representa o volume instantaneo.</p></div>
+        <div class="sec"><h2>Codigo — Visualizador de Volume em Tempo Real</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;math.h&gt;</span>
+
+<span class="kw">const int</span> RATE=<span class="num">16000</span>, SAMPLES=<span class="num">256</span>;
+<span class="kw">int16_t</span> buf[SAMPLES];
+<span class="cm">// Historico de volumes para o grafico</span>
+<span class="kw">int</span> hist[<span class="num">130</span>] = {<span class="num">0</span>};
+<span class="kw">int</span> histPos = <span class="num">0</span>;
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="kw">auto</span> cfg=M5.<span class="fn">config</span>(); M5Cardputer.<span class="fn">begin</span>(cfg,<span class="kw">true</span>);
+  M5Cardputer.Mic.<span class="fn">begin</span>();
+  M5Cardputer.Display.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>);
+  M5Cardputer.Display.<span class="fn">setTextColor</span>(<span class="cls">CYAN</span>);
+  M5Cardputer.Display.<span class="fn">setCursor</span>(<span class="num">3</span>,<span class="num">3</span>);
+  M5Cardputer.Display.<span class="fn">print</span>(<span class="str">"Mic SPM1423 — Osciloscópio"</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="kw">if</span>(!M5Cardputer.Mic.<span class="fn">record</span>(buf, SAMPLES, RATE)) <span class="kw">return</span>;
+
+  <span class="cm">// Calcula RMS</span>
+  <span class="kw">long</span> sum=<span class="num">0</span>;
+  <span class="kw">for</span>(<span class="kw">int</span> i=<span class="num">0</span>;i&lt;SAMPLES;i++) sum+=(long)buf[i]*buf[i];
+  <span class="kw">int</span> rms=(<span class="kw">int</span>)<span class="fn">sqrt</span>((<span class="kw">double</span>)sum/SAMPLES);
+  <span class="kw">int</span> vol=<span class="fn">constrain</span>(<span class="fn">map</span>(rms,<span class="num">0</span>,<span class="num">4000</span>,<span class="num">0</span>,<span class="num">60</span>),<span class="num">0</span>,<span class="num">60</span>);
+
+  <span class="cm">// Adiciona ao historico</span>
+  hist[histPos%<span class="num">130</span>]=vol; histPos++;
+
+  <span class="cm">// Redesenha grafico de forma de onda historica</span>
+  M5Cardputer.Display.<span class="fn">fillRect</span>(<span class="num">0</span>,<span class="num">15</span>,<span class="num">135</span>,<span class="num">100</span>,<span class="cls">BLACK</span>);
+  <span class="kw">for</span>(<span class="kw">int</span> x=<span class="num">0</span>;x&lt;<span class="num">130</span>;x++) {
+    <span class="kw">int</span> idx=(histPos-<span class="num">130</span>+x+<span class="num">130</span>)%<span class="num">130</span>;
+    <span class="kw">int</span> h=hist[idx];
+    <span class="kw">uint16_t</span> c=h&lt;<span class="num">20</span>?<span class="cls">TFT_GREEN</span>:h&lt;<span class="num">40</span>?<span class="cls">TFT_YELLOW</span>:<span class="cls">TFT_RED</span>;
+    M5Cardputer.Display.<span class="fn">drawFastVLine</span>(x+<span class="num">3</span>,<span class="num">75</span>-h,h,c);
+  }
+  <span class="cm">// Nivel atual em texto</span>
+  M5Cardputer.Display.<span class="fn">fillRect</span>(<span class="num">0</span>,<span class="num">118</span>,<span class="num">135</span>,<span class="num">12</span>,<span class="cls">BLACK</span>);
+  M5Cardputer.Display.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>);
+  M5Cardputer.Display.<span class="fn">setCursor</span>(<span class="num">3</span>,<span class="num">118</span>);
+  M5Cardputer.Display.<span class="fn">printf</span>(<span class="str">"RMS:%d Vol:%d"</span>,rms,vol);
+}</div>
+        </div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione deteccao de palmas (clap detection): quando o RMS ultrapassar um limiar (ex: 2000) por pelo menos 2 amostras consecutivas, conte como uma palma e exiba o contador na tela com um flash verde.</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('m21')">← M21 — TLS</button><button class="btn-nav nxt" onclick="go('m23')">M23 — FreeRTOS →</button></div>
+      </section>
+
+      <!-- M23 -->
+      <section id="m23" class="mod">
+        <div class="bc"><span>Fase 3 — Avancado</span><span class="sep">›</span><span class="cur">Modulo 23</span></div>
+        <div class="mhdr"><span class="mbadge b3">M23</span><div><h1>FreeRTOS e Multitasking</h1><p class="sub">Tasks, semaforos, filas (queues) e comunicacao entre tasks no ESP32-S3</p></div></div>
+        <div class="hwcard"><div class="hwico">RTOS<br>dual</div><div><h3>Conceitos deste modulo</h3><div class="tags"><span class="tag">FreeRTOS</span><span class="tag">xTaskCreate</span><span class="tag">xQueueCreate</span><span class="tag">vTaskDelay</span><span class="tag">Dual-core</span></div></div></div>
+        <div class="sec"><h2>Conceito</h2><p>O ESP32-S3 tem dois cores (Core 0 e Core 1). O Arduino loop() roda no Core 1. Com FreeRTOS, crie tasks independentes em qualquer core. xQueueCreate/xQueueSend/xQueueReceive implementam comunicacao segura entre tasks (thread-safe). vTaskDelay(pdMS_TO_TICKS(ms)) e o delay correto dentro de tasks — libera o processador durante a espera.</p></div>
+        <div class="sec"><h2>Codigo — Duas tasks em cores diferentes</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;WiFi.h&gt;</span>
+
+<span class="kw">const char</span>* SSID=<span class="str">"SUA_REDE"</span>, *PASS=<span class="str">"SUA_SENHA"</span>;
+QueueHandle_t queue;
+
+<span class="cm">// Task no Core 0: coleta dados a cada 2 segundos</span>
+<span class="kw">void</span> <span class="fn">taskSensor</span>(<span class="kw">void</span>* p) {
+  <span class="kw">while</span>(<span class="kw">true</span>) {
+    <span class="kw">char</span> msg[<span class="num">48</span>];
+    <span class="fn">snprintf</span>(msg,<span class="kw">sizeof</span>(msg),<span class="str">"BAT:%d%% RSSI:%ddBm"</span>,
+      M5Cardputer.Power.<span class="fn">getBatteryLevel</span>(), WiFi.<span class="fn">RSSI</span>());
+    <span class="fn">xQueueSend</span>(queue, msg, <span class="num">0</span>); <span class="cm">// nao bloqueia se fila cheia</span>
+    <span class="fn">vTaskDelay</span>(<span class="fn">pdMS_TO_TICKS</span>(<span class="num">2000</span>));
+  }
+}
+
+<span class="cm">// Task no Core 1: exibe no display quando recebe mensagem</span>
+<span class="kw">void</span> <span class="fn">taskDisplay</span>(<span class="kw">void</span>* p) {
+  <span class="kw">char</span> msg[<span class="num">48</span>];
+  <span class="kw">int</span> y=<span class="num">20</span>;
+  <span class="kw">while</span>(<span class="kw">true</span>) {
+    <span class="kw">if</span>(<span class="fn">xQueueReceive</span>(queue, msg, <span class="fn">portMAX_DELAY</span>)) {
+      M5Cardputer.Display.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>, <span class="cls">BLACK</span>);
+      M5Cardputer.Display.<span class="fn">setCursor</span>(<span class="num">0</span>,y);
+      M5Cardputer.Display.<span class="fn">println</span>(msg);
+      y+=<span class="num">12</span>;
+      <span class="kw">if</span>(y&gt;<span class="num">120</span>){y=<span class="num">20</span>;M5Cardputer.Display.<span class="fn">fillRect</span>(<span class="num">0</span>,<span class="num">20</span>,<span class="num">135</span>,<span class="num">100</span>,<span class="cls">BLACK</span>);}
+    }
+  }
+}
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="kw">auto</span> cfg=M5.<span class="fn">config</span>(); M5Cardputer.<span class="fn">begin</span>(cfg,<span class="kw">true</span>);
+  <span class="kw">auto</span>&amp; d=M5Cardputer.Display;
+  d.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>); d.<span class="fn">setTextColor</span>(<span class="cls">CYAN</span>); d.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+  d.<span class="fn">setCursor</span>(<span class="num">0</span>,<span class="num">0</span>); d.<span class="fn">print</span>(<span class="str">"FreeRTOS Dual-Core"</span>);
+
+  WiFi.<span class="fn">begin</span>(SSID,PASS);
+  <span class="kw">while</span>(WiFi.<span class="fn">status</span>()!=WL_CONNECTED)<span class="fn">delay</span>(<span class="num">500</span>);
+
+  <span class="cm">// Fila de 5 mensagens de 48 bytes</span>
+  queue = <span class="fn">xQueueCreate</span>(<span class="num">5</span>, <span class="num">48</span>);
+
+  <span class="cm">// xTaskCreatePinnedToCore(funcao, nome, stack, param, prioridade, handle, core)</span>
+  <span class="fn">xTaskCreatePinnedToCore</span>(taskSensor,  <span class="str">"sensor"</span>, <span class="num">4096</span>, <span class="kw">NULL</span>, <span class="num">1</span>, <span class="kw">NULL</span>, <span class="num">0</span>);
+  <span class="fn">xTaskCreatePinnedToCore</span>(taskDisplay, <span class="str">"display"</span>,<span class="num">4096</span>, <span class="kw">NULL</span>, <span class="num">1</span>, <span class="kw">NULL</span>, <span class="num">1</span>);
+}
+<span class="kw">void</span> <span class="fn">loop</span>() { <span class="fn">vTaskDelay</span>(<span class="fn">pdMS_TO_TICKS</span>(<span class="num">1000</span>)); } <span class="cm">// loop idle</span></div>
+        </div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione uma terceira task (Core 0) que escaneia WiFi a cada 10 segundos e envia o numero de redes encontradas para a fila. A task de display deve mostrar as mensagens de sensor e WiFi em cores diferentes (branco para sensor, ciano para WiFi).</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('m22')">← M22 — Microfone</button><button class="btn-nav nxt" onclick="go('p3')">Projeto Final →</button></div>
+      </section>
+
+      <!-- P3 -->
+      <section id="p3" class="mod">
+        <div class="bc"><span>Fase 3 — Avancado</span><span class="sep">›</span><span class="cur">Projeto Final</span></div>
+        <div class="mhdr"><span class="mbadge bp">PROJETO FINAL</span><div><h1>Swiss Army Knife</h1><p class="sub">Ferramenta completa: WiFi Scanner + BLE Scanner + IR Blaster + Terminal</p></div></div>
+        <div class="hwcard"><div class="hwico">SAK<br>v1.0</div><div><h3>Modulos integrados</h3><div class="tags"><span class="tag">WiFi (M9/M18)</span><span class="tag">BLE (M17)</span><span class="tag">IR (M12/M19)</span><span class="tag">Terminal (P2)</span><span class="tag">FreeRTOS (M23)</span></div></div></div>
+        <div class="sec"><h2>Descricao</h2><p>O projeto final integra todas as 3 fases em uma unica aplicacao: menu principal com 4 modos, cada modo usa os modulos ensinados anteriormente. O menu usa a UI do M14, o WiFi scanner do M18, o BLE scanner do M17 e o IR blaster do M19.</p></div>
+        <div class="sec"><h2>Codigo Completo</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;WiFi.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;BLEDevice.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;BLEScan.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;IRremoteESP8266.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;IRsend.h&gt;</span>
+
+IRsend irsend(<span class="num">44</span>);
+<span class="kw">enum</span> Mode { MENU, WIFI, BLE, IR, TERMINAL };
+Mode mode=MENU;
+<span class="kw">int</span> menuSel=<span class="num">0</span>;
+
+<span class="kw">const char</span>* menuItems[]=
+  {<span class="str">"WiFi Scanner"</span>,<span class="str">"BLE Scanner"</span>,<span class="str">"IR Blaster"</span>,<span class="str">"Terminal"</span>};
+<span class="kw">const uint16_t</span> menuColors[]=
+  {<span class="cls">TFT_CYAN</span>,<span class="cls">TFT_YELLOW</span>,<span class="cls">TFT_ORANGE</span>,<span class="cls">TFT_GREEN</span>};
+
+<span class="kw">void</span> <span class="fn">drawMenu</span>() {
+  <span class="kw">auto</span>&amp; d=M5Cardputer.Display;
+  d.<span class="fn">fillScreen</span>(<span class="num">0x020A14</span>);
+  d.<span class="fn">fillRect</span>(<span class="num">0</span>,<span class="num">0</span>,<span class="num">135</span>,<span class="num">18</span>,<span class="num">0x0D1F3A</span>);
+  d.<span class="fn">setTextColor</span>(<span class="cls">TFT_CYAN</span>); d.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+  d.<span class="fn">setCursor</span>(<span class="num">3</span>,<span class="num">5</span>); d.<span class="fn">print</span>(<span class="str">"Swiss Army Knife v1.0"</span>);
+  d.<span class="fn">setTextColor</span>(<span class="num">0x2A4A6A</span>);
+  d.<span class="fn">setCursor</span>(<span class="num">105</span>,<span class="num">5</span>); d.<span class="fn">printf</span>(<span class="str">"%d%%"</span>,M5Cardputer.Power.<span class="fn">getBatteryLevel</span>());
+  <span class="kw">for</span>(<span class="kw">int</span> i=<span class="num">0</span>;i&lt;<span class="num">4</span>;i++){
+    <span class="kw">int</span> y=<span class="num">24</span>+i*<span class="num">26</span>; <span class="kw">bool</span> s=(i==menuSel);
+    <span class="kw">if</span>(s){d.<span class="fn">fillRoundRect</span>(<span class="num">4</span>,y,<span class="num">127</span>,<span class="num">22</span>,<span class="num">4</span>,<span class="num">0x0E2A4A</span>);d.<span class="fn">drawRoundRect</span>(<span class="num">4</span>,y,<span class="num">127</span>,<span class="num">22</span>,<span class="num">4</span>,menuColors[i]);}
+    d.<span class="fn">fillCircle</span>(<span class="num">16</span>,y+<span class="num">11</span>,<span class="num">5</span>,s?menuColors[i]:<span class="num">0x1A2A3A</span>);
+    d.<span class="fn">setTextColor</span>(s?<span class="cls">TFT_WHITE</span>:<span class="num">0x3A4A5A</span>);
+    d.<span class="fn">setCursor</span>(<span class="num">26</span>,y+<span class="num">7</span>); d.<span class="fn">print</span>(menuItems[i]);
+  }
+  d.<span class="fn">setTextColor</span>(<span class="num">0x1A2A3A</span>); d.<span class="fn">setCursor</span>(<span class="num">3</span>,<span class="num">130</span>);
+  d.<span class="fn">print</span>(<span class="str">"TAB=nav ENTER=abre FN=sair"</span>);
+}
+
+<span class="kw">void</span> <span class="fn">runWiFi</span>() {
+  <span class="kw">auto</span>&amp; d=M5Cardputer.Display;
+  d.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>); d.<span class="fn">setTextColor</span>(<span class="cls">CYAN</span>); d.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+  d.<span class="fn">println</span>(<span class="str">"WiFi Scanner...\n"</span>);
+  WiFi.<span class="fn">mode</span>(WIFI_STA); WiFi.<span class="fn">disconnect</span>(); <span class="fn">delay</span>(<span class="num">100</span>);
+  <span class="kw">int</span> n=WiFi.<span class="fn">scanNetworks</span>(<span class="kw">false</span>,<span class="kw">true</span>);
+  d.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>);
+  <span class="kw">for</span>(<span class="kw">int</span> i=<span class="num">0</span>;i&lt;<span class="fn">min</span>(n,<span class="num">7</span>);i++)
+    d.<span class="fn">printf</span>(<span class="str">"%-16s %d\n"</span>,WiFi.<span class="fn">SSID</span>(i).<span class="fn">substring</span>(<span class="num">0</span>,<span class="num">14</span>).<span class="fn">c_str</span>(),WiFi.<span class="fn">RSSI</span>(i));
+  d.<span class="fn">setTextColor</span>(<span class="cls">YELLOW</span>); d.<span class="fn">printf</span>(<span class="str">"\n%d redes. FN=voltar",n</span>);
+}
+
+<span class="kw">void</span> <span class="fn">runBLE</span>() {
+  <span class="kw">auto</span>&amp; d=M5Cardputer.Display;
+  d.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>); d.<span class="fn">setTextColor</span>(<span class="cls">YELLOW</span>); d.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+  d.<span class="fn">println</span>(<span class="str">"BLE Scanner (5s)...\n"</span>);
+  <span class="cls">BLEDevice</span>::<span class="fn">init</span>(<span class="str">"SAK"</span>);
+  BLEScan* s=<span class="cls">BLEDevice</span>::<span class="fn">getScan</span>();
+  s-&gt;<span class="fn">setActiveScan</span>(<span class="kw">true</span>);
+  <span class="cls">BLEScanResults</span> res=s-&gt;<span class="fn">start</span>(<span class="num">5</span>,<span class="kw">false</span>);
+  d.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>);
+  <span class="kw">for</span>(<span class="kw">int</span> i=<span class="num">0</span>;i&lt;<span class="fn">min</span>((<span class="kw">int</span>)res.<span class="fn">getCount</span>(),<span class="num">6</span>);i++){
+    <span class="kw">auto</span> dev=res.<span class="fn">getDevice</span>(i);
+    d.<span class="fn">printf</span>(<span class="str">"%-16s%d\n"</span>,dev.<span class="fn">getName</span>().<span class="fn">length</span>()&gt;<span class="num">0</span>?dev.<span class="fn">getName</span>().<span class="fn">c_str</span>():<span class="str">"[?]"</span>,dev.<span class="fn">getRSSI</span>());
+  }
+  d.<span class="fn">setTextColor</span>(<span class="cls">YELLOW</span>); d.<span class="fn">printf</span>(<span class="str">"\n%d devs. FN=voltar",res.<span class="fn">getCount</span>());
+  s-&gt;<span class="fn">clearResults</span>();
+}
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="kw">auto</span> cfg=M5.<span class="fn">config</span>(); M5Cardputer.<span class="fn">begin</span>(cfg,<span class="kw">true</span>); irsend.<span class="fn">begin</span>();
+  <span class="fn">drawMenu</span>();
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  M5Cardputer.<span class="fn">update</span>();
+  <span class="kw">if</span>(M5Cardputer.Keyboard.<span class="fn">isChange</span>()&amp;&amp;M5Cardputer.Keyboard.<span class="fn">isPressed</span>()){
+    <span class="kw">auto</span> st=M5Cardputer.Keyboard.<span class="fn">keysState</span>();
+    <span class="kw">if</span>(mode==MENU){
+      <span class="kw">if</span>(st.tab){menuSel=(menuSel+<span class="num">1</span>)%<span class="num">4</span>; <span class="fn">drawMenu</span>();}
+      <span class="kw">if</span>(st.enter){
+        mode=(Mode)(menuSel+<span class="num">1</span>);
+        <span class="kw">if</span>(mode==WIFI) <span class="fn">runWiFi</span>();
+        <span class="kw">else if</span>(mode==BLE) <span class="fn">runBLE</span>();
+        <span class="kw">else if</span>(mode==IR){
+          M5Cardputer.Display.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>);
+          M5Cardputer.Display.<span class="fn">println</span>(<span class="str">"IR: 1=Power 2=Vol+ 3=Vol-"</span>);
+        }
+      }
+    } <span class="kw">else</span> {
+      <span class="kw">if</span>(st.fn){mode=MENU; <span class="fn">drawMenu</span>();} <span class="cm">// ESC volta ao menu</span>
+      <span class="kw">if</span>(mode==IR){
+        <span class="kw">for</span>(<span class="kw">auto</span> c:st.word){
+          <span class="kw">if</span>(c==<span class="str">'1'</span>){irsend.<span class="fn">sendNEC</span>(<span class="num">0x20DF10EF</span>,<span class="num">32</span>);M5Cardputer.Speaker.<span class="fn">tone</span>(<span class="num">1200</span>,<span class="num">30</span>);}
+          <span class="kw">if</span>(c==<span class="str">'2'</span>){irsend.<span class="fn">sendNEC</span>(<span class="num">0x20DF40BF</span>,<span class="num">32</span>);M5Cardputer.Speaker.<span class="fn">tone</span>(<span class="num">1200</span>,<span class="num">30</span>);}
+          <span class="kw">if</span>(c==<span class="str">'3'</span>){irsend.<span class="fn">sendNEC</span>(<span class="num">0x20DFC03F</span>,<span class="num">32</span>);M5Cardputer.Speaker.<span class="fn">tone</span>(<span class="num">1200</span>,<span class="num">30</span>);}
+        }
+      }
+    }
+  }
+}</div>
+        </div>
+        <div class="tip"><div class="tip-t">Parabens! Voce concluiu o curso.</div><p>Voce agora domina o M5Stack Cardputer do hardware ao software avancado. Proximos passos: contribua com projetos open-source no GitHub, participe da comunidade M5Stack no Discord e construa suas proprias ferramentas.</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('m23')">← M23 — FreeRTOS</button><button class="btn-nav nxt" onclick="go('m1')" style="background:var(--green);border-color:var(--green)">Recomecar do M1 ↺</button></div>
+      </section>
+
       <!-- MODULOS INSERIDOS AQUI -->
     </main>
   </div>
