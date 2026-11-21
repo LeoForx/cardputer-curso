@@ -343,6 +343,269 @@ M5Canvas sprite(&amp;M5Cardputer.Display);
         <div class="exr"><div class="exr-t">Exercicio</div><p>Crie uma barra de progresso animada que vai de 0% a 100% na tela, mostrando o percentual como texto no centro. Use um Sprite para evitar flickering durante a animacao.</p></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('m3')">← M3 — Hello World</button><button class="btn-nav nxt" onclick="go('m5')">M5 — Teclado →</button></div>
       </section>
+
+      <!-- M5 -->
+      <section id="m5" class="mod">
+        <div class="bc"><span>Fase 1 — Iniciante</span><span class="sep">›</span><span class="cur">Modulo 5</span></div>
+        <div class="mhdr"><span class="mbadge b1">M5</span><div><h1>Lendo o Teclado</h1><p class="sub">Eventos de tecla, leitura de caracteres, input de texto e teclas especiais</p></div></div>
+        <div class="hwcard"><div class="hwico">KEY<br>56t</div><div><h3>Hardware neste modulo</h3><div class="tags"><span class="tag">QWERTY 56 teclas</span><span class="tag">I2C</span><span class="tag">Keyboard_Class</span><span class="tag">KeysState</span></div></div></div>
+        <div class="sec"><h2>Conceito</h2><p>O teclado do Cardputer comunica via I2C com o ESP32-S3. A biblioteca M5Cardputer expoe M5Cardputer.Keyboard com dois metodos principais: isChange() (retorna true quando o estado do teclado mudou) e isPressed() (true se alguma tecla esta pressionada). O struct KeysState contem: word (string com caracteres normais), del (backspace), enter, tab, fn (ESC/funcao).</p></div>
+        <div class="sec"><h2>Codigo — Editor de texto simples</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+
+<span class="cls">String</span> input = <span class="str">""</span>;
+
+<span class="kw">void</span> <span class="fn">redraw</span>() {
+  M5Cardputer.Display.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>);
+  M5Cardputer.Display.<span class="fn">setTextColor</span>(<span class="cls">CYAN</span>);
+  M5Cardputer.Display.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+  M5Cardputer.Display.<span class="fn">setCursor</span>(<span class="num">0</span>, <span class="num">5</span>);
+  M5Cardputer.Display.<span class="fn">println</span>(<span class="str">"Digite (ENTER=nova linha):"</span>);
+  M5Cardputer.Display.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>);
+  M5Cardputer.Display.<span class="fn">setCursor</span>(<span class="num">0</span>, <span class="num">20</span>);
+  M5Cardputer.Display.<span class="fn">print</span>(input + <span class="str">"|"</span>); <span class="cm">// cursor piscante simulado</span>
+}
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="kw">auto</span> cfg = M5.<span class="fn">config</span>();
+  M5Cardputer.<span class="fn">begin</span>(cfg, <span class="kw">true</span>);
+  <span class="fn">redraw</span>();
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  M5Cardputer.<span class="fn">update</span>(); <span class="cm">// OBRIGATORIO: atualiza estado do teclado</span>
+
+  <span class="kw">if</span> (M5Cardputer.Keyboard.<span class="fn">isChange</span>() &amp;&amp; M5Cardputer.Keyboard.<span class="fn">isPressed</span>()) {
+    Keyboard_Class::KeysState st = M5Cardputer.Keyboard.<span class="fn">keysState</span>();
+
+    <span class="cm">// Adiciona caracteres normais</span>
+    <span class="kw">for</span> (<span class="kw">auto</span> c : st.word) input += c;
+
+    <span class="cm">// Backspace (DEL)</span>
+    <span class="kw">if</span> (st.del &amp;&amp; input.<span class="fn">length</span>() > <span class="num">0</span>)
+      input.<span class="fn">remove</span>(input.<span class="fn">length</span>() - <span class="num">1</span>);
+
+    <span class="cm">// Enter: adiciona nova linha</span>
+    <span class="kw">if</span> (st.enter) input += <span class="str">"\n"</span>;
+
+    <span class="cm">// FN (ESC): limpa tudo</span>
+    <span class="kw">if</span> (st.fn) input = <span class="str">""</span>;
+
+    <span class="fn">redraw</span>();
+  }
+}</div>
+        </div>
+        <div class="warn"><div class="warn-t">Aviso Comum</div><p>Sempre chame M5Cardputer.update() no inicio do loop(). Sem ele, o teclado nunca reporta eventos. Este metodo atualiza internamente o estado de todos os perifericos (teclado, IMU, etc.).</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione um contador de caracteres no canto superior direito do display que atualiza em tempo real conforme o usuario digita. Formato: "32/100" onde 32 e o atual e 100 e o maximo permitido.</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('m4')">← M4 — Display</button><button class="btn-nav nxt" onclick="go('m6')">M6 — LED e Som →</button></div>
+      </section>
+
+      <!-- M6 -->
+      <section id="m6" class="mod">
+        <div class="bc"><span>Fase 1 — Iniciante</span><span class="sep">›</span><span class="cur">Modulo 6</span></div>
+        <div class="mhdr"><span class="mbadge b1">M6</span><div><h1>LED e Som Basico</h1><p class="sub">Speaker interno, tonos, melodias e feedback sonoro</p></div></div>
+        <div class="hwcard"><div class="hwico">SPK<br>1W</div><div><h3>Hardware neste modulo</h3><div class="tags"><span class="tag">Speaker 1W</span><span class="tag">I2S</span><span class="tag">M5Cardputer.Speaker</span><span class="tag">tone()</span></div></div></div>
+        <div class="sec"><h2>Conceito</h2><p>O speaker do Cardputer e conectado via I2S ao ESP32-S3 e gerenciado pela classe Speaker da M5Unified. O metodo tone(frequencia, duracao_ms) gera um beep; mute() para o som. Para melodias, crie sequencias de tonos com delay entre eles. A frequencia de 440 Hz e o La musical (note A4).</p></div>
+        <div class="sec"><h2>Codigo — Melodia de startup</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+
+<span class="cm">// Frequencias das notas musicais (Hz)</span>
+<span class="kw">const</span> <span class="kw">int</span> DO = <span class="num">262</span>, RE = <span class="num">294</span>, MI = <span class="num">330</span>;
+<span class="kw">const</span> <span class="kw">int</span> FA = <span class="num">349</span>, SOL = <span class="num">392</span>, LA = <span class="num">440</span>;
+
+<span class="kw">void</span> <span class="fn">nota</span>(<span class="kw">int</span> freq, <span class="kw">int</span> dur) {
+  M5Cardputer.Speaker.<span class="fn">tone</span>(freq, dur);
+  <span class="fn">delay</span>(dur + <span class="num">50</span>); <span class="cm">// pausa entre notas</span>
+  M5Cardputer.Speaker.<span class="fn">mute</span>();
+  <span class="fn">delay</span>(<span class="num">30</span>);
+}
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="kw">auto</span> cfg = M5.<span class="fn">config</span>();
+  M5Cardputer.<span class="fn">begin</span>(cfg, <span class="kw">true</span>);
+
+  <span class="cm">// Define volume (0-255)</span>
+  M5Cardputer.Speaker.<span class="fn">setVolume</span>(<span class="num">128</span>);
+
+  M5Cardputer.Display.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>);
+  M5Cardputer.Display.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>);
+  M5Cardputer.Display.<span class="fn">setCursor</span>(<span class="num">10</span>, <span class="num">60</span>);
+  M5Cardputer.Display.<span class="fn">println</span>(<span class="str">"Tocando melodia..."</span>);
+
+  <span class="cm">// Melodia: Do Re Mi Fa Sol</span>
+  <span class="fn">nota</span>(DO, <span class="num">200</span>); <span class="fn">nota</span>(RE, <span class="num">200</span>);
+  <span class="fn">nota</span>(MI, <span class="num">200</span>); <span class="fn">nota</span>(FA, <span class="num">200</span>);
+  <span class="fn">nota</span>(SOL, <span class="num">400</span>);
+
+  M5Cardputer.Display.<span class="fn">setCursor</span>(<span class="num">10</span>, <span class="num">80</span>);
+  M5Cardputer.Display.<span class="fn">println</span>(<span class="str">"Concluido!"</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  M5Cardputer.<span class="fn">update</span>();
+  <span class="cm">// Pressiona qualquer tecla para tocar novamente</span>
+  <span class="kw">if</span> (M5Cardputer.Keyboard.<span class="fn">isChange</span>() &amp;&amp; M5Cardputer.Keyboard.<span class="fn">isPressed</span>()) {
+    <span class="fn">nota</span>(LA, <span class="num">150</span>); <span class="fn">nota</span>(LA, <span class="num">150</span>); <span class="fn">nota</span>(LA, <span class="num">300</span>);
+  }
+}</div>
+        </div>
+        <div class="tip"><div class="tip-t">Dica</div><p>O Speaker da M5Unified tambem suporta reproducao de WAV via Speaker.playRaw(). Para sons mais complexos, armazene um array de amostras PCM 16-bit e reproduza com esse metodo. Ideal para notificacoes sonoras customizadas.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie um piano simples: cada tecla do teclado (A S D F G H J) toca uma nota diferente enquanto estiver pressionada. Exiba no display qual nota esta sendo tocada.</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('m5')">← M5 — Teclado</button><button class="btn-nav nxt" onclick="go('m7')">M7 — Bateria →</button></div>
+      </section>
+
+      <!-- M7 -->
+      <section id="m7" class="mod">
+        <div class="bc"><span>Fase 1 — Iniciante</span><span class="sep">›</span><span class="cur">Modulo 7</span></div>
+        <div class="mhdr"><span class="mbadge b1">M7</span><div><h1>Bateria e Energia</h1><p class="sub">Leitura de nivel da bateria, status de carga e deep sleep basico</p></div></div>
+        <div class="hwcard"><div class="hwico">PWR<br>BAT</div><div><h3>Hardware neste modulo</h3><div class="tags"><span class="tag">AXP2101 PMIC</span><span class="tag">120mAh bateria</span><span class="tag">M5.Power</span><span class="tag">Deep Sleep</span><span class="tag">esp_sleep.h</span></div></div></div>
+        <div class="sec"><h2>Conceito</h2><p>O Cardputer usa o chip AXP2101 para gerenciamento de energia, acessivel via M5Cardputer.Power. O deep sleep desliga quase todos os circuitos do ESP32-S3 consumindo apenas ~10 uA, ideal para projetos a bateria. Ao acordar, o codigo recomeça do setup() — use RTC_DATA_ATTR para preservar variaveis.</p></div>
+        <div class="sec"><h2>Codigo — Monitor de bateria com sleep</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;esp_sleep.h&gt;</span>
+
+<span class="cm">// RTC_DATA_ATTR: preserva valor durante deep sleep</span>
+<span class="cls">RTC_DATA_ATTR</span> <span class="kw">int</span> wakeCount = <span class="num">0</span>;
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="kw">auto</span> cfg = M5.<span class="fn">config</span>();
+  M5Cardputer.<span class="fn">begin</span>(cfg, <span class="kw">true</span>);
+  wakeCount++;
+
+  <span class="kw">auto</span>&amp; d = M5Cardputer.Display;
+  d.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>);
+  d.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>);
+  d.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+  d.<span class="fn">setCursor</span>(<span class="num">5</span>, <span class="num">5</span>);
+
+  d.<span class="fn">printf</span>(<span class="str">"Acordou #%d\n\n"</span>, wakeCount);
+
+  <span class="cm">// Nivel da bateria em percentual</span>
+  <span class="kw">int</span> bat = M5Cardputer.Power.<span class="fn">getBatteryLevel</span>();
+  <span class="kw">bool</span> charging = M5Cardputer.Power.<span class="fn">isCharging</span>();
+
+  d.<span class="fn">printf</span>(<span class="str">"Bateria: %d%%\n"</span>, bat);
+  d.<span class="fn">printf</span>(<span class="str">"Carregando: %s\n"</span>, charging ? <span class="str">"Sim"</span> : <span class="str">"Nao"</span>);
+
+  <span class="cm">// Barra de bateria</span>
+  <span class="kw">int</span> w = <span class="fn">map</span>(bat, <span class="num">0</span>, <span class="num">100</span>, <span class="num">0</span>, <span class="num">120</span>);
+  <span class="kw">uint16_t</span> col = bat > <span class="num">50</span> ? <span class="cls">GREEN</span> : bat > <span class="num">20</span> ? <span class="cls">YELLOW</span> : <span class="cls">RED</span>;
+  d.<span class="fn">drawRect</span>(<span class="num">5</span>, <span class="num">70</span>, <span class="num">122</span>, <span class="num">12</span>, <span class="cls">WHITE</span>);
+  d.<span class="fn">fillRect</span>(<span class="num">6</span>, <span class="num">71</span>, w, <span class="num">10</span>, col);
+
+  d.<span class="fn">setCursor</span>(<span class="num">5</span>, <span class="num">90</span>);
+  d.<span class="fn">println</span>(<span class="str">"Dormindo em 3s..."</span>);
+  d.<span class="fn">println</span>(<span class="str">"(qualquer tecla acorda)"</span>);
+
+  <span class="fn">delay</span>(<span class="num">3000</span>);
+
+  <span class="cm">// Acorda com qualquer tecla (GPIO0 = tecla do teclado)</span>
+  <span class="fn">esp_sleep_enable_ext0_wakeup</span>((gpio_num_t)<span class="num">0</span>, <span class="num">0</span>);
+  <span class="cm">// OU timer de 30 segundos como backup</span>
+  <span class="fn">esp_sleep_enable_timer_wakeup</span>(<span class="num">30</span> * <span class="num">1000000ULL</span>);
+
+  d.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>);
+  <span class="fn">esp_deep_sleep_start</span>(); <span class="cm">// nao retorna</span>
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {} <span class="cm">// nunca executado em deep sleep</span></div>
+        </div>
+        <div class="tip"><div class="tip-t">Dica — Consumo em diferentes modos</div><p>Ativo: ~100mA. Light sleep: ~2mA. Deep sleep: ~0.01mA. Com a bateria de 120mAh interna, o Cardputer em deep sleep dura mais de 500 dias. No modo ativo WiFi, apenas ~1.2 horas.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie um logger de bateria: a cada vez que o dispositivo acorda (use RTC_DATA_ATTR para guardar historico), registre o nivel da bateria. Exiba um grafico simples dos ultimos 10 registros usando fillRect com alturas proporcionais.</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('m6')">← M6 — Som</button><button class="btn-nav nxt" onclick="go('p1')">Projeto — Calculadora →</button></div>
+      </section>
+
+      <!-- P1 -->
+      <section id="p1" class="mod">
+        <div class="bc"><span>Fase 1 — Iniciante</span><span class="sep">›</span><span class="cur">Projeto Final</span></div>
+        <div class="mhdr"><span class="mbadge bp">PROJETO</span><div><h1>Calculadora com Display</h1><p class="sub">Projeto final da Fase 1 — integra teclado, display e logica de calculo</p></div></div>
+        <div class="hwcard"><div class="hwico">CALC</div><div><h3>Objetivos do Projeto</h3><div class="tags"><span class="tag">Input teclado</span><span class="tag">Display interface</span><span class="tag">Operacoes +−×÷</span><span class="tag">Tratamento de erros</span></div></div></div>
+        <div class="sec"><h2>Descricao</h2><p>Construir uma calculadora funcional que receba expressoes pelo teclado (ex: "12+34"), calcule e exiba o resultado ao pressionar ENTER. Suporta as 4 operacoes basicas, numeros decimais e trata divisao por zero.</p></div>
+        <div class="sec"><h2>Codigo Completo</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+
+<span class="cls">String</span> expr = <span class="str">""</span>;
+<span class="kw">float</span> result = <span class="num">0</span>;
+<span class="kw">bool</span> hasResult = <span class="kw">false</span>;
+
+<span class="kw">void</span> <span class="fn">draw</span>() {
+  <span class="kw">auto</span>&amp; d = M5Cardputer.Display;
+  d.<span class="fn">fillScreen</span>(<span class="num">0x0A0F1A</span>);
+  <span class="cm">// Header</span>
+  d.<span class="fn">fillRect</span>(<span class="num">0</span>, <span class="num">0</span>, <span class="num">135</span>, <span class="num">18</span>, <span class="num">0x0D3A6E</span>);
+  d.<span class="fn">setTextColor</span>(<span class="cls">CYAN</span>); d.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+  d.<span class="fn">setCursor</span>(<span class="num">5</span>, <span class="num">5</span>); d.<span class="fn">print</span>(<span class="str">"Calculadora Cardputer"</span>);
+  <span class="cm">// Resultado anterior</span>
+  <span class="kw">if</span> (hasResult) {
+    d.<span class="fn">setTextColor</span>(<span class="num">0x4499FF</span>); d.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+    d.<span class="fn">setCursor</span>(<span class="num">5</span>, <span class="num">25</span>);
+    d.<span class="fn">printf</span>(<span class="str">"= %.4g"</span>, result);
+  }
+  <span class="cm">// Expressao atual</span>
+  d.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>); d.<span class="fn">setTextSize</span>(<span class="num">2</span>);
+  d.<span class="fn">setCursor</span>(<span class="num">5</span>, <span class="num">45</span>);
+  <span class="cls">String</span> disp = expr.<span class="fn">length</span>() > <span class="num">0</span> ? expr : <span class="str">"0"</span>;
+  <span class="kw">if</span> (disp.<span class="fn">length</span>() > <span class="num">9</span>) disp = disp.<span class="fn">substring</span>(disp.<span class="fn">length</span>() - <span class="num">9</span>);
+  d.<span class="fn">print</span>(disp + <span class="str">"|"</span>);
+  <span class="cm">// Instrucoes</span>
+  d.<span class="fn">setTextColor</span>(<span class="num">0x334455</span>); d.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+  d.<span class="fn">setCursor</span>(<span class="num">0</span>, <span class="num">115</span>);
+  d.<span class="fn">print</span>(<span class="str">" ENTER=calc  DEL=apagar  FN=limpar"</span>);
+}
+
+<span class="kw">float</span> <span class="fn">calc</span>(<span class="cls">String</span> e) {
+  <span class="kw">int</span> pos = -<span class="num">1</span>; <span class="kw">char</span> op = <span class="num">0</span>;
+  <span class="kw">for</span> (<span class="kw">int</span> i = e.<span class="fn">length</span>()-<span class="num">1</span>; i > <span class="num">0</span>; i--)
+    <span class="kw">if</span> (e[i]==<span class="str">'+'</span> || e[i]==<span class="str">'-'</span>) { pos=i; op=e[i]; <span class="kw">break</span>; }
+  <span class="kw">if</span> (pos==-<span class="num">1</span>)
+    <span class="kw">for</span> (<span class="kw">int</span> i = e.<span class="fn">length</span>()-<span class="num">1</span>; i > <span class="num">0</span>; i--)
+      <span class="kw">if</span> (e[i]==<span class="str">'*'</span> || e[i]==<span class="str">'/'</span>) { pos=i; op=e[i]; <span class="kw">break</span>; }
+  <span class="kw">if</span> (pos==-<span class="num">1</span>) <span class="kw">return</span> e.<span class="fn">toFloat</span>();
+  <span class="kw">float</span> a = e.<span class="fn">substring</span>(<span class="num">0</span>, pos).<span class="fn">toFloat</span>();
+  <span class="kw">float</span> b = e.<span class="fn">substring</span>(pos+<span class="num">1</span>).<span class="fn">toFloat</span>();
+  <span class="kw">if</span> (op==<span class="str">'+'</span>) <span class="kw">return</span> a+b;
+  <span class="kw">if</span> (op==<span class="str">'-'</span>) <span class="kw">return</span> a-b;
+  <span class="kw">if</span> (op==<span class="str">'*'</span>) <span class="kw">return</span> a*b;
+  <span class="kw">if</span> (op==<span class="str">'/'</span>) <span class="kw">return</span> b!=<span class="num">0</span> ? a/b : <span class="fn">NAN</span>;
+  <span class="kw">return</span> <span class="num">0</span>;
+}
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="kw">auto</span> cfg = M5.<span class="fn">config</span>();
+  M5Cardputer.<span class="fn">begin</span>(cfg, <span class="kw">true</span>);
+  <span class="fn">draw</span>();
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  M5Cardputer.<span class="fn">update</span>();
+  <span class="kw">if</span> (M5Cardputer.Keyboard.<span class="fn">isChange</span>() &amp;&amp; M5Cardputer.Keyboard.<span class="fn">isPressed</span>()) {
+    Keyboard_Class::KeysState st = M5Cardputer.Keyboard.<span class="fn">keysState</span>();
+    <span class="kw">for</span> (<span class="kw">auto</span> c : st.word)
+      <span class="kw">if</span> ((c>=<span class="str">'0'</span>&amp;&amp;c<=<span class="str">'9'</span>)||c==<span class="str">'.'</span>||c==<span class="str">'+'</span>||c==<span class="str">'-'</span>||c==<span class="str">'*'</span>||c==<span class="str">'/'</span>) {
+        <span class="kw">if</span> (hasResult) { expr=<span class="str">""</span>; hasResult=<span class="kw">false</span>; }
+        expr += c;
+      }
+    <span class="kw">if</span> (st.del &amp;&amp; expr.<span class="fn">length</span>() > <span class="num">0</span>) expr.<span class="fn">remove</span>(expr.<span class="fn">length</span>()-<span class="num">1</span>);
+    <span class="kw">if</span> (st.enter &amp;&amp; expr.<span class="fn">length</span>() > <span class="num">0</span>) {
+      result = <span class="fn">calc</span>(expr);
+      hasResult = <span class="kw">true</span>;
+      <span class="kw">if</span> (<span class="fn">isnan</span>(result)) {
+        M5Cardputer.Display.<span class="fn">fillScreen</span>(<span class="cls">RED</span>);
+        M5Cardputer.Display.<span class="fn">setCursor</span>(<span class="num">30</span>, <span class="num">60</span>);
+        M5Cardputer.Display.<span class="fn">print</span>(<span class="str">"Erro: div/0"</span>);
+        M5Cardputer.Speaker.<span class="fn">tone</span>(<span class="num">200</span>, <span class="num">300</span>);
+        <span class="fn">delay</span>(<span class="num">1500</span>);
+        hasResult=<span class="kw">false</span>; expr=<span class="str">""</span>;
+      }
+    }
+    <span class="kw">if</span> (st.fn) { expr=<span class="str">""</span>; hasResult=<span class="kw">false</span>; }
+    <span class="fn">draw</span>();
+  }
+}</div>
+        </div>
+        <div class="tip"><div class="tip-t">Desafio Extra</div><p>Adicione suporte a parenteses: "2*(3+4)=14". Dica: implemente um parser recursivo simples ou use a funcao eval() de uma biblioteca de expressao matematica para Arduino.</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('m7')">← M7 — Bateria</button><button class="btn-nav nxt" onclick="go('m9')">Fase 2 — M9 WiFi →</button></div>
+      </section>
       <!-- MODULOS INSERIDOS AQUI -->
     </main>
   </div>
