@@ -833,6 +833,269 @@ IRsend irsend(IR_PIN);
         <div class="exr"><div class="exr-t">Exercicio</div><p>Crie um menu de controle remoto para uma TV especifica (escolha a marca da sua TV). Mapeie pelo menos 6 funcoes (power, vol+, vol-, ch+, ch-, mute) para teclas do teclado e exiba o menu visualmente.</p></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('m11')">← M11 — MQTT</button><button class="btn-nav nxt" onclick="go('m13')">M13 — SPIFFS →</button></div>
       </section>
+
+      <!-- M13 -->
+      <section id="m13" class="mod">
+        <div class="bc"><span>Fase 2 — Intermediario</span><span class="sep">›</span><span class="cur">Modulo 13</span></div>
+        <div class="mhdr"><span class="mbadge b2">M13</span><div><h1>Armazenamento SPIFFS</h1><p class="sub">Sistema de arquivos flash, leitura, gravacao e configuracoes persistentes</p></div></div>
+        <div class="hwcard"><div class="hwico">FS<br>8MB</div><div><h3>Hardware neste modulo</h3><div class="tags"><span class="tag">Flash 8MB</span><span class="tag">SPIFFS</span><span class="tag">LittleFS</span><span class="tag">NVS</span></div></div></div>
+        <div class="sec"><h2>Conceito</h2><p>O ESP32-S3 tem 8MB de flash, dos quais parte e reservada para o sistema de arquivos SPIFFS (ou LittleFS). E ideal para armazenar configuracoes (SSID, senha, volume), logs e pequenos arquivos. SPIFFS.begin(true) formata automaticamente se necessario. Arquivos sao acessados como no POSIX: open, read, write, close.</p></div>
+        <div class="sec"><h2>Codigo — Configuracoes Persistentes</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;SPIFFS.h&gt;</span>
+
+<span class="kw">void</span> <span class="fn">saveConfig</span>(<span class="cls">String</span> ssid, <span class="cls">String</span> pass) {
+  File f = SPIFFS.<span class="fn">open</span>(<span class="str">"/config.txt"</span>, <span class="str">"w"</span>);
+  <span class="kw">if</span> (!f) <span class="kw">return</span>;
+  f.<span class="fn">printf</span>(<span class="str">"ssid=%s\n"</span>, ssid.<span class="fn">c_str</span>());
+  f.<span class="fn">printf</span>(<span class="str">"pass=%s\n"</span>, pass.<span class="fn">c_str</span>());
+  f.<span class="fn">printf</span>(<span class="str">"vol=128\n"</span>);
+  f.<span class="fn">close</span>();
+}
+
+<span class="cls">String</span> <span class="fn">readConfig</span>(<span class="cls">String</span> key) {
+  File f = SPIFFS.<span class="fn">open</span>(<span class="str">"/config.txt"</span>, <span class="str">"r"</span>);
+  <span class="kw">if</span> (!f) <span class="kw">return</span> <span class="str">""</span>;
+  <span class="kw">while</span> (f.<span class="fn">available</span>()) {
+    <span class="cls">String</span> line = f.<span class="fn">readStringUntil</span>(<span class="str">'\n'</span>);
+    line.<span class="fn">trim</span>();
+    <span class="kw">if</span> (line.<span class="fn">startsWith</span>(key+<span class="str">"="</span>))
+      <span class="kw">return</span> line.<span class="fn">substring</span>(key.<span class="fn">length</span>()+<span class="num">1</span>);
+  }
+  f.<span class="fn">close</span>();
+  <span class="kw">return</span> <span class="str">""</span>;
+}
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="kw">auto</span> cfg=M5.<span class="fn">config</span>(); M5Cardputer.<span class="fn">begin</span>(cfg,<span class="kw">true</span>);
+  <span class="kw">auto</span>&amp; d=M5Cardputer.Display;
+  d.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>); d.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>); d.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+
+  <span class="kw">if</span> (!SPIFFS.<span class="fn">begin</span>(<span class="kw">true</span>)) { d.<span class="fn">println</span>(<span class="str">"SPIFFS falhou!"</span>); <span class="kw">return</span>; }
+
+  <span class="cm">// Grava configuracao</span>
+  <span class="fn">saveConfig</span>(<span class="str">"MinhaRede"</span>, <span class="str">"senha123"</span>);
+  d.<span class="fn">println</span>(<span class="str">"Config gravada!"</span>);
+
+  <span class="cm">// Le de volta</span>
+  <span class="cls">String</span> ssid = <span class="fn">readConfig</span>(<span class="str">"ssid"</span>);
+  <span class="cls">String</span> vol  = <span class="fn">readConfig</span>(<span class="str">"vol"</span>);
+  d.<span class="fn">printf</span>(<span class="str">"SSID: %s\nVol: %s\n"</span>, ssid.<span class="fn">c_str</span>(), vol.<span class="fn">c_str</span>());
+
+  <span class="cm">// Info do FS</span>
+  d.<span class="fn">printf</span>(<span class="str">"\nTotal: %dKB\nUsado: %dKB\n"</span>,
+    SPIFFS.<span class="fn">totalBytes</span>()/<span class="num">1024</span>, SPIFFS.<span class="fn">usedBytes</span>()/<span class="num">1024</span>);
+}
+<span class="kw">void</span> <span class="fn">loop</span>() {}</div>
+        </div>
+        <div class="tip"><div class="tip-t">Dica — NVS para preferencias simples</div><p>Para guardar apenas pares chave-valor (SSID, tokens), use Preferences.h (NVS) em vez de SPIFFS. E mais simples: prefs.begin("app"); prefs.putString("ssid", "rede"); prefs.getString("ssid", "default");</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie um sistema que salva o volume do speaker (0-255) no SPIFFS. Ao iniciar, leia o volume salvo. Teclas + e - no teclado ajustam o volume e salvam automaticamente o novo valor.</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('m12')">← M12 — IR</button><button class="btn-nav nxt" onclick="go('m14')">M14 — UI Avancada →</button></div>
+      </section>
+
+      <!-- M14 -->
+      <section id="m14" class="mod">
+        <div class="bc"><span>Fase 2 — Intermediario</span><span class="sep">›</span><span class="cur">Modulo 14</span></div>
+        <div class="mhdr"><span class="mbadge b2">M14</span><div><h1>Display UI Avancada</h1><p class="sub">Menus navegaveis, widgets, header/footer e interfaces responsivas</p></div></div>
+        <div class="hwcard"><div class="hwico">UI<br>UX</div><div><h3>Tecnicas neste modulo</h3><div class="tags"><span class="tag">Menu scrollavel</span><span class="tag">Sprites</span><span class="tag">State machine</span><span class="tag">Focus/Select</span></div></div></div>
+        <div class="sec"><h2>Conceito</h2><p>Uma boa UI para o Cardputer tem 3 camadas: header fixo (titulo, status), area de conteudo scrollavel e footer com instrucoes de navegacao. Use uma maquina de estados simples (enum AppState) para gerenciar as telas. Sprites evitam flickering ao redesenhar.</p></div>
+        <div class="sec"><h2>Codigo — Menu Navegavel</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+
+<span class="kw">struct</span> Item { <span class="kw">const char</span>* label; <span class="kw">uint16_t</span> icon_color; };
+Item items[] = {
+  {<span class="str">"WiFi Scanner"</span>, <span class="cls">TFT_CYAN</span>},
+  {<span class="str">"IR Blaster"</span>,   <span class="cls">TFT_ORANGE</span>},
+  {<span class="str">"Calculadora"</span>,  <span class="cls">TFT_GREEN</span>},
+  {<span class="str">"Configuracoes"</span>,<span class="cls">TFT_WHITE</span>},
+  {<span class="str">"Info Sistema"</span>, <span class="cls">TFT_YELLOW</span>},
+  {<span class="str">"Sobre"</span>,        <span class="cls">TFT_LIGHTGREY</span>}
+};
+<span class="kw">const int</span> N = <span class="num">6</span>;
+<span class="kw">int</span> sel = <span class="num">0</span>, scroll = <span class="num">0</span>;
+<span class="kw">const int</span> VISIBLE = <span class="num">4</span>; <span class="cm">// itens visiveis por vez</span>
+
+<span class="kw">void</span> <span class="fn">draw</span>() {
+  <span class="kw">auto</span>&amp; d = M5Cardputer.Display;
+  d.<span class="fn">fillScreen</span>(<span class="num">0x040A14</span>);
+  <span class="cm">// Header</span>
+  d.<span class="fn">fillRect</span>(<span class="num">0</span>,<span class="num">0</span>,<span class="num">135</span>,<span class="num">18</span>,<span class="num">0x0D1F3A</span>);
+  d.<span class="fn">setTextColor</span>(<span class="cls">TFT_CYAN</span>); d.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+  d.<span class="fn">setCursor</span>(<span class="num">5</span>,<span class="num">5</span>); d.<span class="fn">print</span>(<span class="str">"Cardputer ADV"</span>);
+  d.<span class="fn">setTextColor</span>(<span class="cls">TFT_DARKGREY</span>);
+  d.<span class="fn">setCursor</span>(<span class="num">100</span>,<span class="num">5</span>); d.<span class="fn">printf</span>(<span class="str">"%d%%"</span>,M5Cardputer.Power.<span class="fn">getBatteryLevel</span>());
+  <span class="cm">// Itens do menu</span>
+  <span class="kw">for</span>(<span class="kw">int</span> i=<span class="num">0</span>;i&lt;VISIBLE&amp;&amp;(scroll+i)&lt;N;i++) {
+    <span class="kw">int</span> idx=scroll+i, y=<span class="num">22</span>+i*<span class="num">24</span>;
+    <span class="kw">bool</span> s=(idx==sel);
+    <span class="kw">if</span>(s){ d.<span class="fn">fillRoundRect</span>(<span class="num">3</span>,y,<span class="num">129</span>,<span class="num">21</span>,<span class="num">3</span>,<span class="num">0x0E2A4A</span>); d.<span class="fn">drawRoundRect</span>(<span class="num">3</span>,y,<span class="num">129</span>,<span class="num">21</span>,<span class="num">3</span>,items[idx].icon_color); }
+    d.<span class="fn">fillCircle</span>(<span class="num">16</span>,y+<span class="num">10</span>,<span class="num">5</span>,s?items[idx].icon_color:<span class="num">0x1A2A3A</span>);
+    d.<span class="fn">setTextColor</span>(s?<span class="cls">TFT_WHITE</span>:<span class="cls">TFT_DARKGREY</span>);
+    d.<span class="fn">setCursor</span>(<span class="num">26</span>,y+<span class="num">6</span>); d.<span class="fn">print</span>(items[idx].label);
+  }
+  <span class="cm">// Footer</span>
+  d.<span class="fn">drawLine</span>(<span class="num">0</span>,<span class="num">120</span>,<span class="num">135</span>,<span class="num">120</span>,<span class="num">0x1A2A3A</span>);
+  d.<span class="fn">setTextColor</span>(<span class="num">0x2A3A4A</span>); d.<span class="fn">setCursor</span>(<span class="num">3</span>,<span class="num">123</span>);
+  d.<span class="fn">print</span>(<span class="str">"TAB=nav  ENTER=abre  FN=sair"</span>);
+}
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="kw">auto</span> cfg=M5.<span class="fn">config</span>(); M5Cardputer.<span class="fn">begin</span>(cfg,<span class="kw">true</span>);
+  <span class="fn">draw</span>();
+}
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  M5Cardputer.<span class="fn">update</span>();
+  <span class="kw">if</span>(M5Cardputer.Keyboard.<span class="fn">isChange</span>()&amp;&amp;M5Cardputer.Keyboard.<span class="fn">isPressed</span>()) {
+    <span class="kw">auto</span> st=M5Cardputer.Keyboard.<span class="fn">keysState</span>();
+    <span class="kw">if</span>(st.tab) {
+      sel=(sel+<span class="num">1</span>)%N;
+      <span class="kw">if</span>(sel>=scroll+VISIBLE) scroll++;
+      <span class="kw">if</span>(sel&lt;scroll) scroll=sel;
+    }
+    <span class="kw">if</span>(st.enter) { <span class="cm">/* executar items[sel] */</span> }
+    <span class="fn">draw</span>();
+  }
+}</div>
+        </div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione uma segunda tela (AppState) que e mostrada ao pressionar ENTER em um item do menu. A tela deve mostrar o nome do item selecionado em grande e um botao "Voltar". Implemente com enum AppState { STATE_MENU, STATE_DETAIL }.</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('m13')">← M13 — SPIFFS</button><button class="btn-nav nxt" onclick="go('m15')">M15 — Deep Sleep →</button></div>
+      </section>
+
+      <!-- M15 -->
+      <section id="m15" class="mod">
+        <div class="bc"><span>Fase 2 — Intermediario</span><span class="sep">›</span><span class="cur">Modulo 15</span></div>
+        <div class="mhdr"><span class="mbadge b2">M15</span><div><h1>Deep Sleep Avancado</h1><p class="sub">Wake-up sources, RTC memory, timer e ULP (Ultra Low Power)</p></div></div>
+        <div class="hwcard"><div class="hwico">ZZZ<br>ULP</div><div><h3>Hardware neste modulo</h3><div class="tags"><span class="tag">AXP2101</span><span class="tag">RTC Memory</span><span class="tag">ext0/ext1</span><span class="tag">Timer wakeup</span><span class="tag">~10uA sleep</span></div></div></div>
+        <div class="sec"><h2>Conceito</h2><p>No M7 usamos deep sleep basico. Aqui aprofundamos: multiplas fontes de acordar (timer + tecla simultaneamente), RTC_DATA_ATTR para persistir dados, e como identificar o motivo do acordar para executar codigo diferente. O consumo em deep sleep e ~10 microamperes.</p></div>
+        <div class="sec"><h2>Codigo — Multi-source wakeup com historico</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;esp_sleep.h&gt;</span>
+
+<span class="cls">RTC_DATA_ATTR</span> <span class="kw">int</span> boots = <span class="num">0</span>;
+<span class="cls">RTC_DATA_ATTR</span> <span class="kw">int</span> batHistory[<span class="num">10</span>];
+<span class="cls">RTC_DATA_ATTR</span> <span class="kw">int</span> histIdx = <span class="num">0</span>;
+
+<span class="kw">const char</span>* <span class="fn">wakeReason</span>() {
+  <span class="kw">switch</span>(<span class="fn">esp_sleep_get_wakeup_cause</span>()) {
+    <span class="kw">case</span> ESP_SLEEP_WAKEUP_TIMER: <span class="kw">return</span> <span class="str">"Timer"</span>;
+    <span class="kw">case</span> ESP_SLEEP_WAKEUP_EXT0:  <span class="kw">return</span> <span class="str">"Tecla"</span>;
+    <span class="kw">case</span> ESP_SLEEP_WAKEUP_EXT1:  <span class="kw">return</span> <span class="str">"GPIO Ext"</span>;
+    <span class="kw">default</span>: <span class="kw">return</span> <span class="str">"Power-on"</span>;
+  }
+}
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="kw">auto</span> cfg=M5.<span class="fn">config</span>(); M5Cardputer.<span class="fn">begin</span>(cfg,<span class="kw">true</span>);
+  boots++;
+
+  <span class="cm">// Registra bateria no historico circular</span>
+  batHistory[histIdx%<span class="num">10</span>] = M5Cardputer.Power.<span class="fn">getBatteryLevel</span>();
+  histIdx++;
+
+  <span class="kw">auto</span>&amp; d=M5Cardputer.Display;
+  d.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>); d.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>); d.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+  d.<span class="fn">printf</span>(<span class="str">"Boot #%d | %s\n"</span>, boots, <span class="fn">wakeReason</span>());
+
+  <span class="cm">// Grafico do historico de bateria</span>
+  <span class="kw">int</span> count=<span class="fn">min</span>(histIdx,<span class="num">10</span>);
+  <span class="kw">for</span>(<span class="kw">int</span> i=<span class="num">0</span>;i&lt;count;i++){
+    <span class="kw">int</span> h=<span class="fn">map</span>(batHistory[i],<span class="num">0</span>,<span class="num">100</span>,<span class="num">0</span>,<span class="num">40</span>);
+    <span class="kw">uint16_t</span> c=batHistory[i]><span class="num">50</span>?<span class="cls">TFT_GREEN</span>:batHistory[i]><span class="num">20</span>?<span class="cls">TFT_YELLOW</span>:<span class="cls">TFT_RED</span>;
+    d.<span class="fn">fillRect</span>(<span class="num">5</span>+i*<span class="num">13</span>,<span class="num">60</span>-h,<span class="num">10</span>,h,c);
+    d.<span class="fn">drawRect</span>(<span class="num">5</span>+i*<span class="num">13</span>,<span class="num">20</span>,<span class="num">10</span>,<span class="num">40</span>,<span class="num">0x1A2A3A</span>);
+  }
+  d.<span class="fn">setCursor</span>(<span class="num">0</span>,<span class="num">70</span>);
+  d.<span class="fn">printf</span>(<span class="str">"Bat atual: %d%%\nSleep em 3s..."</span>,
+    M5Cardputer.Power.<span class="fn">getBatteryLevel</span>());
+
+  <span class="fn">delay</span>(<span class="num">3000</span>);
+  <span class="fn">esp_sleep_enable_ext0_wakeup</span>((gpio_num_t)<span class="num">0</span>,<span class="num">0</span>);
+  <span class="fn">esp_sleep_enable_timer_wakeup</span>(<span class="num">60</span>*<span class="num">1000000ULL</span>); <span class="cm">// 60s</span>
+  d.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>);
+  <span class="fn">esp_deep_sleep_start</span>();
+}
+<span class="kw">void</span> <span class="fn">loop</span>() {}</div>
+        </div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Implemente um "data logger": a cada 30 segundos o Cardputer acorda via timer, le a bateria, salva no historico (RTC_DATA_ATTR), e volta a dormir. Apos 10 amostras, exibe o grafico completo antes de dormir novamente.</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('m14')">← M14 — UI</button><button class="btn-nav nxt" onclick="go('p2')">Projeto — Terminal WiFi →</button></div>
+      </section>
+
+      <!-- P2 -->
+      <section id="p2" class="mod">
+        <div class="bc"><span>Fase 2 — Intermediario</span><span class="sep">›</span><span class="cur">Projeto Final</span></div>
+        <div class="mhdr"><span class="mbadge bp">PROJETO</span><div><h1>Terminal WiFi</h1><p class="sub">Projeto final da Fase 2 — terminal interativo com comandos e conexao WiFi</p></div></div>
+        <div class="hwcard"><div class="hwico">TERM<br>&gt;_</div><div><h3>Objetivos do Projeto</h3><div class="tags"><span class="tag">Interface terminal</span><span class="tag">WiFi conectado</span><span class="tag">HTTP requests</span><span class="tag">Comandos interativos</span></div></div></div>
+        <div class="sec"><h2>Descricao</h2><p>Um terminal interativo que se conecta ao WiFi e aceita comandos via teclado. Comandos disponiveis: ip (mostra IP), rssi (forca do sinal), bat (bateria), scan (escaneia redes), get [url] (faz GET HTTP e exibe status). Log scrollavel na tela.</p></div>
+        <div class="sec"><h2>Codigo Completo</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;WiFi.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;HTTPClient.h&gt;</span>
+
+<span class="kw">const char</span>* SSID=<span class="str">"SUA_REDE"</span>, *PASS=<span class="str">"SUA_SENHA"</span>;
+<span class="cls">String</span> log_buf=<span class="str">""</span>, cmd=<span class="str">""</span>;
+<span class="kw">int</span> logLines=<span class="num">0</span>;
+<span class="kw">const int</span> MAX_LOG=<span class="num">7</span>;
+
+<span class="kw">void</span> <span class="fn">addLog</span>(<span class="cls">String</span> line) {
+  log_buf += line+<span class="str">"\n"</span>; logLines++;
+  <span class="kw">if</span>(logLines>MAX_LOG){ log_buf=log_buf.<span class="fn">substring</span>(log_buf.<span class="fn">indexOf</span>(<span class="str">'\n'</span>)+<span class="num">1</span>); logLines--; }
+  <span class="fn">draw</span>();
+}
+<span class="kw">void</span> <span class="fn">draw</span>() {
+  <span class="kw">auto</span>&amp; d=M5Cardputer.Display;
+  d.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>);
+  d.<span class="fn">fillRect</span>(<span class="num">0</span>,<span class="num">0</span>,<span class="num">135</span>,<span class="num">14</span>,<span class="num">0x0D3A6E</span>);
+  d.<span class="fn">setTextColor</span>(<span class="cls">CYAN</span>); d.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+  d.<span class="fn">setCursor</span>(<span class="num">2</span>,<span class="num">3</span>);
+  d.<span class="fn">print</span>(WiFi.<span class="fn">isConnected</span>()?WiFi.<span class="fn">localIP</span>().<span class="fn">toString</span>():<span class="str">"desconectado"</span>);
+  d.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>); d.<span class="fn">setCursor</span>(<span class="num">2</span>,<span class="num">16</span>);
+  d.<span class="fn">print</span>(log_buf);
+  d.<span class="fn">drawLine</span>(<span class="num">0</span>,<span class="num">115</span>,<span class="num">135</span>,<span class="num">115</span>,<span class="cls">CYAN</span>);
+  d.<span class="fn">setTextColor</span>(<span class="cls">GREEN</span>); d.<span class="fn">setCursor</span>(<span class="num">2</span>,<span class="num">118</span>);
+  d.<span class="fn">print</span>(<span class="str">"> "</span>+cmd);
+}
+<span class="kw">void</span> <span class="fn">exec</span>(<span class="cls">String</span> c) {
+  c.<span class="fn">trim</span>();
+  <span class="kw">if</span>(c==<span class="str">"ip"</span>)   <span class="fn">addLog</span>(<span class="str">"IP: "</span>+WiFi.<span class="fn">localIP</span>().<span class="fn">toString</span>());
+  <span class="kw">else if</span>(c==<span class="str">"rssi"</span>) <span class="fn">addLog</span>(<span class="str">"RSSI: "</span>+<span class="cls">String</span>(WiFi.<span class="fn">RSSI</span>())+<span class="str">"dBm"</span>);
+  <span class="kw">else if</span>(c==<span class="str">"bat"</span>)  <span class="fn">addLog</span>(<span class="str">"Bat: "</span>+<span class="cls">String</span>(M5Cardputer.Power.<span class="fn">getBatteryLevel</span>())+<span class="str">"%"</span>);
+  <span class="kw">else if</span>(c==<span class="str">"scan"</span>) {
+    <span class="kw">int</span> n=WiFi.<span class="fn">scanNetworks</span>(<span class="num">false</span>,<span class="kw">true</span>);
+    <span class="kw">for</span>(<span class="kw">int</span> i=<span class="num">0</span>;i&lt;<span class="fn">min</span>(n,<span class="num">3</span>);i++) <span class="fn">addLog</span>(WiFi.<span class="fn">SSID</span>(i)+<span class="str">" "</span>+WiFi.<span class="fn">RSSI</span>(i));
+    <span class="fn">addLog</span>(<span class="cls">String</span>(n)+<span class="str">" redes"</span>);
+  }
+  <span class="kw">else if</span>(c.<span class="fn">startsWith</span>(<span class="str">"get "</span>)) {
+    HTTPClient h; h.<span class="fn">begin</span>(c.<span class="fn">substring</span>(<span class="num">4</span>));
+    <span class="kw">int</span> code=h.<span class="fn">GET</span>(); <span class="fn">addLog</span>(<span class="str">"HTTP "</span>+<span class="cls">String</span>(code));
+    <span class="kw">if</span>(code==<span class="num">200</span>) <span class="fn">addLog</span>(h.<span class="fn">getString</span>().<span class="fn">substring</span>(<span class="num">0</span>,<span class="num">40</span>));
+    h.<span class="fn">end</span>();
+  }
+  <span class="kw">else</span> <span class="fn">addLog</span>(<span class="str">"? "</span>+c+<span class="str">" (ip rssi bat scan get)"</span>);
+}
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="kw">auto</span> cfg=M5.<span class="fn">config</span>(); M5Cardputer.<span class="fn">begin</span>(cfg,<span class="kw">true</span>);
+  <span class="fn">addLog</span>(<span class="str">"Conectando..."</span>);
+  WiFi.<span class="fn">begin</span>(SSID,PASS); <span class="kw">int</span> t=<span class="num">0</span>;
+  <span class="kw">while</span>(WiFi.<span class="fn">status</span>()!=WL_CONNECTED&amp;&amp;t++&lt;<span class="num">20</span>)<span class="fn">delay</span>(<span class="num">500</span>);
+  <span class="fn">addLog</span>(WiFi.<span class="fn">isConnected</span>()?<span class="str">"OK! "</span>+WiFi.<span class="fn">localIP</span>().<span class="fn">toString</span>():<span class="str">"FALHA"</span>);
+  <span class="fn">addLog</span>(<span class="str">"cmds: ip rssi bat scan get"</span>);
+}
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  M5Cardputer.<span class="fn">update</span>();
+  <span class="kw">if</span>(M5Cardputer.Keyboard.<span class="fn">isChange</span>()&amp;&amp;M5Cardputer.Keyboard.<span class="fn">isPressed</span>()) {
+    <span class="kw">auto</span> st=M5Cardputer.Keyboard.<span class="fn">keysState</span>();
+    <span class="kw">for</span>(<span class="kw">auto</span> c:st.word) cmd+=c;
+    <span class="kw">if</span>(st.del&amp;&amp;cmd.<span class="fn">length</span>()><span class="num">0</span>) cmd.<span class="fn">remove</span>(cmd.<span class="fn">length</span>()-<span class="num">1</span>);
+    <span class="kw">if</span>(st.enter) { <span class="fn">exec</span>(cmd); cmd=<span class="str">""</span>; }
+    <span class="kw">if</span>(st.fn) { cmd=<span class="str">""</span>; log_buf=<span class="str">""</span>; logLines=<span class="num">0</span>; }
+    <span class="fn">draw</span>();
+  }
+}</div>
+        </div>
+        <div class="tip"><div class="tip-t">Desafio Extra</div><p>Adicione o comando "ping [ip]" que tenta conectar na porta 80 do IP e reporta se esta acessivel (use WiFiClient.connect(ip, 80, 1000)). Adicione "time" que busca o horario pela worldtimeapi.</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('m15')">← M15 — Deep Sleep</button><button class="btn-nav nxt" onclick="go('m17')">Fase 3 — M17 BLE →</button></div>
+      </section>
+
       <!-- MODULOS INSERIDOS AQUI -->
     </main>
   </div>
