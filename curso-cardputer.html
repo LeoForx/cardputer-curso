@@ -92,6 +92,28 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:var
 .sol.open{display:block}
 .sol-hdr{color:#a78bfa;font-size:10px;font-weight:bold;padding:6px 12px;border-bottom:1px solid rgba(124,58,237,.2);background:rgba(124,58,237,.08)}
 .sol pre{margin:0;padding:10px 12px;font-family:'Cascadia Code','Fira Code',monospace;font-size:10.5px;line-height:1.65;color:#c4b5fd;white-space:pre-wrap;word-break:break-all;overflow-x:auto}
+
+/* === PLAYGROUND === */
+.gen-wrap{background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.35);border-radius:8px;padding:16px;margin-bottom:20px}
+.gen-label{color:var(--accent1);font-size:11px;font-weight:bold;margin-bottom:6px}
+.gen-desc{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6}
+.gen-ta{width:100%;background:var(--code-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:13px;line-height:1.6;padding:12px;resize:vertical;min-height:80px;outline:none;transition:border .2s}
+.gen-ta:focus{border-color:var(--phase1)}
+.gen-ta::placeholder{color:var(--dim)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.chip{background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.25);color:var(--accent1);border-radius:12px;padding:3px 10px;font-size:10px;cursor:pointer;transition:all .15s;user-select:none}
+.chip:hover{background:rgba(14,165,233,.25);border-color:var(--accent1)}
+.btn-gen{background:var(--phase1);color:#fff;border:none;border-radius:6px;padding:8px 18px;font-size:12px;font-weight:bold;cursor:pointer}
+.btn-gen:hover{opacity:.85}
+.btn-clear{background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:8px 14px;font-size:12px;cursor:pointer}
+.btn-clear:hover{color:var(--text);border-color:var(--muted)}
+.gen-out{position:relative;margin-top:4px}
+.btn-copy{position:absolute;top:10px;right:10px;background:var(--card-bg);color:var(--muted);border:1px solid var(--border);border-radius:4px;padding:3px 10px;font-size:10px;cursor:pointer;z-index:1;transition:all .15s}
+.btn-copy:hover{color:var(--text);border-color:var(--phase1)}
+.gen-pre{margin:0;white-space:pre-wrap;word-break:break-all;min-height:120px;padding-top:38px!important;font-family:'Cascadia Code','Fira Code',Consolas,monospace!important;font-size:11.5px!important;line-height:1.75!important}
+.gen-feat{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px}
+.gen-feat-tag{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:var(--green);border-radius:3px;padding:1px 8px;font-size:10px}
+
 </style>
 </head>
 <body>
@@ -151,6 +173,13 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:var
           <a class="ml" data-m="m22" onclick="go('m22')">M22 — Microfone e Audio</a>
           <a class="ml" data-m="m23" onclick="go('m23')">M23 — FreeRTOS</a>
           <a class="ml proj" data-m="p3" onclick="go('p3')">&#127942; Projeto Final — Swiss Army Knife</a>
+        </div>
+      </div>
+
+      <div class="phase-sec" style="border-top:1px solid var(--border);margin-top:8px;padding-top:4px">
+        <div class="phase-hdr"><span class="ph-badge" style="background:linear-gradient(135deg,#0ea5e9,#7c3aed)">&#9889;</span><span class="ph-title" style="color:#a0d4f5">EXTRAS</span></div>
+        <div class="phase-mods">
+          <a class="ml" data-m="playground" onclick="go('playground')" style="color:var(--accent1)">&#9889; Gerador de Codigo</a>
         </div>
       </div>
     </nav>
@@ -2158,6 +2187,80 @@ Mode mode=MENU;
         <div class="navbtns"><button class="btn-nav" onclick="go('m23')">← M23 — FreeRTOS</button><button class="btn-nav nxt" onclick="go('m1')" style="background:var(--green);border-color:var(--green)">Recomecar do M1 ↺</button></div>
       </section>
 
+
+      <!-- PLAYGROUND -->
+      <section id="playground" class="mod">
+        <div class="bc"><span>Extras</span><span class="sep">&rsaquo;</span><span class="cur">Gerador de Codigo</span></div>
+        <div class="mhdr">
+          <span class="mbadge" style="background:linear-gradient(135deg,#0ea5e9,#7c3aed);font-size:16px;padding:4px 10px">&#9889;</span>
+          <div><h1>Gerador de Codigo Arduino</h1><p class="sub">Descreva o que voce quer fazer e receba um sketch completo para o Cardputer</p></div>
+        </div>
+        <div class="sec"><h2>Como funciona</h2>
+          <p>Digite em portugues o que o seu projeto deve fazer. O gerador detecta automaticamente as funcionalidades mencionadas e monta um sketch Arduino com includes, variaveis globais, <code style="background:var(--code-bg);padding:1px 5px;border-radius:3px;font-size:11px">setup()</code> e <code style="background:var(--code-bg);padding:1px 5px;border-radius:3px;font-size:11px">loop()</code> prontos para o Cardputer.</p>
+          <ul style="margin-top:10px">
+            <li>Mencione <strong style="color:var(--text)">display</strong> ou <strong style="color:var(--text)">tela</strong> &rarr; codigo TFT ST7789V</li>
+            <li>Mencione <strong style="color:var(--text)">teclado</strong> ou <strong style="color:var(--text)">input</strong> &rarr; leitura de teclado QWERTY</li>
+            <li>Mencione <strong style="color:var(--text)">wifi</strong> &rarr; conexao WiFi</li>
+            <li>Mencione <strong style="color:var(--text)">http</strong>, <strong style="color:var(--text)">api</strong> ou <strong style="color:var(--text)">json</strong> &rarr; HTTPClient + ArduinoJson</li>
+            <li>Mencione <strong style="color:var(--text)">mqtt</strong> ou <strong style="color:var(--text)">iot</strong> &rarr; PubSubClient</li>
+            <li>Mencione <strong style="color:var(--text)">IR</strong> ou <strong style="color:var(--text)">infravermelho</strong> &rarr; IRremote GPIO44</li>
+            <li>Mencione <strong style="color:var(--text)">bluetooth</strong> ou <strong style="color:var(--text)">BLE</strong> &rarr; HID Keyboard via BLE</li>
+            <li>Mencione <strong style="color:var(--text)">bateria</strong> &rarr; leitura de nivel de carga</li>
+            <li>Mencione <strong style="color:var(--text)">sleep</strong> ou <strong style="color:var(--text)">dormir</strong> &rarr; deep sleep com timer</li>
+            <li>Mencione <strong style="color:var(--text)">menu</strong> &rarr; menu navegavel com teclado</li>
+            <li>Combine varios! Ex: <em style="color:var(--dim)">"bateria + display + beep quando bateria baixa"</em></li>
+          </ul>
+        </div>
+        <div class="gen-wrap">
+          <div class="gen-label">&#9889; Descreva seu projeto</div>
+          <div class="gen-desc">Escreva o que voce quer que o Cardputer faca. Pode misturar componentes e funcionalidades.</div>
+          <textarea id="gen-idea" class="gen-ta" placeholder="Ex: Quero mostrar o nivel da bateria no display e emitir um beep quando estiver abaixo de 20%"></textarea>
+          <div style="margin-top:10px">
+            <div style="font-size:10px;color:var(--dim);margin-bottom:6px">Exemplos rapidos (clique para usar):</div>
+            <div class="chips">
+              <span class="chip" onclick="setChip('Mostrar bateria no display e piscar LED quando abaixo de 20%')">Bateria + LED</span>
+              <span class="chip" onclick="setChip('Teclado com display: digitar texto e mostrar na tela')">Teclado + Display</span>
+              <span class="chip" onclick="setChip('Conectar no wifi e fazer uma requisicao http para uma api json e mostrar no display')">WiFi + HTTP + JSON</span>
+              <span class="chip" onclick="setChip('Menu navegavel com teclado e display')">Menu navegavel</span>
+              <span class="chip" onclick="setChip('IR blaster: enviar codigos infravermelho com teclado')">IR Blaster</span>
+              <span class="chip" onclick="setChip('MQTT: publicar dados de bateria no broker iot a cada 3 segundos')">MQTT IoT</span>
+              <span class="chip" onclick="setChip('Deep sleep: trabalhar por 10 segundos exibindo info no display e dormir por 1 minuto')">Deep Sleep</span>
+              <span class="chip" onclick="setChip('Bluetooth BLE HID: digitar no teclado fisico e enviar via BLE para o computador')">BLE HID</span>
+              <span class="chip" onclick="setChip('Contador no display, incrementar com Enter, zerar com Backspace')">Contador + Teclado</span>
+              <span class="chip" onclick="setChip('Tocar uma melodia com o speaker quando pressionar teclas')">Sons + Speaker</span>
+              <span class="chip" onclick="setChip('Salvar configuracao em arquivo SPIFFS e ler ao ligar')">SPIFFS + Config</span>
+              <span class="chip" onclick="setChip('Timer: atualizar display a cada segundo com contagem regressiva')">Timer Display</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+            <button class="btn-gen" onclick="genCode()">&#9889; Gerar Codigo</button>
+            <button class="btn-clear" onclick="clearGen()">&#8635; Limpar</button>
+          </div>
+        </div>
+        <div id="gen-result" style="display:none">
+          <div class="sec">
+            <h2>Codigo Gerado</h2>
+            <p style="font-size:12px;color:var(--muted);margin-bottom:5px">Funcionalidades detectadas:</p>
+            <div class="gen-feat" id="gen-feat"></div>
+            <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Sketch pronto para copiar no Arduino IDE 2.x:</p>
+            <div class="gen-out">
+              <button class="btn-copy" id="copy-btn" onclick="copyGen()">&#128203; Copiar</button>
+              <div class="cb gen-pre" id="gen-output"></div>
+            </div>
+          </div>
+          <div class="tip"><div class="tip-t">Como usar o codigo gerado</div>
+            <p>1. Copie o codigo. &nbsp;2. Abra o Arduino IDE 2.x e cole em um novo sketch. &nbsp;3. Ajuste os parametros marcados (SSID, senha, URL, etc.). &nbsp;4. Instale as bibliotecas necessarias via Library Manager. &nbsp;5. Conecte o Cardputer via USB-C e clique em Upload.</p>
+          </div>
+          <div class="warn"><div class="warn-t">Codigo gerado e um ponto de partida</div>
+            <p>O gerador cria uma estrutura funcional. Pode precisar de ajustes finos para o seu caso especifico. Consulte os modulos do curso para entender cada parte.</p>
+          </div>
+        </div>
+        <div class="navbtns">
+          <button class="btn-nav" onclick="go('p3')">&larr; Projeto Final</button>
+          <button class="btn-nav nxt" onclick="go('m1')">Recomecar do M1 &rarr;</button>
+        </div>
+      </section>
+
       <!-- MODULOS INSERIDOS AQUI -->
     </main>
   </div>
@@ -2212,6 +2315,402 @@ function toggleSol(btn){
     btn.textContent='▼ Ocultar solucao';
   }
 }
+
+
+// === PLAYGROUND ===
+function setChip(t){document.getElementById('gen-idea').value=t;document.getElementById('gen-idea').focus();}
+function clearGen(){document.getElementById('gen-idea').value='';document.getElementById('gen-result').style.display='none';document.getElementById('gen-idea').focus();}
+function copyGen(){
+  var text=document.getElementById('gen-output').textContent;
+  navigator.clipboard.writeText(text).then(function(){
+    var b=document.getElementById('copy-btn');
+    b.textContent='\u2713 Copiado!';
+    setTimeout(function(){b.innerHTML='&#128203; Copiar';},2000);
+  });
+}
+function genCode(){
+  var idea=document.getElementById('gen-idea').value.toLowerCase().trim();
+  if(!idea){document.getElementById('gen-idea').focus();return;}
+  var f={
+    display: /display|mostrar|escrever|texto|tela|imprimir|lcd/.test(idea),
+    keyboard:/teclado|tecla|digitar|input|botao|pressionar/.test(idea),
+    wifi:    /wifi|internet|conectar|rede|ssid|wireless/.test(idea),
+    http:    /http|api|rest|get|post|json|request|url/.test(idea),
+    mqtt:    /mqtt|broker|topic|iot|publicar|subscrever/.test(idea),
+    ir:      /infravermelho|\bir\b|remote|controle remoto|nec|sony/.test(idea),
+    ble:     /bluetooth|ble|hid/.test(idea),
+    spiffs:  /arquivo|salvar|gravar|spiffs|filesystem|config|persistente|armazenar/.test(idea),
+    sleep:   /sleep|dormir|economia|deep.?sleep|wake/.test(idea),
+    led:     /\bled\b|rgb|piscar|blink/.test(idea),
+    sound:   /\bsom\b|beep|speaker|audio|tom|frequencia|tocar|musica|melodia/.test(idea),
+    battery: /bateria|nivel|porcentagem|voltagem|carga/.test(idea),
+    menu:    /menu|opcao|navegar|lista|selecionar/.test(idea),
+    counter: /contador|contar|incrementar|count/.test(idea),
+    timer:   /timer|intervalo|periodico|a cada|contagem/.test(idea),
+    serial:  /serial|debug|log|monitor/.test(idea),
+    sensor:  /temperatura|umidade|sensor|i2c|medir/.test(idea)
+  };
+  if(f.http||f.mqtt) f.wifi=true;
+  if(f.keyboard||f.menu||f.counter||f.battery) f.display=true;
+  var feats=[];
+  if(f.display)  feats.push('Display TFT');
+  if(f.keyboard) feats.push('Teclado QWERTY');
+  if(f.wifi)     feats.push('WiFi');
+  if(f.http)     feats.push('HTTP + JSON');
+  if(f.mqtt)     feats.push('MQTT');
+  if(f.ir)       feats.push('IR Blaster');
+  if(f.ble)      feats.push('BLE HID');
+  if(f.spiffs)   feats.push('SPIFFS');
+  if(f.sleep)    feats.push('Deep Sleep');
+  if(f.led)      feats.push('LED');
+  if(f.sound)    feats.push('Speaker');
+  if(f.battery)  feats.push('Bateria');
+  if(f.menu)     feats.push('Menu');
+  if(f.counter)  feats.push('Contador');
+  if(f.timer)    feats.push('Timer');
+  if(f.serial)   feats.push('Serial Debug');
+  if(f.sensor)   feats.push('Sensor I2C');
+  if(!feats.length) feats.push('Sketch basico');
+  document.getElementById('gen-feat').innerHTML=feats.map(function(t){return '<span class="gen-feat-tag">'+t+'</span>';}).join('');
+
+  var inc=[],glb=[],xtra=[],setup=[],loop=[];
+
+  // --- includes base ---
+  inc.push('#include <M5Cardputer.h>');
+
+  // --- WiFi ---
+  if(f.wifi){
+    inc.push('#include <WiFi.h>');
+    glb.push('const char* SSID = "SUA_REDE_WIFI";  // <-- altere');
+    glb.push('const char* PASS = "SUA_SENHA";       // <-- altere');
+    setup.push('');
+    setup.push('  // Conexao WiFi');
+    setup.push('  WiFi.begin(SSID, PASS);');
+    if(f.display) setup.push('  M5Cardputer.Display.print("Conectando WiFi");');
+    setup.push('  while (WiFi.status() != WL_CONNECTED) {');
+    setup.push('    delay(300);');
+    if(f.display) setup.push('    M5Cardputer.Display.print(".");');
+    setup.push('  }');
+    if(f.display){
+      setup.push('  M5Cardputer.Display.println(" OK");');
+      setup.push('  M5Cardputer.Display.println(WiFi.localIP().toString());');
+    }
+  }
+
+  // --- HTTP ---
+  if(f.http){
+    inc.push('#include <HTTPClient.h>');
+    inc.push('#include <ArduinoJson.h>');
+    glb.push('unsigned long lastReq = 0;');
+    loop.push('');
+    loop.push('  if (millis() - lastReq >= 5000) {');
+    loop.push('    lastReq = millis();');
+    loop.push('    HTTPClient http;');
+    loop.push('    http.begin("https://api.exemplo.com/dados"); // <-- altere a URL');
+    loop.push('    int code = http.GET();');
+    loop.push('    if (code == 200) {');
+    loop.push('      StaticJsonDocument<512> doc;');
+    loop.push('      deserializeJson(doc, http.getString());');
+    loop.push('      String valor = doc["value"].as<String>(); // <-- ajuste o campo');
+    if(f.display){
+      loop.push('      M5Cardputer.Display.setCursor(0, 30);');
+      loop.push('      M5Cardputer.Display.println("API: " + valor);');
+    }
+    loop.push('    } else {');
+    if(f.display) loop.push('      M5Cardputer.Display.println("Erro HTTP: " + String(code));');
+    loop.push('    }');
+    loop.push('    http.end();');
+    loop.push('  }');
+  }
+
+  // --- MQTT ---
+  if(f.mqtt){
+    inc.push('#include <PubSubClient.h>');
+    glb.push('WiFiClient wifiClient;');
+    glb.push('PubSubClient mqtt(wifiClient);');
+    xtra.push('void mqttCallback(char* topic, byte* payload, unsigned int len) {');
+    xtra.push('  String msg = "";');
+    xtra.push('  for (unsigned int i = 0; i < len; i++) msg += (char)payload[i];');
+    if(f.display) xtra.push('  M5Cardputer.Display.println("MQTT << " + msg);');
+    xtra.push('}');
+    setup.push('');
+    setup.push('  mqtt.setServer("broker.hivemq.com", 1883);');
+    setup.push('  mqtt.setCallback(mqttCallback);');
+    setup.push('  mqtt.connect("cardputer");');
+    setup.push('  mqtt.subscribe("cardputer/cmd"); // <-- altere o topico');
+    loop.push('');
+    loop.push('  if (!mqtt.connected()) mqtt.connect("cardputer");');
+    loop.push('  mqtt.loop();');
+    loop.push('  static unsigned long lastPub = 0;');
+    loop.push('  if (millis() - lastPub >= 3000) {');
+    loop.push('    lastPub = millis();');
+    loop.push('    mqtt.publish("cardputer/status", "online"); // <-- altere o topico/valor');
+    loop.push('  }');
+  }
+
+  // --- IR ---
+  if(f.ir){
+    inc.push('#include <IRremoteESP8266.h>');
+    inc.push('#include <IRsend.h>');
+    glb.push('IRsend irsend(44);  // GPIO 44 = IR emitter do Cardputer');
+    setup.push('  irsend.begin();');
+    if(f.display){
+      setup.push('  M5Cardputer.Display.println("IR Blaster pronto");');
+      setup.push('  M5Cardputer.Display.println("1=Power  2=Vol+  3=Vol-");');
+    }
+    if(f.keyboard){
+      loop.push('');
+      loop.push('  if (M5Cardputer.Keyboard.isChange()) {');
+      loop.push('    auto& st = M5Cardputer.Keyboard.keysState();');
+      loop.push('    for (auto c : st.word) {');
+      loop.push("      if (c == '1') { irsend.sendNEC(0x20DF10EF, 32); M5Cardputer.Speaker.tone(1200, 50); } // Power");
+      loop.push("      if (c == '2') { irsend.sendNEC(0x20DF40BF, 32); M5Cardputer.Speaker.tone(1300, 50); } // Vol+");
+      loop.push("      if (c == '3') { irsend.sendNEC(0x20DFC03F, 32); M5Cardputer.Speaker.tone(1400, 50); } // Vol-");
+      loop.push('    }');
+      loop.push('  }');
+    } else {
+      loop.push('  irsend.sendNEC(0x20DF10EF, 32);  // Power NEC LG');
+      loop.push('  delay(2000);');
+    }
+  }
+
+  // --- BLE ---
+  if(f.ble){
+    inc.push('#include <BleKeyboard.h>  // instale: T-vK/ESP32-BLE-Keyboard');
+    glb.push('BleKeyboard bleKb("Cardputer", "M5Stack", 100);');
+    setup.push('  bleKb.begin();');
+    if(f.display) setup.push('  M5Cardputer.Display.println("BLE: aguardando par...");');
+    loop.push('');
+    loop.push('  if (bleKb.isConnected()) {');
+    if(f.keyboard){
+      loop.push('    if (M5Cardputer.Keyboard.isChange()) {');
+      loop.push('      auto& st = M5Cardputer.Keyboard.keysState();');
+      loop.push('      for (auto c : st.word) bleKb.print(c);');
+      loop.push('      if (st.del) bleKb.write(KEY_BACKSPACE);');
+      loop.push('    }');
+    } else {
+      loop.push('    bleKb.println("Cardputer!");');
+      loop.push('    delay(3000);');
+    }
+    loop.push('  }');
+  }
+
+  // --- SPIFFS ---
+  if(f.spiffs){
+    inc.push('#include <SPIFFS.h>');
+    setup.push('');
+    setup.push('  SPIFFS.begin(true); // formata na 1a vez se necessario');
+    setup.push('  if (!SPIFFS.exists("/config.txt")) {');
+    setup.push('    File fw = SPIFFS.open("/config.txt", "w");');
+    setup.push('    if (fw) { fw.println("valor=42"); fw.close(); }');
+    setup.push('  }');
+    setup.push('  File fr = SPIFFS.open("/config.txt", "r");');
+    setup.push('  if (fr) {');
+    if(f.display){
+      setup.push('    while (fr.available())');
+      setup.push('      M5Cardputer.Display.println(fr.readStringUntil(\'\\n\'));');
+    }
+    setup.push('    fr.close();');
+    setup.push('  }');
+  }
+
+  // --- Battery ---
+  if(f.battery){
+    glb.push('int prevBat = -1;');
+    loop.push('');
+    loop.push('  int bat = M5Cardputer.Power.getBatteryLevel();');
+    loop.push('  if (bat != prevBat) {');
+    loop.push('    prevBat = bat;');
+    if(f.display){
+      loop.push('    M5Cardputer.Display.setCursor(0, 10);');
+      loop.push('    M5Cardputer.Display.printf("Bateria: %d%%  \\n", bat);');
+    }
+    if(f.led)   loop.push('    M5Cardputer.Power.setLed(bat < 20 ? 255 : 0);');
+    if(f.sound) loop.push('    if (bat < 20) M5Cardputer.Speaker.tone(440, 500);');
+    loop.push('  }');
+    loop.push('  delay(1000);');
+  }
+
+  // --- LED (sem bateria) ---
+  if(f.led && !f.battery){
+    loop.push('');
+    loop.push('  M5Cardputer.Power.setLed(255); delay(300);');
+    loop.push('  M5Cardputer.Power.setLed(0);   delay(700);');
+  }
+
+  // --- Sound (sem bateria, sem IR) ---
+  if(f.sound && !f.battery && !f.ir){
+    loop.push('');
+    loop.push('  // Notas: La4=880 Si4=988 Do5=1047 Re5=1175 Mi5=1319');
+    loop.push('  M5Cardputer.Speaker.tone(880,  150); delay(200);');
+    loop.push('  M5Cardputer.Speaker.tone(1047, 150); delay(200);');
+    loop.push('  M5Cardputer.Speaker.tone(1319, 300); delay(1000);');
+  }
+
+  // --- Deep sleep ---
+  if(f.sleep){
+    glb.push('unsigned long wakeAt = 0;');
+    setup.push('  wakeAt = millis();');
+    if(f.display) setup.push('  M5Cardputer.Display.println("Acordei! Trabalhando 10s...");');
+    loop.push('');
+    loop.push('  if (millis() - wakeAt >= 10000) {');
+    if(f.display){
+      loop.push('    M5Cardputer.Display.println("Indo dormir...");');
+      loop.push('    delay(500);');
+    }
+    loop.push('    esp_sleep_enable_timer_wakeup(60ULL * 1000000ULL); // 1 minuto');
+    loop.push('    esp_deep_sleep_start();');
+    loop.push('  }');
+  }
+
+  // --- Counter ---
+  if(f.counter){
+    glb.push('int contador = 0;');
+    if(f.keyboard){
+      loop.push('');
+      loop.push('  if (M5Cardputer.Keyboard.isChange()) {');
+      loop.push('    auto& st = M5Cardputer.Keyboard.keysState();');
+      loop.push("    for (auto c : st.word) if (c == '\\n') contador++;");
+      loop.push('    if (st.del) contador = 0;');
+      if(f.display){
+        loop.push('    M5Cardputer.Display.setCursor(0, 50);');
+        loop.push('    M5Cardputer.Display.printf("Contador: %d  \\n", contador);');
+      }
+      loop.push('  }');
+    } else {
+      loop.push('');
+      loop.push('  contador++;');
+      if(f.display){
+        loop.push('  M5Cardputer.Display.setCursor(0, 0);');
+        loop.push('  M5Cardputer.Display.printf("Contador: %d\\n", contador);');
+      }
+      loop.push('  delay(1000);');
+    }
+  }
+
+  // --- Menu ---
+  if(f.menu){
+    glb.push('int menuIdx = 0;');
+    glb.push('const char* OPCOES[] = { "Opcao 1", "Opcao 2", "Opcao 3" };');
+    glb.push('const int NOPCOES = 3;');
+    xtra.push('');
+    xtra.push('void drawMenu() {');
+    xtra.push('  M5Cardputer.Display.fillScreen(BLACK);');
+    xtra.push('  M5Cardputer.Display.setTextColor(CYAN, BLACK);');
+    xtra.push('  M5Cardputer.Display.setCursor(0, 0);');
+    xtra.push('  M5Cardputer.Display.println("=== MENU ===");');
+    xtra.push('  M5Cardputer.Display.setTextColor(WHITE, BLACK);');
+    xtra.push('  for (int i = 0; i < NOPCOES; i++) {');
+    xtra.push('    M5Cardputer.Display.print(i == menuIdx ? "> " : "  ");');
+    xtra.push('    M5Cardputer.Display.println(OPCOES[i]);');
+    xtra.push('  }');
+    xtra.push('}');
+    setup.push('');
+    setup.push('  drawMenu();');
+    loop.push('');
+    loop.push('  if (M5Cardputer.Keyboard.isChange()) {');
+    loop.push('    auto& st = M5Cardputer.Keyboard.keysState();');
+    loop.push('    for (auto c : st.word) {');
+    loop.push("      if (c == 'a') { menuIdx = (menuIdx + 1) % NOPCOES; drawMenu(); }");
+    loop.push("      if (c == '\\n') {");
+    loop.push('        if (menuIdx == 0) { /* acao Opcao 1 */ }');
+    loop.push('        if (menuIdx == 1) { /* acao Opcao 2 */ }');
+    loop.push('        if (menuIdx == 2) { /* acao Opcao 3 */ }');
+    loop.push('      }');
+    loop.push('    }');
+    loop.push('    if (st.del) { menuIdx = (menuIdx - 1 + NOPCOES) % NOPCOES; drawMenu(); }');
+    loop.push('  }');
+
+  // --- Basic keyboard (sem menu, BLE, IR, counter) ---
+  } else if(f.keyboard && !f.ble && !f.ir && !f.counter){
+    glb.push('String inputStr = "";');
+    if(f.display){
+      setup.push('');
+      setup.push('  M5Cardputer.Display.println("Digite e pressione Enter:");');
+    }
+    loop.push('');
+    loop.push('  if (M5Cardputer.Keyboard.isChange()) {');
+    loop.push('    auto& st = M5Cardputer.Keyboard.keysState();');
+    loop.push('    if (st.del && inputStr.length() > 0) inputStr.remove(inputStr.length() - 1);');
+    loop.push('    for (auto c : st.word) {');
+    loop.push("      if (c == '\\n') {");
+    if(f.display) loop.push('        M5Cardputer.Display.println(">>> " + inputStr);');
+    loop.push('        inputStr = "";');
+    loop.push('      } else inputStr += c;');
+    loop.push('    }');
+    if(f.display){
+      loop.push('    M5Cardputer.Display.setCursor(0, 100);');
+      loop.push('    M5Cardputer.Display.print("> " + inputStr + "_  ");');
+    }
+    loop.push('  }');
+  }
+
+  // --- Timer (sem http, battery, counter) ---
+  if(f.timer && !f.http && !f.battery && !f.counter){
+    glb.push('unsigned long lastTick = 0;');
+    loop.push('');
+    loop.push('  if (millis() - lastTick >= 1000) {');
+    loop.push('    lastTick = millis();');
+    if(f.display){
+      loop.push('    static unsigned long ticks = 0;');
+      loop.push('    M5Cardputer.Display.setCursor(0, 0);');
+      loop.push('    M5Cardputer.Display.printf("Tick: %lu\\n", ++ticks);');
+    }
+    loop.push('  }');
+  }
+
+  // --- Serial debug ---
+  if(f.serial){
+    setup.push('  Serial.begin(115200);');
+    setup.push('  Serial.println("Cardputer ready!");');
+  }
+
+  // --- Sensor I2C ---
+  if(f.sensor){
+    inc.push('#include <Wire.h>  // adicione a lib do sensor: ex. DallasTemperature, DHT');
+    setup.push('  Wire.begin();');
+    loop.push('');
+    loop.push('  // float temp = sensor.readTemperature(); // ajuste para o sensor');
+    if(f.display) loop.push('  // M5Cardputer.Display.printf("Temp: %.1f C\\n", temp);');
+    loop.push('  delay(2000);');
+  }
+
+  // --- Fallback display ---
+  if(f.display && !loop.length){
+    loop.push('  static int frame = 0;');
+    loop.push('  M5Cardputer.Display.setCursor(0, 0);');
+    loop.push('  M5Cardputer.Display.printf("Frame: %d\\n", frame++);');
+    loop.push('  delay(500);');
+  }
+  if(!loop.length) loop.push('  delay(10);');
+
+  // --- Assemble ---
+  var out=[];
+  out=out.concat(inc);
+  if(glb.length){out.push('');out=out.concat(glb);}
+  if(xtra.length){out.push('');out=out.concat(xtra);}
+  out.push('');
+  out.push('void setup() {');
+  out.push('  auto cfg = M5.config();');
+  out.push('  M5Cardputer.begin(cfg, true);');
+  if(f.display){
+    out.push('  M5Cardputer.Display.setTextColor(WHITE, BLACK);');
+    out.push('  M5Cardputer.Display.setTextSize(1);');
+    out.push('  M5Cardputer.Display.fillScreen(BLACK);');
+  }
+  out=out.concat(setup);
+  out.push('}');
+  out.push('');
+  out.push('void loop() {');
+  out.push('  M5Cardputer.update();');
+  out=out.concat(loop);
+  out.push('}');
+
+  document.getElementById('gen-output').textContent = out.join('\n');
+  document.getElementById('gen-result').style.display = 'block';
+  document.getElementById('gen-result').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
 </script>
 </body>
 </html>
