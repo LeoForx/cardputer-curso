@@ -90,10 +90,29 @@ body{font-family:'Segoe UI',system-ui,sans-serif;color:var(--text);background:#f
 @media print{
   .cover{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .hw-chip{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .back-bar{display:none}
 }
+.back-bar{
+  position:fixed;top:0;left:0;right:0;z-index:999;
+  background:#0d1526;padding:7px 16px;
+  display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid #1e3a5f;
+}
+.back-bar a{color:#38bdf8;font-size:11px;text-decoration:none}
+.back-bar a:hover{color:#7dd3fc}
+.back-bar .sep{color:#334155;font-size:11px}
+.back-bar .lbl{color:#64748b;font-size:11px}
+body{padding-top:34px}
 </style>
 </head>
 <body>
+
+<!-- BARRA VOLTAR (oculta no print) -->
+<div class="back-bar">
+  <a href="curso-cardputer.html">&#8592; Voltar ao curso interativo</a>
+  <span class="sep">·</span>
+  <span class="lbl">M5Stack Cardputer — Versao PDF</span>
+</div>
 
 <!-- CAPA -->
 <div class="cover">
