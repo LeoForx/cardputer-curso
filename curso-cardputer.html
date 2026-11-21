@@ -240,6 +240,109 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:var
         <div class="exr"><div class="exr-t">Exercicio</div><p>Apos o upload bem-sucedido do blink, modifique o codigo para o display alternar entre 3 cores diferentes (vermelho, verde, azul) com 300ms de intervalo cada.</p></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('m1')">← M1 — Hardware</button><button class="btn-nav nxt" onclick="go('m3')">M3 — Hello World →</button></div>
       </section>
+
+      <!-- M3 -->
+      <section id="m3" class="mod">
+        <div class="bc"><span>Fase 1 — Iniciante</span><span class="sep">›</span><span class="cur">Modulo 3</span></div>
+        <div class="mhdr"><span class="mbadge b1">M3</span><div><h1>Hello World no Display</h1><p class="sub">TFT ST7789V2, cores, fontes, cursores e primeiro programa visual</p></div></div>
+        <div class="hwcard"><div class="hwico">TFT<br>1.14"</div><div><h3>Hardware neste modulo</h3><div class="tags"><span class="tag">ST7789V2</span><span class="tag">135x240 px</span><span class="tag">SPI</span><span class="tag">M5.Display</span><span class="tag">16-bit color</span></div></div></div>
+        <div class="sec"><h2>Conceito</h2>
+          <p>O display TFT do Cardputer tem resolucao 135x240 pixels com 16-bit de cor (65536 cores). A comunicacao e via SPI a alta velocidade, abstraida pela biblioteca M5GFX. O ponto de origem (0,0) fica no canto superior esquerdo. O eixo X vai ate 134 e o eixo Y ate 239.</p>
+          <ul style="margin-top:10px">
+            <li><strong style="color:var(--text)">setCursor(x, y)</strong> — posiciona o cursor de texto</li>
+            <li><strong style="color:var(--text)">setTextColor(cor)</strong> — define a cor do texto (WHITE, RED, CYAN, etc.)</li>
+            <li><strong style="color:var(--text)">setTextSize(n)</strong> — define o tamanho do texto (1=pequeno, 2=medio, 3=grande)</li>
+            <li><strong style="color:var(--text)">print()/println()</strong> — escreve texto, igual ao Serial</li>
+            <li><strong style="color:var(--text)">printf()</strong> — escreve texto formatado (como printf do C)</li>
+            <li><strong style="color:var(--text)">fillScreen(cor)</strong> — preenche toda a tela com uma cor</li>
+          </ul>
+        </div>
+        <div class="sec"><h2>Codigo</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="kw">auto</span> cfg = M5.<span class="fn">config</span>();
+  M5Cardputer.<span class="fn">begin</span>(cfg, <span class="kw">true</span>);
+
+  <span class="cm">// Limpa a tela com cor preta</span>
+  M5Cardputer.Display.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>);
+
+  <span class="cm">// Texto branco, tamanho 2 (16x16 pixels por char)</span>
+  M5Cardputer.Display.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>);
+  M5Cardputer.Display.<span class="fn">setTextSize</span>(<span class="num">2</span>);
+  M5Cardputer.Display.<span class="fn">setCursor</span>(<span class="num">5</span>, <span class="num">30</span>);
+  M5Cardputer.Display.<span class="fn">print</span>(<span class="str">"Hello!"</span>);
+
+  <span class="cm">// Texto ciano, tamanho 1, linha abaixo</span>
+  M5Cardputer.Display.<span class="fn">setTextColor</span>(<span class="cls">CYAN</span>);
+  M5Cardputer.Display.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+  M5Cardputer.Display.<span class="fn">setCursor</span>(<span class="num">5</span>, <span class="num">65</span>);
+  M5Cardputer.Display.<span class="fn">print</span>(<span class="str">"Cardputer ADV"</span>);
+
+  <span class="cm">// Printf para dados numericos</span>
+  M5Cardputer.Display.<span class="fn">setTextColor</span>(<span class="cls">YELLOW</span>);
+  M5Cardputer.Display.<span class="fn">setCursor</span>(<span class="num">5</span>, <span class="num">80</span>);
+  M5Cardputer.Display.<span class="fn">printf</span>(<span class="str">"Bat: %d%%"</span>, M5Cardputer.Power.<span class="fn">getBatteryLevel</span>());
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {}</div>
+        </div>
+        <div class="warn"><div class="warn-t">Aviso Comum</div><p>Sem chamar fillScreen() antes de escrever novo texto, o texto antigo permanece visivel. Sempre limpe a area antes de atualizar. Para areas especificas, use fillRect(x, y, largura, altura, BLACK).</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie um programa que exiba seu nome em grande (setTextSize 3) no centro da tela, e abaixo mostre a data atual como texto. Dica: o centro horizontal e aproximadamente x=67 para texto tamanho 3.</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('m2')">← M2 — Ambiente</button><button class="btn-nav nxt" onclick="go('m4')">M4 — Display Avancado →</button></div>
+      </section>
+
+      <!-- M4 -->
+      <section id="m4" class="mod">
+        <div class="bc"><span>Fase 1 — Iniciante</span><span class="sep">›</span><span class="cur">Modulo 4</span></div>
+        <div class="mhdr"><span class="mbadge b1">M4</span><div><h1>Display Avancado</h1><p class="sub">Formas geometricas, sprites, bitmaps e construcao de interfaces</p></div></div>
+        <div class="hwcard"><div class="hwico">M5<br>GFX</div><div><h3>Hardware neste modulo</h3><div class="tags"><span class="tag">ST7789V2</span><span class="tag">M5GFX</span><span class="tag">Sprites</span><span class="tag">DMA</span></div></div></div>
+        <div class="sec"><h2>Conceito</h2>
+          <p>Alem de texto, a biblioteca M5GFX oferece primitivas graficas completas: retangulos, circulos, triangulos, linhas e arcos. Para animacoes suaves sem flickering, use Sprites — buffers de pixel em RAM que sao copiados para o display de uma vez (double buffering).</p>
+        </div>
+        <div class="sec"><h2>Codigo — Primitivas e Sprite</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+
+<span class="cm">// Sprite: buffer de pixels em PSRAM</span>
+M5Canvas sprite(&amp;M5Cardputer.Display);
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="kw">auto</span> cfg = M5.<span class="fn">config</span>();
+  M5Cardputer.<span class="fn">begin</span>(cfg, <span class="kw">true</span>);
+
+  <span class="kw">auto</span>&amp; d = M5Cardputer.Display;
+  d.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>);
+
+  <span class="cm">// Retangulo (x, y, largura, altura, cor)</span>
+  d.<span class="fn">drawRect</span>(<span class="num">5</span>, <span class="num">5</span>, <span class="num">50</span>, <span class="num">30</span>, <span class="cls">RED</span>);
+  d.<span class="fn">fillRect</span>(<span class="num">60</span>, <span class="num">5</span>, <span class="num">50</span>, <span class="num">30</span>, <span class="cls">BLUE</span>);
+
+  <span class="cm">// Circulo (cx, cy, raio, cor)</span>
+  d.<span class="fn">drawCircle</span>(<span class="num">30</span>, <span class="num">70</span>, <span class="num">20</span>, <span class="cls">YELLOW</span>);
+  d.<span class="fn">fillCircle</span>(<span class="num">90</span>, <span class="num">70</span>, <span class="num">20</span>, <span class="cls">GREEN</span>);
+
+  <span class="cm">// Linha (x1, y1, x2, y2, cor)</span>
+  d.<span class="fn">drawLine</span>(<span class="num">0</span>, <span class="num">100</span>, <span class="num">134</span>, <span class="num">100</span>, <span class="cls">WHITE</span>);
+
+  <span class="cm">// Triangulo preenchido</span>
+  d.<span class="fn">fillTriangle</span>(<span class="num">20</span>, <span class="num">110</span>, <span class="num">67</span>, <span class="num">140</span>, <span class="num">114</span>, <span class="num">110</span>, <span class="cls">MAGENTA</span>);
+}
+
+<span class="kw">int</span> x = <span class="num">0</span>;
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="cm">// Sprite para animacao sem flickering</span>
+  sprite.<span class="fn">createSprite</span>(<span class="num">135</span>, <span class="num">20</span>);
+  sprite.<span class="fn">fillSprite</span>(<span class="cls">BLACK</span>);
+  sprite.<span class="fn">fillRect</span>(x, <span class="num">0</span>, <span class="num">20</span>, <span class="num">20</span>, <span class="cls">CYAN</span>);
+  sprite.<span class="fn">pushSprite</span>(<span class="num">0</span>, <span class="num">150</span>);
+  x = (x + <span class="num">2</span>) % <span class="num">115</span>;
+  <span class="fn">delay</span>(<span class="num">16</span>); <span class="cm">// ~60 FPS</span>
+}</div>
+        </div>
+        <div class="tip"><div class="tip-t">Dica — Cores personalizadas</div><p>Use M5Cardputer.Display.color565(r, g, b) para criar qualquer cor RGB. Exemplo: color565(255, 128, 0) = laranja. As constantes WHITE, BLACK, RED, GREEN, BLUE, CYAN, YELLOW, MAGENTA estao predefinidas.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie uma barra de progresso animada que vai de 0% a 100% na tela, mostrando o percentual como texto no centro. Use um Sprite para evitar flickering durante a animacao.</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('m3')">← M3 — Hello World</button><button class="btn-nav nxt" onclick="go('m5')">M5 — Teclado →</button></div>
+      </section>
       <!-- MODULOS INSERIDOS AQUI -->
     </main>
   </div>
