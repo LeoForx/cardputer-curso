@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>M5Stack Cardputer — Curso Completo PDF</title>
+<style>
+/* ===== VARIAVEIS ===== */
+:root{
+  --p1:#0ea5e9; --p2:#7c3aed; --p3:#ef4444;
+  --text:#1e293b; --muted:#64748b; --light:#f8fafc;
+  --code-bg:#f1f5f9; --border:#e2e8f0;
+}
+/* ===== BASE ===== */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;color:var(--text);background:#fff;font-size:11pt}
+/* ===== PAGINAS ===== */
+@page{size:A4;margin:18mm 15mm 18mm 15mm}
+@page:first{margin-top:0;margin-bottom:0}
+.page{page-break-before:always;min-height:257mm;position:relative;padding-bottom:12mm}
+.page:first-child{page-break-before:avoid}
+/* ===== RODAPE ===== */
+.page-footer{
+  position:absolute;bottom:0;left:0;right:0;
+  display:flex;justify-content:space-between;align-items:center;
+  border-top:1px solid var(--border);padding-top:4px;
+}
+.page-footer span{font-size:8pt;color:var(--muted)}
+/* ===== CAPA ===== */
+.cover{
+  min-height:297mm;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  background:linear-gradient(160deg,#0a0f1a 0%,#0d1f3a 60%,#0a0f1a 100%);
+  color:#fff;padding:20mm;page-break-after:always;
+}
+.cover-badge{background:#0ea5e9;border-radius:8px;padding:8px 20px;font-size:16pt;font-weight:bold;font-family:monospace;letter-spacing:2px;margin-bottom:16mm}
+.cover h1{font-size:28pt;margin-bottom:6mm;line-height:1.2}
+.cover .sub{color:#94a3b8;font-size:13pt;margin-bottom:14mm}
+.cover-stats{display:flex;gap:16mm;justify-content:center;background:rgba(255,255,255,.05);border-radius:10px;padding:8mm 16mm;border:1px solid rgba(255,255,255,.1)}
+.stat-n{font-size:24pt;font-weight:bold;color:#38bdf8}
+.stat-l{font-size:9pt;color:#64748b;margin-top:2mm}
+.cover-footer{margin-top:16mm;color:#334155;font-size:9pt}
+/* ===== SUMARIO ===== */
+.toc h1{font-size:18pt;margin-bottom:8mm;padding-bottom:4mm;border-bottom:2px solid var(--p1);color:var(--p1)}
+.toc-phase{margin-top:6mm}
+.toc-phase h2{font-size:11pt;font-weight:bold;margin-bottom:3mm}
+.toc-ph1 h2{color:var(--p1)} .toc-ph2 h2{color:var(--p2)} .toc-ph3 h2{color:var(--p3)}
+.toc-entry{display:flex;justify-content:space-between;padding:2.5mm 0;border-bottom:1px dotted #e2e8f0;font-size:10pt}
+.toc-entry span{color:var(--muted);min-width:16mm;text-align:right}
+/* ===== MODULO ===== */
+.mod-header{display:flex;align-items:center;gap:5mm;margin-bottom:5mm;padding-bottom:4mm;border-bottom:2px solid}
+.ph1 .mod-header{border-color:var(--p1)} .ph2 .mod-header{border-color:var(--p2)} .ph3 .mod-header{border-color:var(--p3)} .proj .mod-header{border-color:#f59e0b}
+.mod-badge{border-radius:4px;padding:2px 8px;font-size:9pt;font-weight:bold;color:#fff;white-space:nowrap;flex-shrink:0}
+.ph1 .mod-badge{background:var(--p1)} .ph2 .mod-badge{background:var(--p2)} .ph3 .mod-badge{background:var(--p3)} .proj .mod-badge{background:#f59e0b;color:#000}
+.mod-header h1{font-size:14pt;line-height:1.2}
+.mod-sub{font-size:9pt;color:var(--muted);margin-top:1mm}
+.mod-phase{font-size:8pt;color:var(--muted);margin-left:auto;white-space:nowrap}
+/* Layout 2 colunas */
+.two-col{display:grid;grid-template-columns:1fr 160px;gap:5mm;margin-top:4mm}
+.one-col{margin-top:4mm}
+/* Conteudo */
+.content h2{font-size:10pt;font-weight:bold;color:#0ea5e9;margin:4mm 0 2mm;border-bottom:1px solid var(--border);padding-bottom:1.5mm}
+.content p,.content li{font-size:9.5pt;line-height:1.75;color:var(--text)}
+.content ul{padding-left:5mm;margin-bottom:3mm}
+.content li{margin-bottom:1.5mm}
+/* Codigo */
+.code{background:var(--code-bg);border-left:3px solid var(--p1);border-radius:0 4px 4px 0;padding:4mm;font-family:'Cascadia Code','Consolas',monospace;font-size:7.5pt;line-height:1.65;overflow:hidden;white-space:pre-wrap;word-break:break-all}
+/* HW ilustracao */
+.hw-box{background:var(--light);border:1px solid var(--border);border-radius:6px;padding:4mm;text-align:center}
+.hw-chip{background:#0f172a;border-radius:4px;padding:4mm;color:#38bdf8;font-family:monospace;font-size:8pt;margin-bottom:3mm;min-height:28mm;display:flex;align-items:center;justify-content:center;line-height:1.5;white-height:100%}
+.hw-box h3{font-size:8pt;color:var(--muted);margin-bottom:2mm}
+.hw-tags{display:flex;flex-wrap:wrap;gap:2mm;justify-content:center}
+.hw-tag{background:#e0f2fe;color:#0369a1;border-radius:3px;padding:0.5mm 2.5mm;font-size:7pt}
+/* Aviso / Dica / Exercicio */
+.warn-box{background:#fefce8;border-left:3px solid #f59e0b;padding:3mm 4mm;margin-top:3mm;border-radius:0 4px 4px 0}
+.warn-box .label{color:#b45309;font-size:8pt;font-weight:bold;margin-bottom:1.5mm}
+.warn-box p{font-size:8.5pt;color:#78350f;line-height:1.65}
+.tip-box{background:#f0fdf4;border-left:3px solid #22c55e;padding:3mm 4mm;margin-top:3mm;border-radius:0 4px 4px 0}
+.tip-box .label{color:#15803d;font-size:8pt;font-weight:bold;margin-bottom:1.5mm}
+.tip-box p{font-size:8.5pt;color:#166534;line-height:1.65}
+.exr-box{background:#f5f3ff;border-left:3px solid var(--p2);padding:3mm 4mm;margin-top:3mm;border-radius:0 4px 4px 0}
+.exr-box .label{color:var(--p2);font-size:8pt;font-weight:bold;margin-bottom:1.5mm}
+.exr-box p{font-size:8.5pt;color:#4c1d95;line-height:1.65}
+/* Separador de fase */
+.phase-divider{page-break-before:always;padding:8mm 0 6mm;border-bottom:3px solid;margin-bottom:6mm}
+.div-ph1{border-color:var(--p1)} .div-ph2{border-color:var(--p2)} .div-ph3{border-color:var(--p3)}
+.phase-divider h1{font-size:22pt;font-weight:bold}
+.div-ph1 h1{color:var(--p1)} .div-ph2 h1{color:var(--p2)} .div-ph3 h1{color:var(--p3)}
+.phase-divider p{color:var(--muted);font-size:11pt;margin-top:2mm}
+/* Contador de paginas via CSS */
+@media print{
+  .cover{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .hw-chip{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+
+<!-- CAPA -->
+<div class="cover">
+  <div class="cover-badge">M5STACK</div>
+  <h1>Cardputer-ADV<br>Curso Completo</h1>
+  <p class="sub">Do Zero ao Avancado — Arduino C/C++</p>
+  <div class="cover-stats">
+    <div><div class="stat-n">24</div><div class="stat-l">Modulos</div></div>
+    <div><div class="stat-n" style="color:#a78bfa">3</div><div class="stat-l">Fases</div></div>
+    <div><div class="stat-n" style="color:#fb923c">~24h</div><div class="stat-l">Conteudo</div></div>
+  </div>
+  <p class="cover-footer">v1.0 · 2024 · M5Stack Cardputer-ADV · Arduino C/C++</p>
+</div>
+
+<!-- SUMARIO -->
+<div class="page toc">
+  <h1>Sumario</h1>
+  <div class="toc-phase toc-ph1">
+    <h2>Fase 1 — Iniciante</h2>
+    <div class="toc-entry">M1 · Conhecendo o Hardware<span>4</span></div>
+    <div class="toc-entry">M2 · Configurando o Ambiente<span>6</span></div>
+    <div class="toc-entry">M3 · Hello World no Display<span>8</span></div>
+    <div class="toc-entry">M4 · Display Avancado — Sprites e Formas<span>10</span></div>
+    <div class="toc-entry">M5 · Lendo o Teclado<span>12</span></div>
+    <div class="toc-entry">M6 · LED e Som Basico<span>14</span></div>
+    <div class="toc-entry">M7 · Bateria e Energia<span>16</span></div>
+    <div class="toc-entry" style="font-weight:bold">Projeto 1 · Calculadora com Display<span>18</span></div>
+  </div>
+  <div class="toc-phase toc-ph2">
+    <h2>Fase 2 — Intermediario</h2>
+    <div class="toc-entry">M9 · WiFi Basico<span>22</span></div>
+    <div class="toc-entry">M10 · HTTP e APIs REST<span>24</span></div>
+    <div class="toc-entry">M11 · MQTT e IoT<span>26</span></div>
+    <div class="toc-entry">M12 · Infravermelho (IR)<span>28</span></div>
+    <div class="toc-entry">M13 · Armazenamento SPIFFS<span>30</span></div>
+    <div class="toc-entry">M14 · Display UI Avancada<span>32</span></div>
+    <div class="toc-entry">M15 · Deep Sleep Avancado<span>34</span></div>
+    <div class="toc-entry" style="font-weight:bold">Projeto 2 · Terminal WiFi<span>36</span></div>
+  </div>
+  <div class="toc-phase toc-ph3">
+    <h2>Fase 3 — Avancado</h2>
+    <div class="toc-entry">M17 · BLE e Bluetooth<span>40</span></div>
+    <div class="toc-entry">M18 · Scanner WiFi Avancado<span>42</span></div>
+    <div class="toc-entry">M19 · IR Blaster Universal<span>44</span></div>
+    <div class="toc-entry">M20 · OTA Updates<span>46</span></div>
+    <div class="toc-entry">M21 · Criptografia e TLS<span>48</span></div>
+    <div class="toc-entry">M22 · Microfone e Audio<span>50</span></div>
+    <div class="toc-entry">M23 · FreeRTOS e Multitasking<span>52</span></div>
+    <div class="toc-entry" style="font-weight:bold">Projeto Final · Swiss Army Knife<span>54</span></div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>Sumario</span></div>
+</div>
+
+<!-- FASE 1 DIVIDER -->
+<div class="phase-divider div-ph1 page">
+  <h1>Fase 1<br>Iniciante</h1>
+  <p>8 modulos · ~6 horas de conteudo · Do hardware ao primeiro projeto</p>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>Fase 1 · Iniciante</span></div>
+</div>
+
+<!-- M1 -->
+<div class="page ph1">
+  <div class="mod-header"><span class="mod-badge">M1</span><div><h1>Conhecendo o Hardware</h1><p class="mod-sub">ESP32-S3, especificacoes, pinout e todos os componentes do Cardputer</p></div><span class="mod-phase">Fase 1 · Iniciante</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Especificacoes Tecnicas</h2>
+      <ul>
+        <li><strong>MCU:</strong> ESP32-S3FN8 — dual-core Xtensa LX7 @ 240 MHz</li>
+        <li><strong>Memoria:</strong> 8 MB PSRAM + 8 MB Flash integrada</li>
+        <li><strong>Display:</strong> ST7789V2 TFT 1.14" — 135 x 240 pixels, interface SPI</li>
+        <li><strong>Teclado:</strong> 56 teclas QWERTY com teclas de funcao e numeros</li>
+        <li><strong>Audio:</strong> Speaker interno 1W (I2S) + Microfone PDM SPM1423</li>
+        <li><strong>Wireless:</strong> WiFi 802.11 b/g/n 2.4GHz + BLE 5.0</li>
+        <li><strong>IR:</strong> Emissor infravermelho 940nm no GPIO44</li>
+        <li><strong>Bateria:</strong> 120mAh interna + slot para bateria externa ate 2000mAh</li>
+        <li><strong>USB:</strong> USB-C com conversor CH9102F para programacao e carga</li>
+        <li><strong>Expansao:</strong> Conector M5Stack Bus + header GPIO na parte inferior</li>
+      </ul>
+      <div class="tip-box"><div class="label">Dica de Inicializacao</div><p>M5Cardputer.begin(cfg, true) inicializa todos os perifericos. O parametro 'true' ativa a rotacao correta do display para o Cardputer. Sempre inclua esta linha no setup().</p></div>
+      <div class="exr-box"><div class="label">Exercicio</div><p>Compile e grave o codigo ao lado. O display deve mostrar as informacoes do chip. Adicione tambem o endereco MAC WiFi usando WiFi.macAddress() apos incluir WiFi.h.</p></div>
+    </div>
+    <div>
+      <div class="hw-box">
+        <div class="hw-chip">ESP32-S3<br>240MHz<br>Dual-Core<br>8MB PSRAM<br>8MB Flash</div>
+        <h3>Hardware neste modulo</h3>
+        <div class="hw-tags"><span class="hw-tag">ESP32-S3</span><span class="hw-tag">USB-C</span><span class="hw-tag">CH9102F</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="content" style="margin-top:4mm">
+    <h2>Codigo — Informacoes do Sistema</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+
+void setup() {
+  auto cfg = M5.config();
+  M5Cardputer.begin(cfg, true);
+
+  M5Cardputer.Display.setTextColor(WHITE);
+  M5Cardputer.Display.setTextSize(1);
+  M5Cardputer.Display.setCursor(5, 5);
+
+  M5Cardputer.Display.println("=== Cardputer Info ===");
+  M5Cardputer.Display.printf("CPU: %d MHz\n", ESP.getCpuFreqMHz());
+  M5Cardputer.Display.printf("Flash: %d KB\n", ESP.getFlashChipSize()/1024);
+  M5Cardputer.Display.printf("PSRAM: %d KB\n", ESP.getPsramSize()/1024);
+  M5Cardputer.Display.printf("RAM: %d KB\n", ESP.getFreeHeap()/1024);
+  M5Cardputer.Display.printf("Bat: %d%%\n",
+    M5Cardputer.Power.getBatteryLevel());
+}
+void loop() {}</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>4</span></div>
+</div>
+
+<!-- M2 -->
+<div class="page ph1">
+  <div class="mod-header"><span class="mod-badge">M2</span><div><h1>Configurando o Ambiente</h1><p class="mod-sub">Arduino IDE 2.x, driver USB, suporte ESP32 e bibliotecas M5Stack</p></div><span class="mod-phase">Fase 1 · Iniciante</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Passo a Passo</h2>
+      <ul>
+        <li><strong>1. Arduino IDE 2.x</strong> — Baixe em arduino.cc. Instale a versao 2.x.</li>
+        <li><strong>2. Driver CH9102F</strong> — Windows: wch.cn. macOS/Linux: automatico.</li>
+        <li><strong>3. URL do Board Package</strong> — Em Preferences, adicione:<br><code style="font-size:7pt;word-break:break-all">https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json</code></li>
+        <li><strong>4. Instalar ESP32 Core</strong> — Boards Manager &gt; "esp32 by Espressif" &gt; versao 3.x.</li>
+        <li><strong>5. Biblioteca M5Cardputer</strong> — Library Manager &gt; "M5Cardputer" &gt; Instalar.</li>
+        <li><strong>6. Board</strong> — Tools &gt; Board &gt; esp32 &gt; M5Stack-Cardputer</li>
+        <li><strong>7. Porta</strong> — Tools &gt; Port &gt; porta COM (Windows) ou /dev/cu.* (macOS)</li>
+        <li><strong>8. Upload Speed</strong> — Tools &gt; Upload Speed &gt; 921600</li>
+      </ul>
+      <div class="warn-box"><div class="label">Aviso — Upload Falhou?</div><p>Se "Failed to connect", mantenha pressionada a tecla 'G' no Cardputer durante o upload. Isso ativa o modo bootloader forcado do ESP32-S3.</p></div>
+      <div class="exr-box"><div class="label">Exercicio</div><p>Apos instalar tudo, grave o codigo de teste ao lado. O display deve piscar alternando entre preto e azul a cada 500ms.</p></div>
+    </div>
+    <div>
+      <div class="hw-box">
+        <div class="hw-chip">USB-C<br>CH9102F<br>Arduino<br>IDE 2.x<br>ESP32 3.x</div>
+        <h3>Requisitos</h3>
+        <div class="hw-tags"><span class="hw-tag">IDE 2.x</span><span class="hw-tag">ESP32 3.x</span><span class="hw-tag">M5Cardputer</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="content" style="margin-top:4mm">
+    <h2>Codigo de Teste — Display Blink</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+
+void setup() {
+  auto cfg = M5.config();
+  M5Cardputer.begin(cfg, true);
+}
+
+void loop() {
+  // Alterna entre preto e azul a cada 500ms
+  M5Cardputer.Display.fillScreen(BLACK);
+  delay(500);
+  M5Cardputer.Display.fillScreen(BLUE);
+  delay(500);
+}</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>6</span></div>
+</div>
+
+<!-- M3 -->
+<div class="page ph1">
+  <div class="mod-header"><span class="mod-badge">M3</span><div><h1>Hello World no Display</h1><p class="mod-sub">TFT ST7789V2, cores, fontes, cursores e primeiro programa visual</p></div><span class="mod-phase">Fase 1 · Iniciante</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Conceito</h2>
+      <p>O display TFT tem resolucao 135x240 pixels. O ponto (0,0) fica no canto superior esquerdo. Metodos principais:</p>
+      <ul style="margin-top:2mm">
+        <li><strong>fillScreen(cor)</strong> — limpa a tela</li>
+        <li><strong>setTextColor(cor)</strong> — cor do proximo texto</li>
+        <li><strong>setTextSize(n)</strong> — tamanho 1=6x8, 2=12x16, 3=18x24</li>
+        <li><strong>setCursor(x, y)</strong> — posiciona cursor</li>
+        <li><strong>print/printf</strong> — escreve texto</li>
+      </ul>
+      <div class="warn-box"><div class="label">Aviso</div><p>Sem fillScreen() antes de nova escrita, o texto antigo permanece. Use fillRect(x,y,w,h,BLACK) para limpar areas especificas.</p></div>
+      <div class="exr-box"><div class="label">Exercicio</div><p>Exiba seu nome em setTextSize(3) no centro da tela (aprox. x=67 para texto grande) e abaixo mostre a porcentagem da bateria em tempo real no loop().</p></div>
+    </div>
+    <div>
+      <div class="hw-box">
+        <div class="hw-chip">ST7789V2<br>135x240px<br>16-bit<br>65536 cores<br>SPI</div>
+        <h3>Display TFT</h3>
+        <div class="hw-tags"><span class="hw-tag">ST7789V2</span><span class="hw-tag">SPI</span><span class="hw-tag">M5GFX</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="content" style="margin-top:4mm">
+    <h2>Codigo — Texto Colorido</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+
+void setup() {
+  auto cfg = M5.config();
+  M5Cardputer.begin(cfg, true);
+
+  M5Cardputer.Display.fillScreen(BLACK);
+
+  // Texto branco, tamanho 2
+  M5Cardputer.Display.setTextColor(WHITE);
+  M5Cardputer.Display.setTextSize(2);
+  M5Cardputer.Display.setCursor(5, 30);
+  M5Cardputer.Display.print("Hello!");
+
+  // Texto ciano, tamanho 1
+  M5Cardputer.Display.setTextColor(CYAN);
+  M5Cardputer.Display.setTextSize(1);
+  M5Cardputer.Display.setCursor(5, 65);
+  M5Cardputer.Display.print("Cardputer ADV");
+
+  // Printf com dado dinamico
+  M5Cardputer.Display.setTextColor(YELLOW);
+  M5Cardputer.Display.setCursor(5, 80);
+  M5Cardputer.Display.printf("Bat: %d%%",
+    M5Cardputer.Power.getBatteryLevel());
+}
+void loop() {}</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>8</span></div>
+</div>
+
+<!-- M4 -->
+<div class="page ph1">
+  <div class="mod-header"><span class="mod-badge">M4</span><div><h1>Display Avancado — Sprites e Formas</h1><p class="mod-sub">Primitivas graficas, sprites para animacao suave e cores personalizadas</p></div><span class="mod-phase">Fase 1 · Iniciante</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Conceito</h2>
+      <p>M5GFX oferece primitivas graficas completas. Sprites sao buffers em PSRAM que eliminam flickering em animacoes (double buffering): desenha no sprite, depois pushSprite() copia de uma vez para o display.</p>
+      <div class="tip-box"><div class="label">Cores RGB</div><p>Use color565(r, g, b) para qualquer cor. Exemplo: color565(255,128,0) = laranja. Constantes: WHITE, BLACK, RED, GREEN, BLUE, CYAN, YELLOW, MAGENTA.</p></div>
+      <div class="exr-box"><div class="label">Exercicio</div><p>Crie uma barra de progresso animada de 0% a 100% usando Sprite. Exiba o percentual como texto no centro da barra durante a animacao.</p></div>
+    </div>
+    <div>
+      <div class="hw-box">
+        <div class="hw-chip">M5GFX<br>Sprites<br>PSRAM<br>DMA<br>60fps</div>
+        <h3>Motor Grafico</h3>
+        <div class="hw-tags"><span class="hw-tag">M5Canvas</span><span class="hw-tag">DMA</span><span class="hw-tag">60fps</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="content" style="margin-top:4mm">
+    <h2>Codigo — Primitivas e Sprite Animado</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+
+M5Canvas sprite(&amp;M5Cardputer.Display);
+
+void setup() {
+  auto cfg = M5.config();
+  M5Cardputer.begin(cfg, true);
+  auto&amp; d = M5Cardputer.Display;
+  d.fillScreen(BLACK);
+
+  d.drawRect(5, 5, 50, 30, RED);       // retangulo borda
+  d.fillRect(60, 5, 50, 30, BLUE);     // retangulo preenchido
+  d.drawCircle(30, 70, 20, YELLOW);    // circulo borda
+  d.fillCircle(90, 70, 20, GREEN);     // circulo preenchido
+  d.drawLine(0, 100, 134, 100, WHITE); // linha horizontal
+  d.fillTriangle(20,110,67,140,114,110,MAGENTA); // triangulo
+}
+
+int x = 0;
+void loop() {
+  sprite.createSprite(135, 20);
+  sprite.fillSprite(BLACK);
+  sprite.fillRect(x, 0, 20, 20, CYAN);
+  sprite.pushSprite(0, 150);
+  x = (x + 2) % 115;
+  delay(16); // ~60 FPS
+}</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>10</span></div>
+</div>
+
+<!-- M5 -->
+<div class="page ph1">
+  <div class="mod-header"><span class="mod-badge">M5</span><div><h1>Lendo o Teclado</h1><p class="mod-sub">Eventos de tecla, leitura de caracteres, input de texto e teclas especiais</p></div><span class="mod-phase">Fase 1 · Iniciante</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Conceito</h2>
+      <p>O teclado comunica via I2C. Sempre chame M5Cardputer.update() no loop(). isChange() indica mudanca de estado; isPressed() indica tecla ativa. KeysState tem: word (chars), del (backspace), enter, tab, fn (ESC).</p>
+      <div class="warn-box"><div class="label">Aviso Critico</div><p>update() e OBRIGATORIO no loop(). Sem ele, o teclado nunca reporta eventos. Tambem atualiza IMU e outros perifericos.</p></div>
+      <div class="exr-box"><div class="label">Exercicio</div><p>Adicione um contador de caracteres "32/100" no canto superior direito que atualiza em tempo real. Limite o input a 100 caracteres.</p></div>
+    </div>
+    <div>
+      <div class="hw-box">
+        <div class="hw-chip">QWERTY<br>56 teclas<br>I2C<br>Keyboard<br>_Class</div>
+        <h3>Teclado QWERTY</h3>
+        <div class="hw-tags"><span class="hw-tag">I2C</span><span class="hw-tag">KeysState</span><span class="hw-tag">word</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="content" style="margin-top:4mm">
+    <h2>Codigo — Editor de Texto</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+
+String input = "";
+
+void redraw() {
+  M5Cardputer.Display.fillScreen(BLACK);
+  M5Cardputer.Display.setTextColor(CYAN);
+  M5Cardputer.Display.setCursor(0, 5);
+  M5Cardputer.Display.println("Digite (FN=limpar):");
+  M5Cardputer.Display.setTextColor(WHITE);
+  M5Cardputer.Display.setCursor(0, 20);
+  M5Cardputer.Display.print(input + "|");
+}
+
+void setup() {
+  auto cfg = M5.config();
+  M5Cardputer.begin(cfg, true);
+  redraw();
+}
+
+void loop() {
+  M5Cardputer.update(); // OBRIGATORIO!
+  if (M5Cardputer.Keyboard.isChange() &amp;&amp;
+      M5Cardputer.Keyboard.isPressed()) {
+    auto st = M5Cardputer.Keyboard.keysState();
+    for (auto c : st.word) input += c;
+    if (st.del &amp;&amp; input.length() > 0)
+      input.remove(input.length() - 1);
+    if (st.enter) input += "\n";
+    if (st.fn) input = "";
+    redraw();
+  }
+}</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>12</span></div>
+</div>
+
+<!-- M6 -->
+<div class="page ph1">
+  <div class="mod-header"><span class="mod-badge">M6</span><div><h1>LED e Som Basico</h1><p class="mod-sub">Speaker interno I2S, tonos musicais, melodias e feedback sonoro</p></div><span class="mod-phase">Fase 1 · Iniciante</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Conceito</h2>
+      <p>O speaker usa I2S gerenciado pela M5Unified. tone(freq, dur_ms) gera beep; mute() para. setVolume(0-255) ajusta o volume. As frequencias musicais: Do=262Hz, Re=294Hz, Mi=330Hz, Fa=349Hz, Sol=392Hz, La=440Hz.</p>
+      <div class="tip-box"><div class="label">Dica — WAV</div><p>Speaker.playRaw(samples, count, rate, stereo, channel, repeat) reproduz audio PCM 16-bit. Armazene arrays de amostras em PROGMEM para notificacoes sonoras customizadas sem usar SPIFFS.</p></div>
+      <div class="exr-box"><div class="label">Exercicio</div><p>Crie um piano: teclas A S D F G H J tocam notas Do a Sol enquanto pressionadas. Exiba o nome da nota no display.</p></div>
+    </div>
+    <div>
+      <div class="hw-box">
+        <div class="hw-chip">Speaker<br>1W I2S<br>Mic PDM<br>SPM1423<br>16kHz</div>
+        <h3>Audio</h3>
+        <div class="hw-tags"><span class="hw-tag">I2S</span><span class="hw-tag">tone()</span><span class="hw-tag">1W</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="content" style="margin-top:4mm">
+    <h2>Codigo — Melodia de Startup</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+
+const int DO=262,RE=294,MI=330,FA=349,SOL=392,LA=440;
+
+void nota(int freq, int dur) {
+  M5Cardputer.Speaker.tone(freq, dur);
+  delay(dur + 50);
+  M5Cardputer.Speaker.mute();
+  delay(30);
+}
+
+void setup() {
+  auto cfg = M5.config();
+  M5Cardputer.begin(cfg, true);
+  M5Cardputer.Speaker.setVolume(128);
+
+  M5Cardputer.Display.fillScreen(BLACK);
+  M5Cardputer.Display.setTextColor(WHITE);
+  M5Cardputer.Display.setCursor(10, 60);
+  M5Cardputer.Display.println("Tocando melodia...");
+
+  nota(DO,200); nota(RE,200); nota(MI,200);
+  nota(FA,200); nota(SOL,400);
+
+  M5Cardputer.Display.setCursor(10, 80);
+  M5Cardputer.Display.println("Concluido!");
+}
+void loop() {
+  M5Cardputer.update();
+  if (M5Cardputer.Keyboard.isChange() &amp;&amp;
+      M5Cardputer.Keyboard.isPressed()) {
+    nota(LA, 150); nota(LA, 150); nota(LA, 300);
+  }
+}</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>14</span></div>
+</div>
+
+<!-- M7 -->
+<div class="page ph1">
+  <div class="mod-header"><span class="mod-badge">M7</span><div><h1>Bateria e Energia</h1><p class="mod-sub">PMIC AXP2101, leitura de bateria, carga e deep sleep com wakeup</p></div><span class="mod-phase">Fase 1 · Iniciante</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Conceito</h2>
+      <p>O AXP2101 gerencia a bateria e carga via M5Cardputer.Power. Deep sleep consome ~10 uA. RTC_DATA_ATTR preserva variaveis durante o sleep. O setup() e reexecutado apos cada wakeup.</p>
+      <div class="tip-box"><div class="label">Consumo em cada modo</div><p>Ativo WiFi: ~100-250mA. Loop simples: ~40mA. Light sleep: ~2mA. Deep sleep: ~0.01mA. Com bateria de 120mAh, em deep sleep o Cardputer dura mais de 500 dias.</p></div>
+      <div class="exr-box"><div class="label">Exercicio</div><p>Crie um logger: a cada wakeup, salve o nivel de bateria em um array RTC_DATA_ATTR[10]. Exiba um mini-grafico de barras dos ultimos 10 registros.</p></div>
+    </div>
+    <div>
+      <div class="hw-box">
+        <div class="hw-chip">AXP2101<br>PMIC<br>120mAh<br>Deep<br>Sleep</div>
+        <h3>Energia</h3>
+        <div class="hw-tags"><span class="hw-tag">AXP2101</span><span class="hw-tag">RTC</span><span class="hw-tag">~10uA</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="content" style="margin-top:4mm">
+    <h2>Codigo — Monitor e Deep Sleep</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+#include &lt;esp_sleep.h&gt;
+
+RTC_DATA_ATTR int wakeCount = 0; // persiste no sleep
+
+void setup() {
+  auto cfg = M5.config();
+  M5Cardputer.begin(cfg, true);
+  wakeCount++;
+  auto&amp; d = M5Cardputer.Display;
+  d.fillScreen(BLACK);
+  d.setTextColor(WHITE); d.setTextSize(1);
+  d.setCursor(5, 5);
+  d.printf("Acordou #%d\n\n", wakeCount);
+
+  int bat = M5Cardputer.Power.getBatteryLevel();
+  d.printf("Bateria: %d%%\n", bat);
+  d.printf("Carregando: %s\n",
+    M5Cardputer.Power.isCharging() ? "Sim" : "Nao");
+
+  // Barra de bateria colorida
+  int w = map(bat, 0, 100, 0, 120);
+  uint16_t c = bat>50 ? GREEN : bat>20 ? YELLOW : RED;
+  d.drawRect(5, 70, 122, 12, WHITE);
+  d.fillRect(6, 71, w, 10, c);
+
+  d.setCursor(5, 90);
+  d.println("Dormindo em 3s...");
+  delay(3000);
+
+  esp_sleep_enable_ext0_wakeup((gpio_num_t)0, 0);
+  esp_sleep_enable_timer_wakeup(30 * 1000000ULL);
+  d.fillScreen(BLACK);
+  esp_deep_sleep_start(); // nao retorna!
+}
+void loop() {}</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>16</span></div>
+</div>
+
+<!-- P1 -->
+<div class="page proj">
+  <div class="mod-header"><span class="mod-badge">PROJETO 1</span><div><h1>Calculadora com Display</h1><p class="mod-sub">Projeto final da Fase 1 — integra teclado, display e logica de calculo</p></div><span class="mod-phase">Fase 1 · Projeto</span></div>
+  <div class="one-col">
+    <div class="content">
+      <h2>Objetivos</h2>
+      <ul>
+        <li>Receber expressoes matematicas pelo teclado (ex: 12+34)</li>
+        <li>Exibir a expressao atual e resultado anterior no display</li>
+        <li>Suportar operacoes: + - * / com numeros decimais</li>
+        <li>Tratar divisao por zero com mensagem de erro e beep</li>
+        <li>Tecla DEL apaga ultimo caractere; FN limpa tudo</li>
+      </ul>
+    </div>
+    <div class="content" style="margin-top:4mm">
+      <h2>Codigo Completo</h2>
+      <div class="code">#include &lt;M5Cardputer.h&gt;
+
+String expr = ""; float result = 0; bool hasResult = false;
+
+void draw() {
+  auto&amp; d = M5Cardputer.Display;
+  d.fillScreen(0x0A0F1A);
+  d.fillRect(0, 0, 135, 18, 0x0D3A6E);
+  d.setTextColor(CYAN); d.setTextSize(1);
+  d.setCursor(5, 5); d.print("Calculadora Cardputer");
+  if (hasResult) {
+    d.setTextColor(0x4499FF); d.setTextSize(1);
+    d.setCursor(5, 25); d.printf("= %.4g", result);
+  }
+  d.setTextColor(WHITE); d.setTextSize(2);
+  d.setCursor(5, 45);
+  String disp = expr.length() > 0 ? expr : "0";
+  if (disp.length() > 9) disp = disp.substring(disp.length()-9);
+  d.print(disp + "|");
+  d.setTextColor(0x334455); d.setTextSize(1);
+  d.setCursor(0, 115);
+  d.print(" ENTER=calc  DEL=apagar  FN=limpar");
+}
+
+float calc(String e) {
+  int pos = -1; char op = 0;
+  for (int i=e.length()-1; i>0; i--)
+    if (e[i]=='+'||e[i]=='-') { pos=i; op=e[i]; break; }
+  if (pos==-1)
+    for (int i=e.length()-1; i>0; i--)
+      if (e[i]=='*'||e[i]=='/') { pos=i; op=e[i]; break; }
+  if (pos==-1) return e.toFloat();
+  float a=e.substring(0,pos).toFloat();
+  float b=e.substring(pos+1).toFloat();
+  if (op=='+') return a+b; if (op=='-') return a-b;
+  if (op=='*') return a*b;
+  if (op=='/') return b!=0 ? a/b : NAN;
+  return 0;
+}
+
+void setup() {
+  auto cfg = M5.config(); M5Cardputer.begin(cfg, true); draw();
+}
+void loop() {
+  M5Cardputer.update();
+  if (M5Cardputer.Keyboard.isChange() &amp;&amp;
+      M5Cardputer.Keyboard.isPressed()) {
+    auto st = M5Cardputer.Keyboard.keysState();
+    for (auto c : st.word)
+      if ((c>='0'&amp;&amp;c&lt;='9')||c=='.'||c=='+'||c=='-'||c=='*'||c=='/'){
+        if (hasResult) { expr=""; hasResult=false; }
+        expr += c;
+      }
+    if (st.del &amp;&amp; expr.length()>0) expr.remove(expr.length()-1);
+    if (st.enter &amp;&amp; expr.length()>0) {
+      result = calc(expr); hasResult = true;
+      if (isnan(result)) {
+        M5Cardputer.Display.fillScreen(RED);
+        M5Cardputer.Display.setCursor(30,60);
+        M5Cardputer.Display.print("Erro: div/0!");
+        M5Cardputer.Speaker.tone(200, 300);
+        delay(1500); hasResult=false; expr="";
+      }
+    }
+    if (st.fn) { expr=""; hasResult=false; }
+    draw();
+  }
+}</div>
+    </div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>18</span></div>
+</div>
+
+<!-- FASE 2 DIVIDER -->
+<div class="phase-divider div-ph2 page">
+  <h1>Fase 2<br>Intermediario</h1>
+  <p>8 modulos · ~8 horas de conteudo · WiFi, IoT, IR, Storage e UI avancada</p>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>Fase 2 · Intermediario</span></div>
+</div>
+
+<!-- M9 ao M15 + P2: paginas resumidas para o PDF (mesma estrutura de M1) -->
+<!-- Por brevidade do plano, as paginas M9-P2 seguem o mesmo template acima -->
+<!-- O implementador deve replicar o padrao para cada modulo da Fase 2 e 3 -->
+<!-- Substituir o placeholder abaixo pelas paginas reais: -->
+
+<div class="page ph2">
+  <div class="mod-header"><span class="mod-badge">M9</span><div><h1>WiFi Basico</h1><p class="mod-sub">Scan de redes, conexao, status e informacoes de rede</p></div><span class="mod-phase">Fase 2 · Intermediario</span></div>
+  <div class="two-col">
+    <div class="content">
+      <h2>Conceito</h2><p>WiFi.mode(WIFI_STA) ativa modo cliente. scanNetworks() retorna quantidade de redes. WiFi.begin(ssid, pass) inicia conexao. WiFi.status() == WL_CONNECTED indica sucesso. WiFi.localIP() retorna o IP atribuido.</p>
+      <div class="warn-box"><div class="label">Aviso</div><p>O ESP32-S3 suporta APENAS WiFi 2.4 GHz. Redes 5 GHz sao invisiveis. Verifique a faixa da sua rede se ela nao aparecer no scan.</p></div>
+      <div class="exr-box"><div class="label">Exercicio</div><p>Crie um monitor de sinal: exiba o RSSI atual como barra colorida (verde &gt;-50, amarelo &gt;-70, vermelho demais) atualizada a cada 1 segundo.</p></div>
+    </div>
+    <div><div class="hw-box"><div class="hw-chip">WiFi<br>802.11<br>b/g/n<br>2.4GHz<br>ESP32-S3</div><h3>Wireless</h3><div class="hw-tags"><span class="hw-tag">WiFi.h</span><span class="hw-tag">STA</span><span class="hw-tag">WL_CONNECTED</span></div></div></div>
+  </div>
+  <div class="content" style="margin-top:4mm"><h2>Codigo — Scan e Conexao</h2>
+    <div class="code">#include &lt;M5Cardputer.h&gt;
+#include &lt;WiFi.h&gt;
+
+const char* SSID = "SUA_REDE";
+const char* PASS = "SUA_SENHA";
+
+void setup() {
+  auto cfg = M5.config(); M5Cardputer.begin(cfg, true);
+  auto&amp; d = M5Cardputer.Display;
+  d.fillScreen(BLACK); d.setTextColor(WHITE); d.setTextSize(1);
+
+  WiFi.mode(WIFI_STA);
+  d.println("Escaneando redes...\n");
+  int n = WiFi.scanNetworks();
+  d.printf("%d redes encontradas:\n", n);
+  for (int i = 0; i &lt; min(n, 5); i++)
+    d.printf("%-18s %ddBm ch%d\n",
+      WiFi.SSID(i).substring(0,16).c_str(),
+      WiFi.RSSI(i), WiFi.channel(i));
+
+  delay(2000);
+  d.fillScreen(BLACK); d.setCursor(0,0);
+  d.printf("Conectando a %s\n", SSID);
+  WiFi.begin(SSID, PASS);
+  int t = 0;
+  while (WiFi.status() != WL_CONNECTED &amp;&amp; t++ &lt; 20)
+    { delay(500); d.print("."); }
+
+  if (WiFi.status() == WL_CONNECTED) {
+    d.println("\n\nConectado!");
+    d.println(WiFi.localIP().toString());
+    d.printf("RSSI: %d dBm\n", WiFi.RSSI());
+  } else d.println("\nFalha! Verifique SSID/SENHA");
+}
+void loop() {}</div>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>22</span></div>
+</div>
+
+<!-- As paginas M10 a P3 seguem o mesmo padrao. Por questao de tamanho do plano, -->
+<!-- insira cada modulo como uma <div class="page ph2"> ou <div class="page ph3"> -->
+<!-- copiando a estrutura de M9 acima com o conteudo especifico de cada modulo. -->
+<!-- O codigo completo de cada modulo esta disponivel no arquivo curso-cardputer.html. -->
+
+<!-- FASE 3 DIVIDER -->
+<div class="phase-divider div-ph3 page">
+  <h1>Fase 3<br>Avancado</h1>
+  <p>8 modulos · ~10 horas de conteudo · BLE, Scanner, IR Universal, OTA, TLS, Audio, FreeRTOS</p>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>Fase 3 · Avancado</span></div>
+</div>
+
+<!-- REFERENCIAS -->
+<div class="page">
+  <div style="border-bottom:2px solid var(--p1);padding-bottom:4mm;margin-bottom:6mm">
+    <h1 style="font-size:18pt;color:var(--p1)">Referencias e Recursos</h1>
+  </div>
+  <div class="content">
+    <h2>Documentacao Oficial</h2>
+    <ul>
+      <li><strong>M5Stack Cardputer Docs:</strong> docs.m5stack.com/en/core/Cardputer</li>
+      <li><strong>M5Unified Library:</strong> github.com/m5stack/M5Unified</li>
+      <li><strong>M5GFX Library:</strong> github.com/m5stack/M5GFX</li>
+      <li><strong>ESP32 Arduino Core:</strong> github.com/espressif/arduino-esp32</li>
+      <li><strong>ESP-IDF Reference:</strong> docs.espressif.com/projects/esp-idf</li>
+    </ul>
+    <h2 style="margin-top:5mm">Bibliotecas de Terceiros</h2>
+    <ul>
+      <li><strong>ArduinoJson 7.x:</strong> arduinojson.org</li>
+      <li><strong>PubSubClient (MQTT):</strong> github.com/knolleary/pubsubclient</li>
+      <li><strong>IRremoteESP8266:</strong> github.com/crankyoldgit/IRremoteESP8266</li>
+      <li><strong>ESP32 BLE Keyboard:</strong> github.com/T-vK/ESP32-BLE-Keyboard</li>
+    </ul>
+    <h2 style="margin-top:5mm">Comunidade</h2>
+    <ul>
+      <li><strong>Forum M5Stack:</strong> community.m5stack.com</li>
+      <li><strong>Discord M5Stack:</strong> discord.gg/m5stack</li>
+      <li><strong>Reddit:</strong> reddit.com/r/m5stack</li>
+      <li><strong>IRDB (codigos IR):</strong> irdb.tk</li>
+    </ul>
+  </div>
+  <div class="page-footer"><span>M5Stack Cardputer — Curso Completo</span><span>138</span></div>
+</div>
+
+</body>
+</html>
