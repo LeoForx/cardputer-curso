@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M5Stack Cardputer — Curso Completo</title>
+<style>
+:root {
+  --bg:#0a0f1a; --sidebar-bg:#0d1526; --card-bg:#1e293b; --border:#1e3a5f;
+  --phase1:#0ea5e9; --phase2:#7c3aed; --phase3:#ef4444;
+  --text:#e2e8f0; --muted:#94a3b8; --dim:#475569;
+  --code-bg:#020817; --accent1:#38bdf8; --accent2:#a78bfa; --accent3:#fca5a5;
+  --green:#22c55e; --yellow:#f59e0b; --sidebar-w:220px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+#app{display:flex;flex-direction:column;height:100vh}
+#topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:#0d1526;border-bottom:1px solid var(--border);flex-shrink:0;z-index:10}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-badge{background:var(--phase1);color:#fff;border-radius:4px;padding:3px 8px;font-size:12px;font-weight:bold;font-family:monospace}
+.logo-title{font-size:14px;font-weight:bold}
+.topbar-right{display:flex;gap:12px;align-items:center}
+.topbar-right a{color:var(--muted);font-size:11px;text-decoration:none}
+.btn-pdf{background:var(--phase1);color:#fff;border:none;border-radius:5px;padding:6px 14px;font-size:11px;cursor:pointer;text-decoration:none}
+.btn-pdf:hover{opacity:.85}
+#body{display:flex;flex:1;overflow:hidden}
+#sidebar{width:var(--sidebar-w);background:var(--sidebar-bg);border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0;padding:12px 0}
+.prog-wrap{padding:0 12px 10px;border-bottom:1px solid var(--border);margin-bottom:8px}
+.prog-label{color:var(--dim);font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.prog-bar{background:var(--border);border-radius:4px;height:4px;margin-bottom:4px}
+.prog-fill{background:var(--phase1);border-radius:4px;height:4px;width:0%;transition:width .3s}
+.prog-text{color:var(--dim);font-size:9px}
+.phase-sec{margin-bottom:4px}
+.phase-hdr{display:flex;align-items:center;gap:7px;padding:6px 12px;cursor:pointer;user-select:none}
+.ph-badge{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;color:#fff;flex-shrink:0}
+.ph-title{font-size:10px;font-weight:bold}
+.ph1 .ph-badge{background:var(--phase1)} .ph2 .ph-badge{background:var(--phase2)} .ph3 .ph-badge{background:var(--phase3)}
+.ph1 .ph-title{color:var(--accent1)} .ph2 .ph-title{color:var(--accent2)} .ph3 .ph-title{color:var(--accent3)}
+.phase-mods{padding-bottom:4px}
+.ml{display:block;padding:5px 10px 5px 12px;margin:1px 8px;border-radius:0 4px 4px 0;cursor:pointer;font-size:10px;color:var(--dim);text-decoration:none;border-left:2px solid transparent;transition:all .15s}
+.ml:hover{color:var(--muted);background:rgba(255,255,255,.03)}
+.ml.visited{color:var(--muted);border-left-color:rgba(14,165,233,.4)}
+.ml.active{background:var(--card-bg);color:var(--text);font-weight:bold}
+.ph1 .ml.active{border-left-color:var(--phase1)} .ph2 .ml.active{border-left-color:var(--phase2)} .ph3 .ml.active{border-left-color:var(--phase3)}
+.ml.proj{color:var(--phase1)}
+#main{flex:1;overflow-y:auto;padding:24px 32px}
+.mod{display:none;max-width:800px}
+.mod.active{display:block}
+.bc{display:flex;align-items:center;gap:6px;margin-bottom:14px}
+.bc span{color:var(--dim);font-size:11px} .bc .sep{color:var(--border)} .bc .cur{color:var(--accent1)}
+.mhdr{display:flex;align-items:flex-start;gap:12px;margin-bottom:20px}
+.mbadge{border-radius:5px;padding:3px 10px;font-size:11px;font-weight:bold;color:#fff;white-space:nowrap;flex-shrink:0;margin-top:3px}
+.b1{background:var(--phase1)} .b2{background:var(--phase2)} .b3{background:var(--phase3)} .bp{background:var(--yellow);color:#000}
+.mhdr h1{font-size:20px;color:var(--text);margin-bottom:4px}
+.mhdr .sub{font-size:12px;color:var(--muted)}
+.hwcard{display:flex;align-items:center;gap:14px;background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin-bottom:20px}
+.hwico{width:56px;height:46px;background:#0f172a;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--phase1);font-size:10px;text-align:center;flex-shrink:0;font-family:monospace;line-height:1.4;border:1px solid var(--border)}
+.hwcard h3{font-size:11px;color:var(--muted);margin-bottom:6px}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{background:rgba(14,165,233,.1);color:var(--accent1);border:1px solid rgba(14,165,233,.25);border-radius:3px;padding:1px 7px;font-size:10px}
+.sec{margin-bottom:24px}
+.sec h2{font-size:13px;color:var(--accent1);font-weight:bold;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.sec p,.sec li{font-size:13px;color:var(--muted);line-height:1.8}
+.sec ul{padding-left:20px} .sec li{margin-bottom:4px}
+.cb{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:16px;overflow-x:auto;font-family:'Cascadia Code','Fira Code',Consolas,monospace;font-size:12px;line-height:1.8;white-space:pre}
+.kw{color:#a78bfa} .fn{color:#38bdf8} .str{color:#86efac} .cm{color:#475569;font-style:italic} .num{color:#fb923c} .pp{color:#c084fc} .cls{color:#fbbf24}
+.warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:6px;padding:12px 16px;margin-bottom:20px}
+.warn-t{color:var(--yellow);font-size:11px;font-weight:bold;margin-bottom:5px}
+.warn p{font-size:12px;color:#fcd34d;line-height:1.7}
+.tip{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.25);border-radius:6px;padding:12px 16px;margin-bottom:20px}
+.tip-t{color:var(--green);font-size:11px;font-weight:bold;margin-bottom:5px}
+.tip p{font-size:12px;color:#86efac;line-height:1.7}
+.exr{background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.3);border-radius:6px;padding:14px 16px;margin-bottom:24px}
+.exr-t{color:var(--accent2);font-size:11px;font-weight:bold;margin-bottom:6px}
+.exr p{font-size:12px;color:#c4b5fd;line-height:1.7}
+.navbtns{display:flex;justify-content:space-between;padding-top:16px;border-top:1px solid var(--border);margin-top:8px}
+.btn-nav{background:var(--card-bg);color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:8px 16px;font-size:12px;cursor:pointer}
+.btn-nav:hover{color:var(--text);border-color:var(--phase1)}
+.btn-nav.nxt{background:var(--phase1);color:#fff;border-color:var(--phase1)}
+.btn-nav.nxt:hover{opacity:.85}
+#ham{display:none;background:none;border:none;color:var(--text);cursor:pointer;font-size:20px;padding:4px}
+@media(max-width:700px){
+  #ham{display:block}
+  #sidebar{position:fixed;left:-240px;top:0;height:100%;z-index:100;transition:left .25s}
+  #sidebar.open{left:0}
+  #main{padding:16px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="topbar">
+    <div class="logo">
+      <button id="ham" onclick="toggleSidebar()">&#9776;</button>
+      <span class="logo-badge">M5</span>
+      <span class="logo-title">Cardputer — Curso Completo</span>
+    </div>
+    <div class="topbar-right">
+      <a href="curso-cardputer-pdf.html" target="_blank">Versao PDF</a>
+      <a href="curso-cardputer-pdf.html" class="btn-pdf" target="_blank">&#8595; PDF</a>
+    </div>
+  </header>
+  <div id="body">
+    <nav id="sidebar">
+      <div class="prog-wrap">
+        <div class="prog-label">Progresso</div>
+        <div class="prog-bar"><div class="prog-fill" id="pf"></div></div>
+        <div class="prog-text" id="pt">0 / 24 modulos</div>
+      </div>
+      <div class="phase-sec ph1">
+        <div class="phase-hdr"><span class="ph-badge">1</span><span class="ph-title">INICIANTE</span></div>
+        <div class="phase-mods">
+          <a class="ml" data-m="m1" onclick="go('m1')">M1 — Conhecendo Hardware</a>
+          <a class="ml" data-m="m2" onclick="go('m2')">M2 — Configurando Ambiente</a>
+          <a class="ml" data-m="m3" onclick="go('m3')">M3 — Hello World Display</a>
+          <a class="ml" data-m="m4" onclick="go('m4')">M4 — Display Avancado</a>
+          <a class="ml" data-m="m5" onclick="go('m5')">M5 — Lendo o Teclado</a>
+          <a class="ml" data-m="m6" onclick="go('m6')">M6 — LED e Som</a>
+          <a class="ml" data-m="m7" onclick="go('m7')">M7 — Bateria e Energia</a>
+          <a class="ml proj" data-m="p1" onclick="go('p1')">&#127942; Projeto — Calculadora</a>
+        </div>
+      </div>
+      <div class="phase-sec ph2">
+        <div class="phase-hdr"><span class="ph-badge">2</span><span class="ph-title">INTERMEDIARIO</span></div>
+        <div class="phase-mods">
+          <a class="ml" data-m="m9"  onclick="go('m9')">M9 — WiFi Basico</a>
+          <a class="ml" data-m="m10" onclick="go('m10')">M10 — HTTP e APIs REST</a>
+          <a class="ml" data-m="m11" onclick="go('m11')">M11 — MQTT e IoT</a>
+          <a class="ml" data-m="m12" onclick="go('m12')">M12 — Infravermelho (IR)</a>
+          <a class="ml" data-m="m13" onclick="go('m13')">M13 — Armazenamento SPIFFS</a>
+          <a class="ml" data-m="m14" onclick="go('m14')">M14 — Display UI Avancada</a>
+          <a class="ml" data-m="m15" onclick="go('m15')">M15 — Deep Sleep</a>
+          <a class="ml proj" data-m="p2" onclick="go('p2')">&#127942; Projeto — Terminal WiFi</a>
+        </div>
+      </div>
+      <div class="phase-sec ph3">
+        <div class="phase-hdr"><span class="ph-badge">3</span><span class="ph-title">AVANCADO</span></div>
+        <div class="phase-mods">
+          <a class="ml" data-m="m17" onclick="go('m17')">M17 — BLE e Bluetooth</a>
+          <a class="ml" data-m="m18" onclick="go('m18')">M18 — Scanner WiFi Avancado</a>
+          <a class="ml" data-m="m19" onclick="go('m19')">M19 — IR Blaster Universal</a>
+          <a class="ml" data-m="m20" onclick="go('m20')">M20 — OTA Updates</a>
+          <a class="ml" data-m="m21" onclick="go('m21')">M21 — Criptografia e TLS</a>
+          <a class="ml" data-m="m22" onclick="go('m22')">M22 — Microfone e Audio</a>
+          <a class="ml" data-m="m23" onclick="go('m23')">M23 — FreeRTOS</a>
+          <a class="ml proj" data-m="p3" onclick="go('p3')">&#127942; Projeto Final — Swiss Army Knife</a>
+        </div>
+      </div>
+    </nav>
+    <main id="main">
+      <div id="welcome" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;gap:12px">
+        <span class="logo-badge" style="font-size:24px;padding:10px 18px">M5</span>
+        <h1 style="font-size:24px">M5Stack Cardputer-ADV</h1>
+        <h2 style="font-size:16px;color:var(--muted);font-weight:normal">Curso Completo — Do Zero ao Avancado</h2>
+        <p style="color:var(--dim);font-size:13px">24 modulos · Arduino C/C++ · 3 projetos praticos</p>
+        <button class="btn-nav nxt" onclick="go('m1')" style="font-size:14px;padding:12px 28px;margin-top:8px">Comecar pelo Modulo 1 &#8594;</button>
+      </div>
+      <!-- MODULOS INSERIDOS AQUI -->
+    </main>
+  </div>
+</div>
+<script>
+const IDS=['m1','m2','m3','m4','m5','m6','m7','p1','m9','m10','m11','m12','m13','m14','m15','p2','m17','m18','m19','m20','m21','m22','m23','p3'];
+const TOTAL=24;
+function go(id){
+  document.querySelectorAll('.mod').forEach(m=>m.classList.remove('active'));
+  document.getElementById('welcome').style.display='none';
+  const el=document.getElementById(id);
+  if(el){el.classList.add('active');document.getElementById('main').scrollTop=0;}
+  document.querySelectorAll('.ml').forEach(l=>l.classList.remove('active'));
+  const lk=document.querySelector('[data-m="'+id+'"]');
+  if(lk)lk.classList.add('active');
+  mark(id);
+  history.replaceState(null,'','#'+id);
+  if(window.innerWidth<=700)document.getElementById('sidebar').classList.remove('open');
+}
+function mark(id){
+  const v=JSON.parse(localStorage.getItem('cp')||'[]');
+  if(!v.includes(id)){v.push(id);localStorage.setItem('cp',JSON.stringify(v));}
+  updProg();
+}
+function updProg(){
+  const v=JSON.parse(localStorage.getItem('cp')||'[]');
+  document.getElementById('pf').style.width=Math.round(v.length/TOTAL*100)+'%';
+  document.getElementById('pt').textContent=v.length+' / '+TOTAL+' modulos';
+  document.querySelectorAll('.ml').forEach(l=>l.classList.toggle('visited',v.includes(l.dataset.m)));
+}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
+window.addEventListener('load',()=>{
+  updProg();
+  const h=location.hash.replace('#','');
+  if(h&&IDS.includes(h))go(h);
+});
+document.addEventListener('keydown',e=>{
+  const a=document.querySelector('.mod.active');
+  if(!a)return;
+  const i=IDS.indexOf(a.id);
+  if(e.key==='ArrowRight'&&i<IDS.length-1)go(IDS[i+1]);
+  if(e.key==='ArrowLeft'&&i>0)go(IDS[i-1]);
+});
+</script>
+</body>
+</html>
