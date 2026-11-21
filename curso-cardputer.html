@@ -606,6 +606,233 @@ M5Canvas sprite(&amp;M5Cardputer.Display);
         <div class="tip"><div class="tip-t">Desafio Extra</div><p>Adicione suporte a parenteses: "2*(3+4)=14". Dica: implemente um parser recursivo simples ou use a funcao eval() de uma biblioteca de expressao matematica para Arduino.</p></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('m7')">← M7 — Bateria</button><button class="btn-nav nxt" onclick="go('m9')">Fase 2 — M9 WiFi →</button></div>
       </section>
+
+      <!-- M9 -->
+      <section id="m9" class="mod">
+        <div class="bc"><span>Fase 2 — Intermediario</span><span class="sep">›</span><span class="cur">Modulo 9</span></div>
+        <div class="mhdr"><span class="mbadge b2">M9</span><div><h1>WiFi Basico</h1><p class="sub">Scan de redes, conexao, status e informacoes de rede</p></div></div>
+        <div class="hwcard"><div class="hwico">WiFi<br>802</div><div><h3>Hardware neste modulo</h3><div class="tags"><span class="tag">ESP32-S3 WiFi</span><span class="tag">802.11 b/g/n</span><span class="tag">WiFi.h</span><span class="tag">2.4 GHz</span></div></div></div>
+        <div class="sec"><h2>Conceito</h2><p>O ESP32-S3 tem WiFi 802.11 b/g/n 2.4GHz integrado. A biblioteca WiFi.h (incluida no ESP32 Arduino core) oferece metodos para scan, conexao, servidor e cliente. WiFi.scanNetworks() retorna a quantidade de redes encontradas; acesse cada uma com WiFi.SSID(i), WiFi.RSSI(i) e WiFi.channel(i).</p></div>
+        <div class="sec"><h2>Codigo — Scan e Conexao</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;WiFi.h&gt;</span>
+
+<span class="kw">const char</span>* SSID = <span class="str">"SUA_REDE"</span>;
+<span class="kw">const char</span>* PASS = <span class="str">"SUA_SENHA"</span>;
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="kw">auto</span> cfg = M5.<span class="fn">config</span>();
+  M5Cardputer.<span class="fn">begin</span>(cfg, <span class="kw">true</span>);
+  <span class="kw">auto</span>&amp; d = M5Cardputer.Display;
+  d.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>); d.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>); d.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+
+  <span class="cm">// Modo estacao (cliente)</span>
+  WiFi.<span class="fn">mode</span>(WIFI_STA);
+  d.<span class="fn">println</span>(<span class="str">"Escaneando redes...\n"</span>);
+
+  <span class="kw">int</span> n = WiFi.<span class="fn">scanNetworks</span>();
+  d.<span class="fn">printf</span>(<span class="str">"%d redes encontradas:\n"</span>, n);
+  <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; <span class="fn">min</span>(n, <span class="num">5</span>); i++) {
+    d.<span class="fn">printf</span>(<span class="str">"%-18s %ddBm ch%d\n"</span>,
+      WiFi.<span class="fn">SSID</span>(i).<span class="fn">substring</span>(<span class="num">0</span>,<span class="num">16</span>).<span class="fn">c_str</span>(),
+      WiFi.<span class="fn">RSSI</span>(i), WiFi.<span class="fn">channel</span>(i));
+  }
+  <span class="fn">delay</span>(<span class="num">2000</span>);
+
+  <span class="cm">// Conectar a rede especifica</span>
+  d.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>); d.<span class="fn">setCursor</span>(<span class="num">0</span>,<span class="num">0</span>);
+  d.<span class="fn">printf</span>(<span class="str">"Conectando a %s\n"</span>, SSID);
+  WiFi.<span class="fn">begin</span>(SSID, PASS);
+
+  <span class="kw">int</span> t = <span class="num">0</span>;
+  <span class="kw">while</span> (WiFi.<span class="fn">status</span>() != WL_CONNECTED &amp;&amp; t++ &lt; <span class="num">20</span>) {
+    <span class="fn">delay</span>(<span class="num">500</span>); d.<span class="fn">print</span>(<span class="str">"."</span>);
+  }
+
+  <span class="kw">if</span> (WiFi.<span class="fn">status</span>() == WL_CONNECTED) {
+    d.<span class="fn">println</span>(<span class="str">"\n\nConectado!"</span>);
+    d.<span class="fn">println</span>(WiFi.<span class="fn">localIP</span>().<span class="fn">toString</span>());
+    d.<span class="fn">printf</span>(<span class="str">"RSSI: %d dBm\n"</span>, WiFi.<span class="fn">RSSI</span>());
+  } <span class="kw">else</span> {
+    d.<span class="fn">println</span>(<span class="str">"\nFalha! Verifique SSID/SENHA"</span>);
+  }
+}
+<span class="kw">void</span> <span class="fn">loop</span>() {}</div>
+        </div>
+        <div class="warn"><div class="warn-t">Aviso</div><p>O ESP32-S3 suporta apenas WiFi 2.4 GHz. Redes 5 GHz sao invisiveis para ele. Se a rede nao aparecer no scan, verifique se ela esta na faixa de 2.4 GHz.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie um visualizador de forca de sinal: conecte ao WiFi e, no loop(), exiba o RSSI atual como uma barra de sinal colorida (verde > -50dBm, amarelo > -70dBm, vermelho demais). Atualiza a cada 1 segundo.</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('p1')">← Projeto Calculadora</button><button class="btn-nav nxt" onclick="go('m10')">M10 — HTTP e APIs →</button></div>
+      </section>
+
+      <!-- M10 -->
+      <section id="m10" class="mod">
+        <div class="bc"><span>Fase 2 — Intermediario</span><span class="sep">›</span><span class="cur">Modulo 10</span></div>
+        <div class="mhdr"><span class="mbadge b2">M10</span><div><h1>HTTP e APIs REST</h1><p class="sub">Requisicoes GET e POST, parsing de JSON e consumo de APIs publicas</p></div></div>
+        <div class="hwcard"><div class="hwico">HTTP<br>REST</div><div><h3>Bibliotecas necessarias</h3><div class="tags"><span class="tag">HTTPClient.h</span><span class="tag">ArduinoJson</span><span class="tag">WiFiClient</span></div></div></div>
+        <div class="sec"><h2>Conceito</h2><p>HTTPClient abstrai conexoes TCP para requisicoes HTTP. Instale a biblioteca "ArduinoJson" pelo Library Manager (versao 7.x) para fazer parse de respostas JSON. O fluxo e: http.begin(url) → http.GET() → verificar codigo (200=OK) → http.getString() → deserializeJson().</p></div>
+        <div class="sec"><h2>Codigo — Hora atual via API publica</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;WiFi.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;HTTPClient.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;ArduinoJson.h&gt;</span>
+
+<span class="kw">const char</span>* SSID = <span class="str">"SUA_REDE"</span>;
+<span class="kw">const char</span>* PASS = <span class="str">"SUA_SENHA"</span>;
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="kw">auto</span> cfg = M5.<span class="fn">config</span>();
+  M5Cardputer.<span class="fn">begin</span>(cfg, <span class="kw">true</span>);
+  <span class="kw">auto</span>&amp; d = M5Cardputer.Display;
+  d.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>); d.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>); d.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+
+  WiFi.<span class="fn">begin</span>(SSID, PASS);
+  <span class="kw">while</span> (WiFi.<span class="fn">status</span>() != WL_CONNECTED) <span class="fn">delay</span>(<span class="num">500</span>);
+  d.<span class="fn">println</span>(<span class="str">"WiFi OK! Buscando hora...\n"</span>);
+
+  HTTPClient http;
+  <span class="cm">// API publica de horario (sem autenticacao)</span>
+  http.<span class="fn">begin</span>(<span class="str">"http://worldtimeapi.org/api/timezone/America/Sao_Paulo"</span>);
+  <span class="kw">int</span> code = http.<span class="fn">GET</span>();
+
+  <span class="kw">if</span> (code == <span class="num">200</span>) {
+    <span class="cls">String</span> body = http.<span class="fn">getString</span>();
+    JsonDocument doc;
+    <span class="fn">deserializeJson</span>(doc, body);
+
+    <span class="cls">String</span> dt = doc[<span class="str">"datetime"</span>].<span class="fn">as</span>&lt;<span class="cls">String</span>&gt;();
+    <span class="kw">int</span> offset = doc[<span class="str">"utc_offset"</span>].<span class="fn">as</span>&lt;<span class="kw">int</span>&gt;();
+
+    d.<span class="fn">setTextColor</span>(<span class="cls">CYAN</span>); d.<span class="fn">setTextSize</span>(<span class="num">2</span>);
+    d.<span class="fn">setCursor</span>(<span class="num">5</span>, <span class="num">30</span>);
+    d.<span class="fn">println</span>(dt.<span class="fn">substring</span>(<span class="num">11</span>, <span class="num">19</span>)); <span class="cm">// HH:MM:SS</span>
+    d.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>); d.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+    d.<span class="fn">setCursor</span>(<span class="num">5</span>, <span class="num">65</span>);
+    d.<span class="fn">println</span>(dt.<span class="fn">substring</span>(<span class="num">0</span>, <span class="num">10</span>)); <span class="cm">// YYYY-MM-DD</span>
+    d.<span class="fn">printf</span>(<span class="str">"Fuso: UTC%+d\n"</span>, offset/<span class="num">3600</span>);
+  } <span class="kw">else</span> {
+    d.<span class="fn">printf</span>(<span class="str">"Erro HTTP: %d"</span>, code);
+  }
+  http.<span class="fn">end</span>();
+}
+<span class="kw">void</span> <span class="fn">loop</span>() {}</div>
+        </div>
+        <div class="warn"><div class="warn-t">Aviso</div><p>Instale "ArduinoJson" versao 7.x pelo Library Manager, nao a 5.x ou 6.x. A API mudou entre versoes. Na 7.x use JsonDocument em vez de DynamicJsonDocument ou StaticJsonDocument.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Consuma a API https://catfact.ninja/fact (retorna um fato sobre gatos em JSON, campo "fact"). Exiba o fato no display com quebra de linha automatica usando display.setTextWrap(true).</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('m9')">← M9 — WiFi</button><button class="btn-nav nxt" onclick="go('m11')">M11 — MQTT →</button></div>
+      </section>
+
+      <!-- M11 -->
+      <section id="m11" class="mod">
+        <div class="bc"><span>Fase 2 — Intermediario</span><span class="sep">›</span><span class="cur">Modulo 11</span></div>
+        <div class="mhdr"><span class="mbadge b2">M11</span><div><h1>MQTT e IoT</h1><p class="sub">Protocolo MQTT, broker publico, publicar e subscrever topicos</p></div></div>
+        <div class="hwcard"><div class="hwico">MQTT<br>IoT</div><div><h3>Bibliotecas necessarias</h3><div class="tags"><span class="tag">PubSubClient</span><span class="tag">WiFiClient</span><span class="tag">broker.hivemq.com</span></div></div></div>
+        <div class="sec"><h2>Conceito</h2><p>MQTT (Message Queuing Telemetry Transport) e um protocolo leve de publicacao/subscricao ideal para IoT. Um broker central (ex: HiveMQ) roteia mensagens entre dispositivos via topicos. O Cardputer publica dados (bateria, sensores) e recebe comandos remotamente. Instale "PubSubClient" pelo Library Manager.</p></div>
+        <div class="sec"><h2>Codigo</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;WiFi.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;PubSubClient.h&gt;</span>
+
+<span class="kw">const char</span>* SSID=<span class="str">"SUA_REDE"</span>, *PASS=<span class="str">"SUA_SENHA"</span>;
+<span class="kw">const char</span>* HOST=<span class="str">"broker.hivemq.com"</span>;
+<span class="kw">const char</span>* PUB=<span class="str">"cardputer/status"</span>, *SUB=<span class="str">"cardputer/cmd"</span>;
+
+WiFiClient wc; PubSubClient mqtt(wc);
+
+<span class="kw">void</span> <span class="fn">onMsg</span>(<span class="kw">char</span>* topic, <span class="kw">byte</span>* payload, <span class="kw">unsigned int</span> len) {
+  <span class="cls">String</span> msg = <span class="str">""</span>;
+  <span class="kw">for</span> (<span class="kw">uint</span> i=<span class="num">0</span>;i&lt;len;i++) msg += (<span class="kw">char</span>)payload[i];
+  M5Cardputer.Display.<span class="fn">fillRect</span>(<span class="num">0</span>,<span class="num">100</span>,<span class="num">135</span>,<span class="num">40</span>,<span class="cls">BLACK</span>);
+  M5Cardputer.Display.<span class="fn">setTextColor</span>(<span class="cls">GREEN</span>);
+  M5Cardputer.Display.<span class="fn">setCursor</span>(<span class="num">0</span>,<span class="num">102</span>);
+  M5Cardputer.Display.<span class="fn">printf</span>(<span class="str">"CMD: %s"</span>, msg.<span class="fn">c_str</span>());
+}
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="kw">auto</span> cfg=M5.<span class="fn">config</span>(); M5Cardputer.<span class="fn">begin</span>(cfg,<span class="kw">true</span>);
+  <span class="kw">auto</span>&amp; d=M5Cardputer.Display;
+  d.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>); d.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>); d.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+
+  WiFi.<span class="fn">begin</span>(SSID,PASS);
+  <span class="kw">while</span>(WiFi.<span class="fn">status</span>()!=WL_CONNECTED)<span class="fn">delay</span>(<span class="num">500</span>);
+
+  mqtt.<span class="fn">setServer</span>(HOST,<span class="num">1883</span>);
+  mqtt.<span class="fn">setCallback</span>(onMsg);
+  <span class="kw">while</span>(!mqtt.<span class="fn">connect</span>(<span class="str">"cardputer-001"</span>)) <span class="fn">delay</span>(<span class="num">1000</span>);
+  mqtt.<span class="fn">subscribe</span>(SUB);
+
+  d.<span class="fn">println</span>(<span class="str">"MQTT OK!"</span>);
+  d.<span class="fn">printf</span>(<span class="str">"Sub: %s\n"</span>, SUB);
+  d.<span class="fn">printf</span>(<span class="str">"Pub: %s\n"</span>, PUB);
+  d.<span class="fn">println</span>(<span class="str">"\nPublicando bat a cada 5s"</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  mqtt.<span class="fn">loop</span>(); <span class="cm">// OBRIGATORIO: processa mensagens</span>
+  <span class="kw">static</span> <span class="kw">unsigned long</span> last=<span class="num">0</span>;
+  <span class="kw">if</span>(millis()-last><span class="num">5000</span>) {
+    last=millis();
+    <span class="kw">char</span> msg[<span class="num">48</span>];
+    <span class="fn">snprintf</span>(msg,<span class="kw">sizeof</span>(msg),<span class="str">"{\"bat\":%d,\"rssi\":%d}"</span>,
+      M5Cardputer.Power.<span class="fn">getBatteryLevel</span>(), WiFi.<span class="fn">RSSI</span>());
+    mqtt.<span class="fn">publish</span>(PUB, msg);
+  }
+}</div>
+        </div>
+        <div class="tip"><div class="tip-t">Dica</div><p>Use o app MQTT Explorer (gratuito) no PC para monitorar os topicos em tempo real. Conecte ao broker.hivemq.com:1883 e assine "cardputer/#" para ver todas as mensagens do seu Cardputer.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione ao codigo a capacidade de receber um comando "beep" pelo topico "cardputer/cmd". Quando receber essa mensagem, o Cardputer deve tocar um beep e exibir "Beep recebido!" no display.</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('m10')">← M10 — HTTP</button><button class="btn-nav nxt" onclick="go('m12')">M12 — IR →</button></div>
+      </section>
+
+      <!-- M12 -->
+      <section id="m12" class="mod">
+        <div class="bc"><span>Fase 2 — Intermediario</span><span class="sep">›</span><span class="cur">Modulo 12</span></div>
+        <div class="mhdr"><span class="mbadge b2">M12</span><div><h1>Infravermelho (IR)</h1><p class="sub">Emissor IR, protocolos NEC/Sony, transmitir e capturar codigos</p></div></div>
+        <div class="hwcard"><div class="hwico">IR<br>940nm</div><div><h3>Hardware neste modulo</h3><div class="tags"><span class="tag">IR LED 940nm</span><span class="tag">GPIO44 (TX)</span><span class="tag">IRremoteESP8266</span><span class="tag">NEC/Sony/RC5</span></div></div></div>
+        <div class="sec"><h2>Conceito</h2><p>O Cardputer tem um emissor IR de 940nm no GPIO44. Para controlar, instale "IRremoteESP8266" pelo Library Manager. Os principais protocolos sao NEC (32 bits, usado por LG/Samsung), Sony (12 bits) e RC5 (12 bits, Philips). Cada aparelho tem codigos especificos — bases de dados online (IRDB) listam codigos por marca e modelo.</p></div>
+        <div class="sec"><h2>Codigo — Controle Remoto Simples</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;IRremoteESP8266.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;IRsend.h&gt;</span>
+
+<span class="kw">const uint16_t</span> IR_PIN = <span class="num">44</span>; <span class="cm">// pino IR do Cardputer</span>
+IRsend irsend(IR_PIN);
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="kw">auto</span> cfg=M5.<span class="fn">config</span>(); M5Cardputer.<span class="fn">begin</span>(cfg,<span class="kw">true</span>);
+  irsend.<span class="fn">begin</span>();
+
+  <span class="kw">auto</span>&amp; d=M5Cardputer.Display;
+  d.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>); d.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>); d.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+  d.<span class="fn">println</span>(<span class="str">"IR Transmitter"</span>);
+  d.<span class="fn">println</span>(<span class="str">"1 = NEC Power (Samsung)"</span>);
+  d.<span class="fn">println</span>(<span class="str">"2 = Sony Power (TV)"</span>);
+  d.<span class="fn">println</span>(<span class="str">"3 = NEC Vol+ (LG)"</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  M5Cardputer.<span class="fn">update</span>();
+  <span class="kw">if</span>(M5Cardputer.Keyboard.<span class="fn">isChange</span>()&amp;&amp;M5Cardputer.Keyboard.<span class="fn">isPressed</span>()) {
+    Keyboard_Class::KeysState st=M5Cardputer.Keyboard.<span class="fn">keysState</span>();
+    <span class="kw">for</span>(<span class="kw">auto</span> c:st.word) {
+      <span class="cls">String</span> sent = <span class="str">""</span>;
+      <span class="kw">if</span>(c==<span class="str">'1'</span>) { irsend.<span class="fn">sendNEC</span>(<span class="num">0x07E0E21D</span>,<span class="num">32</span>); sent=<span class="str">"NEC Power Samsung"</span>; }
+      <span class="kw">if</span>(c==<span class="str">'2'</span>) { irsend.<span class="fn">sendSony</span>(<span class="num">0xA90</span>,<span class="num">12</span>); sent=<span class="str">"Sony Power TV"</span>; }
+      <span class="kw">if</span>(c==<span class="str">'3'</span>) { irsend.<span class="fn">sendNEC</span>(<span class="num">0x20DF40BF</span>,<span class="num">32</span>); sent=<span class="str">"NEC Vol+ LG"</span>; }
+      <span class="kw">if</span>(sent.<span class="fn">length</span>()>0) {
+        M5Cardputer.Display.<span class="fn">fillRect</span>(<span class="num">0</span>,<span class="num">60</span>,<span class="num">135</span>,<span class="num">12</span>,<span class="cls">BLACK</span>);
+        M5Cardputer.Display.<span class="fn">setTextColor</span>(<span class="cls">GREEN</span>);
+        M5Cardputer.Display.<span class="fn">setCursor</span>(<span class="num">0</span>,<span class="num">60</span>);
+        M5Cardputer.Display.<span class="fn">print</span>(<span class="str">"Enviado: "</span>+sent);
+        M5Cardputer.Speaker.<span class="fn">tone</span>(<span class="num">1200</span>,<span class="num">30</span>);
+      }
+    }
+  }
+}</div>
+        </div>
+        <div class="tip"><div class="tip-t">Dica — Encontrar codigos IR</div><p>Use o site irdb.tk ou o app "IR Remote" no smartphone para encontrar os codigos NEC/Sony do seu aparelho. Tambem e possivel capturar codigos de um controle remoto real usando IRrecv com um receptor IR de 38kHz conectado ao GPIO expansor do Cardputer.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie um menu de controle remoto para uma TV especifica (escolha a marca da sua TV). Mapeie pelo menos 6 funcoes (power, vol+, vol-, ch+, ch-, mute) para teclas do teclado e exiba o menu visualmente.</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('m11')">← M11 — MQTT</button><button class="btn-nav nxt" onclick="go('m13')">M13 — SPIFFS →</button></div>
+      </section>
       <!-- MODULOS INSERIDOS AQUI -->
     </main>
   </div>
