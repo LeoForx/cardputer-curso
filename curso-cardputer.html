@@ -85,6 +85,13 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:var
   #sidebar.open{left:0}
   #main{padding:16px}
 }
+
+.btn-sol{display:inline-block;margin-top:10px;background:transparent;border:1px solid rgba(124,58,237,.4);color:#a78bfa;border-radius:4px;padding:4px 12px;font-size:10px;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-sol:hover{background:rgba(124,58,237,.18);border-color:#a78bfa}
+.sol{display:none;margin-top:10px;background:#0a0520;border:1px solid rgba(124,58,237,.2);border-radius:5px;overflow:hidden}
+.sol.open{display:block}
+.sol-hdr{color:#a78bfa;font-size:10px;font-weight:bold;padding:6px 12px;border-bottom:1px solid rgba(124,58,237,.2);background:rgba(124,58,237,.08)}
+.sol pre{margin:0;padding:10px 12px;font-family:'Cascadia Code','Fira Code',monospace;font-size:10.5px;line-height:1.65;color:#c4b5fd;white-space:pre-wrap;word-break:break-all;overflow-x:auto}
 </style>
 </head>
 <body>
@@ -200,7 +207,21 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:var
 <span class="kw">void</span> <span class="fn">loop</span>() {}</div>
         </div>
         <div class="tip"><div class="tip-t">Dica</div><p>O metodo M5Cardputer.begin(cfg, true) inicializa o display com orientacao correta para o Cardputer. O segundo parametro 'true' ativa a rotacao automatica. Sem ele, o display aparece de lado.</p></div>
-        <div class="exr"><div class="exr-t">Exercicio</div><p>Modifique o codigo para tambem exibir o endereco MAC WiFi do dispositivo. Dica: use <code style="color:var(--accent1)">WiFi.macAddress()</code> apos incluir <code style="color:var(--accent1)">&lt;WiFi.h&gt;</code>.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Modifique o codigo para tambem exibir o endereco MAC WiFi do dispositivo. Dica: use <code style="color:var(--accent1)">WiFi.macAddress()</code> apos incluir <code style="color:var(--accent1)">&lt;WiFi.h&gt;</code>.</p><button class="btn-sol" onclick="toggleSol(this)">▶ Ver solucao</button><div class="sol"><div class="sol-hdr">Solucao</div><pre>#include &lt;M5Cardputer.h&gt;
+#include &lt;WiFi.h&gt;
+void setup() {
+  auto cfg = M5.config(); M5Cardputer.begin(cfg, true);
+  WiFi.mode(WIFI_STA);
+  auto&amp; d = M5Cardputer.Display;
+  d.setTextColor(WHITE); d.setTextSize(1); d.setCursor(5, 5);
+  d.printf(&quot;CPU: %d MHz\n&quot;,    ESP.getCpuFreqMHz());
+  d.printf(&quot;Flash: %d KB\n&quot;,   ESP.getFlashChipSize()/1024);
+  d.printf(&quot;PSRAM: %d KB\n&quot;,   ESP.getPsramSize()/1024);
+  d.printf(&quot;RAM: %d KB\n&quot;,     ESP.getFreeHeap()/1024);
+  d.printf(&quot;Bat: %d%%\n&quot;,      M5Cardputer.Power.getBatteryLevel());
+  d.printf(&quot;MAC: %s\n&quot;,        WiFi.macAddress().c_str()); // NOVO
+}
+void loop() {}</pre></div></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('p3')" style="visibility:hidden">←</button><button class="btn-nav nxt" onclick="go('m2')">M2 — Configurando Ambiente →</button></div>
       </section>
 
@@ -237,7 +258,13 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:var
 }</div>
         </div>
         <div class="warn"><div class="warn-t">Aviso Comum</div><p>Se o upload falhar com "Failed to connect", mantenha pressionada a tecla 'G' (GPIO0) no Cardputer enquanto clica em Upload no Arduino IDE. Isso coloca o ESP32-S3 em modo de boot forcado.</p></div>
-        <div class="exr"><div class="exr-t">Exercicio</div><p>Apos o upload bem-sucedido do blink, modifique o codigo para o display alternar entre 3 cores diferentes (vermelho, verde, azul) com 300ms de intervalo cada.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Apos o upload bem-sucedido do blink, modifique o codigo para o display alternar entre 3 cores diferentes (vermelho, verde, azul) com 300ms de intervalo cada.</p><button class="btn-sol" onclick="toggleSol(this)">▶ Ver solucao</button><div class="sol"><div class="sol-hdr">Solucao</div><pre>#include &lt;M5Cardputer.h&gt;
+void setup() { auto cfg = M5.config(); M5Cardputer.begin(cfg, true); }
+void loop() {
+  M5Cardputer.Display.fillScreen(RED);   delay(300);
+  M5Cardputer.Display.fillScreen(GREEN); delay(300);
+  M5Cardputer.Display.fillScreen(BLUE);  delay(300);
+}</pre></div></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('m1')">← M1 — Hardware</button><button class="btn-nav nxt" onclick="go('m3')">M3 — Hello World →</button></div>
       </section>
 
@@ -288,7 +315,25 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:var
 <span class="kw">void</span> <span class="fn">loop</span>() {}</div>
         </div>
         <div class="warn"><div class="warn-t">Aviso Comum</div><p>Sem chamar fillScreen() antes de escrever novo texto, o texto antigo permanece visivel. Sempre limpe a area antes de atualizar. Para areas especificas, use fillRect(x, y, largura, altura, BLACK).</p></div>
-        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie um programa que exiba seu nome em grande (setTextSize 3) no centro da tela, e abaixo mostre a data atual como texto. Dica: o centro horizontal e aproximadamente x=67 para texto tamanho 3.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie um programa que exiba seu nome em grande (setTextSize 3) no centro da tela, e abaixo mostre a data atual como texto. Dica: o centro horizontal e aproximadamente x=67 para texto tamanho 3.</p><button class="btn-sol" onclick="toggleSol(this)">▶ Ver solucao</button><div class="sol"><div class="sol-hdr">Solucao</div><pre>#include &lt;M5Cardputer.h&gt;
+void setup() {
+  auto cfg = M5.config(); M5Cardputer.begin(cfg, true);
+  M5Cardputer.Display.fillScreen(BLACK);
+  M5Cardputer.Display.setTextColor(CYAN);
+  M5Cardputer.Display.setTextSize(3);
+  M5Cardputer.Display.setCursor(10, 20);
+  M5Cardputer.Display.print(&quot;SEU NOME&quot;); // substitua
+}
+void loop() {
+  // Bateria em tempo real
+  M5Cardputer.Display.fillRect(0, 80, 135, 20, BLACK);
+  M5Cardputer.Display.setTextColor(YELLOW);
+  M5Cardputer.Display.setTextSize(1);
+  M5Cardputer.Display.setCursor(5, 85);
+  M5Cardputer.Display.printf(&quot;Bat: %d%%&quot;,
+    M5Cardputer.Power.getBatteryLevel());
+  delay(1000);
+}</pre></div></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('m2')">← M2 — Ambiente</button><button class="btn-nav nxt" onclick="go('m4')">M4 — Display Avancado →</button></div>
       </section>
 
@@ -340,7 +385,27 @@ M5Canvas sprite(&amp;M5Cardputer.Display);
 }</div>
         </div>
         <div class="tip"><div class="tip-t">Dica — Cores personalizadas</div><p>Use M5Cardputer.Display.color565(r, g, b) para criar qualquer cor RGB. Exemplo: color565(255, 128, 0) = laranja. As constantes WHITE, BLACK, RED, GREEN, BLUE, CYAN, YELLOW, MAGENTA estao predefinidas.</p></div>
-        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie uma barra de progresso animada que vai de 0% a 100% na tela, mostrando o percentual como texto no centro. Use um Sprite para evitar flickering durante a animacao.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie uma barra de progresso animada que vai de 0% a 100% na tela, mostrando o percentual como texto no centro. Use um Sprite para evitar flickering durante a animacao.</p><button class="btn-sol" onclick="toggleSol(this)">▶ Ver solucao</button><div class="sol"><div class="sol-hdr">Solucao</div><pre>#include &lt;M5Cardputer.h&gt;
+M5Canvas sprite(&amp;M5Cardputer.Display);
+void setup() {
+  auto cfg = M5.config(); M5Cardputer.begin(cfg, true);
+  M5Cardputer.Display.fillScreen(BLACK);
+  sprite.createSprite(125, 24);
+}
+void loop() {
+  for (int pct = 0; pct &lt;= 100; pct++) {
+    sprite.fillSprite(BLACK);
+    sprite.drawRect(0, 2, 123, 18, WHITE);
+    int w = pct * 121 / 100;
+    uint16_t c = pct&lt;50 ? TFT_GREEN : pct&lt;80 ? TFT_YELLOW : TFT_RED;
+    sprite.fillRect(1, 3, w, 16, c);
+    sprite.setTextColor(BLACK);
+    sprite.setCursor(52, 5);
+    sprite.printf(&quot;%d%%&quot;, pct);
+    sprite.pushSprite(5, 60);
+    delay(30);
+  }
+}</pre></div></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('m3')">← M3 — Hello World</button><button class="btn-nav nxt" onclick="go('m5')">M5 — Teclado →</button></div>
       </section>
 
@@ -396,7 +461,36 @@ M5Canvas sprite(&amp;M5Cardputer.Display);
 }</div>
         </div>
         <div class="warn"><div class="warn-t">Aviso Comum</div><p>Sempre chame M5Cardputer.update() no inicio do loop(). Sem ele, o teclado nunca reporta eventos. Este metodo atualiza internamente o estado de todos os perifericos (teclado, IMU, etc.).</p></div>
-        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione um contador de caracteres no canto superior direito do display que atualiza em tempo real conforme o usuario digita. Formato: "32/100" onde 32 e o atual e 100 e o maximo permitido.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione um contador de caracteres no canto superior direito do display que atualiza em tempo real conforme o usuario digita. Formato: "32/100" onde 32 e o atual e 100 e o maximo permitido.</p><button class="btn-sol" onclick="toggleSol(this)">▶ Ver solucao</button><div class="sol"><div class="sol-hdr">Solucao</div><pre>#include &lt;M5Cardputer.h&gt;
+String input = &quot;&quot;;
+const int MAX_CHARS = 100;
+void redraw() {
+  auto&amp; d = M5Cardputer.Display;
+  d.fillScreen(BLACK);
+  d.setTextColor(CYAN); d.setCursor(0, 5);
+  d.println(&quot;Digite (FN=limpar):&quot;);
+  // Contador canto direito
+  uint16_t cc = (int)input.length() &gt;= MAX_CHARS ? RED : TFT_DARKGREY;
+  d.setTextColor(cc); d.setCursor(90, 5);
+  d.printf(&quot;%d/%d&quot;, (int)input.length(), MAX_CHARS);
+  d.setTextColor(WHITE); d.setCursor(0, 20);
+  d.print(input + &quot;|&quot;);
+}
+void setup() {
+  auto cfg = M5.config(); M5Cardputer.begin(cfg, true); redraw();
+}
+void loop() {
+  M5Cardputer.update();
+  if (M5Cardputer.Keyboard.isChange() &amp;&amp; M5Cardputer.Keyboard.isPressed()) {
+    auto st = M5Cardputer.Keyboard.keysState();
+    for (auto c : st.word)
+      if ((int)input.length() &lt; MAX_CHARS) input += c;
+    if (st.del &amp;&amp; input.length() &gt; 0) input.remove(input.length()-1);
+    if (st.enter &amp;&amp; (int)input.length() &lt; MAX_CHARS) input += &quot;\n&quot;;
+    if (st.fn) input = &quot;&quot;;
+    redraw();
+  }
+}</pre></div></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('m4')">← M4 — Display</button><button class="btn-nav nxt" onclick="go('m6')">M6 — LED e Som →</button></div>
       </section>
 
@@ -450,7 +544,36 @@ M5Canvas sprite(&amp;M5Cardputer.Display);
 }</div>
         </div>
         <div class="tip"><div class="tip-t">Dica</div><p>O Speaker da M5Unified tambem suporta reproducao de WAV via Speaker.playRaw(). Para sons mais complexos, armazene um array de amostras PCM 16-bit e reproduza com esse metodo. Ideal para notificacoes sonoras customizadas.</p></div>
-        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie um piano simples: cada tecla do teclado (A S D F G H J) toca uma nota diferente enquanto estiver pressionada. Exiba no display qual nota esta sendo tocada.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie um piano simples: cada tecla do teclado (A S D F G H J) toca uma nota diferente enquanto estiver pressionada. Exiba no display qual nota esta sendo tocada.</p><button class="btn-sol" onclick="toggleSol(this)">▶ Ver solucao</button><div class="sol"><div class="sol-hdr">Solucao</div><pre>#include &lt;M5Cardputer.h&gt;
+const int freqs[] = {262,294,330,349,392,440,494};
+const char keys[] = {&#x27;a&#x27;,&#x27;s&#x27;,&#x27;d&#x27;,&#x27;f&#x27;,&#x27;g&#x27;,&#x27;h&#x27;,&#x27;j&#x27;};
+const char* names[] = {&quot;Do&quot;,&quot;Re&quot;,&quot;Mi&quot;,&quot;Fa&quot;,&quot;Sol&quot;,&quot;La&quot;,&quot;Si&quot;};
+void setup() {
+  auto cfg = M5.config(); M5Cardputer.begin(cfg, true);
+  M5Cardputer.Speaker.setVolume(150);
+  M5Cardputer.Display.fillScreen(BLACK);
+  M5Cardputer.Display.setTextColor(CYAN); M5Cardputer.Display.setCursor(5,5);
+  M5Cardputer.Display.println(&quot;Piano: A S D F G H J&quot;);
+}
+void loop() {
+  M5Cardputer.update();
+  if (M5Cardputer.Keyboard.isChange()) {
+    if (M5Cardputer.Keyboard.isPressed()) {
+      auto st = M5Cardputer.Keyboard.keysState();
+      for (auto c : st.word)
+        for (int i = 0; i &lt; 7; i++)
+          if (c == keys[i]) {
+            M5Cardputer.Speaker.tone(freqs[i], 500);
+            M5Cardputer.Display.fillRect(0,50,135,40,BLACK);
+            M5Cardputer.Display.setTextColor(YELLOW);
+            M5Cardputer.Display.setTextSize(3);
+            M5Cardputer.Display.setCursor(40, 55);
+            M5Cardputer.Display.print(names[i]);
+            M5Cardputer.Display.setTextSize(1);
+          }
+    } else { M5Cardputer.Speaker.mute(); }
+  }
+}</pre></div></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('m5')">← M5 — Teclado</button><button class="btn-nav nxt" onclick="go('m7')">M7 — Bateria →</button></div>
       </section>
 
@@ -511,7 +634,30 @@ M5Canvas sprite(&amp;M5Cardputer.Display);
 <span class="kw">void</span> <span class="fn">loop</span>() {} <span class="cm">// nunca executado em deep sleep</span></div>
         </div>
         <div class="tip"><div class="tip-t">Dica — Consumo em diferentes modos</div><p>Ativo: ~100mA. Light sleep: ~2mA. Deep sleep: ~0.01mA. Com a bateria de 120mAh interna, o Cardputer em deep sleep dura mais de 500 dias. No modo ativo WiFi, apenas ~1.2 horas.</p></div>
-        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie um logger de bateria: a cada vez que o dispositivo acorda (use RTC_DATA_ATTR para guardar historico), registre o nivel da bateria. Exiba um grafico simples dos ultimos 10 registros usando fillRect com alturas proporcionais.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie um logger de bateria: a cada vez que o dispositivo acorda (use RTC_DATA_ATTR para guardar historico), registre o nivel da bateria. Exiba um grafico simples dos ultimos 10 registros usando fillRect com alturas proporcionais.</p><button class="btn-sol" onclick="toggleSol(this)">▶ Ver solucao</button><div class="sol"><div class="sol-hdr">Solucao</div><pre>#include &lt;M5Cardputer.h&gt;
+#include &lt;esp_sleep.h&gt;
+RTC_DATA_ATTR int wakeCount = 0;
+RTC_DATA_ATTR int history[10] = {0};
+void setup() {
+  auto cfg = M5.config(); M5Cardputer.begin(cfg, true);
+  int bat = M5Cardputer.Power.getBatteryLevel();
+  history[wakeCount % 10] = bat;
+  wakeCount++;
+  auto&amp; d = M5Cardputer.Display;
+  d.fillScreen(BLACK); d.setTextColor(WHITE); d.setTextSize(1);
+  d.setCursor(0,0); d.printf(&quot;Acord.#%d  Bat:%d%%\n&quot;, wakeCount, bat);
+  int samples = min(wakeCount, 10);
+  for (int i = 0; i &lt; samples; i++) {
+    int idx = (wakeCount - samples + i) % 10;
+    int h = map(history[idx], 0, 100, 2, 60);
+    uint16_t c = history[idx]&gt;50?TFT_GREEN:history[idx]&gt;20?TFT_YELLOW:TFT_RED;
+    d.fillRect(5+i*13, 90-h, 11, h, c);
+  }
+  delay(3000);
+  esp_sleep_enable_timer_wakeup(30ULL*1000000ULL);
+  d.fillScreen(BLACK); esp_deep_sleep_start();
+}
+void loop() {}</pre></div></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('m6')">← M6 — Som</button><button class="btn-nav nxt" onclick="go('p1')">Projeto — Calculadora →</button></div>
       </section>
 
@@ -660,7 +806,29 @@ M5Canvas sprite(&amp;M5Cardputer.Display);
 <span class="kw">void</span> <span class="fn">loop</span>() {}</div>
         </div>
         <div class="warn"><div class="warn-t">Aviso</div><p>O ESP32-S3 suporta apenas WiFi 2.4 GHz. Redes 5 GHz sao invisiveis para ele. Se a rede nao aparecer no scan, verifique se ela esta na faixa de 2.4 GHz.</p></div>
-        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie um visualizador de forca de sinal: conecte ao WiFi e, no loop(), exiba o RSSI atual como uma barra de sinal colorida (verde > -50dBm, amarelo > -70dBm, vermelho demais). Atualiza a cada 1 segundo.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie um visualizador de forca de sinal: conecte ao WiFi e, no loop(), exiba o RSSI atual como uma barra de sinal colorida (verde > -50dBm, amarelo > -70dBm, vermelho demais). Atualiza a cada 1 segundo.</p><button class="btn-sol" onclick="toggleSol(this)">▶ Ver solucao</button><div class="sol"><div class="sol-hdr">Solucao</div><pre>#include &lt;M5Cardputer.h&gt;
+#include &lt;WiFi.h&gt;
+const char* SSID = &quot;SUA_REDE&quot;;
+const char* PASS = &quot;SUA_SENHA&quot;;
+void setup() {
+  auto cfg = M5.config(); M5Cardputer.begin(cfg, true);
+  M5Cardputer.Display.setTextColor(WHITE); M5Cardputer.Display.setTextSize(1);
+  WiFi.begin(SSID, PASS);
+  while (WiFi.status() != WL_CONNECTED)
+    { delay(500); M5Cardputer.Display.print(&quot;.&quot;); }
+}
+void loop() {
+  int rssi = WiFi.RSSI();
+  uint16_t c = rssi&gt;-50 ? TFT_GREEN : rssi&gt;-70 ? TFT_YELLOW : TFT_RED;
+  int w = constrain(map(rssi,-90,-30,0,123),0,123);
+  auto&amp; d = M5Cardputer.Display;
+  d.fillScreen(BLACK);
+  d.setTextColor(c); d.setCursor(5,5);
+  d.printf(&quot;RSSI: %d dBm&quot;, rssi);
+  d.drawRect(5,25,125,20,WHITE);
+  d.fillRect(6,26,w,18,c);
+  delay(1000);
+}</pre></div></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('p1')">← Projeto Calculadora</button><button class="btn-nav nxt" onclick="go('m10')">M10 — HTTP e APIs →</button></div>
       </section>
 
@@ -717,7 +885,35 @@ M5Canvas sprite(&amp;M5Cardputer.Display);
 <span class="kw">void</span> <span class="fn">loop</span>() {}</div>
         </div>
         <div class="warn"><div class="warn-t">Aviso</div><p>Instale "ArduinoJson" versao 7.x pelo Library Manager, nao a 5.x ou 6.x. A API mudou entre versoes. Na 7.x use JsonDocument em vez de DynamicJsonDocument ou StaticJsonDocument.</p></div>
-        <div class="exr"><div class="exr-t">Exercicio</div><p>Consuma a API https://catfact.ninja/fact (retorna um fato sobre gatos em JSON, campo "fact"). Exiba o fato no display com quebra de linha automatica usando display.setTextWrap(true).</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Consuma a API https://catfact.ninja/fact (retorna um fato sobre gatos em JSON, campo "fact"). Exiba o fato no display com quebra de linha automatica usando display.setTextWrap(true).</p><button class="btn-sol" onclick="toggleSol(this)">▶ Ver solucao</button><div class="sol"><div class="sol-hdr">Solucao</div><pre>// Requer WiFiClientSecure para HTTPS
+#include &lt;M5Cardputer.h&gt;
+#include &lt;WiFi.h&gt;
+#include &lt;WiFiClientSecure.h&gt;
+#include &lt;HTTPClient.h&gt;
+#include &lt;ArduinoJson.h&gt;
+const char* SSID = &quot;SUA_REDE&quot;;
+const char* PASS = &quot;SUA_SENHA&quot;;
+void setup() {
+  auto cfg = M5.config(); M5Cardputer.begin(cfg, true);
+  auto&amp; d = M5Cardputer.Display;
+  d.fillScreen(BLACK); d.setTextColor(WHITE); d.setTextSize(1);
+  WiFi.begin(SSID, PASS);
+  while (WiFi.status()!=WL_CONNECTED){delay(500);d.print(&quot;.&quot;);}
+  WiFiClientSecure client; client.setInsecure();
+  HTTPClient https;
+  https.begin(client,&quot;https://catfact.ninja/fact&quot;);
+  if (https.GET() == 200) {
+    JsonDocument doc;
+    deserializeJson(doc, https.getString());
+    String fact = doc[&quot;fact&quot;].as&lt;String&gt;();
+    d.fillScreen(BLACK); d.setCursor(0,0);
+    d.setTextWrap(true);
+    d.setTextColor(CYAN); d.println(&quot;Cat Fact:&quot;);
+    d.setTextColor(WHITE); d.println(fact);
+  }
+  https.end();
+}
+void loop() {}</pre></div></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('m9')">← M9 — WiFi</button><button class="btn-nav nxt" onclick="go('m11')">M11 — MQTT →</button></div>
       </section>
 
@@ -779,7 +975,21 @@ WiFiClient wc; PubSubClient mqtt(wc);
 }</div>
         </div>
         <div class="tip"><div class="tip-t">Dica</div><p>Use o app MQTT Explorer (gratuito) no PC para monitorar os topicos em tempo real. Conecte ao broker.hivemq.com:1883 e assine "cardputer/#" para ver todas as mensagens do seu Cardputer.</p></div>
-        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione ao codigo a capacidade de receber um comando "beep" pelo topico "cardputer/cmd". Quando receber essa mensagem, o Cardputer deve tocar um beep e exibir "Beep recebido!" no display.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione ao codigo a capacidade de receber um comando "beep" pelo topico "cardputer/cmd". Quando receber essa mensagem, o Cardputer deve tocar um beep e exibir "Beep recebido!" no display.</p><button class="btn-sol" onclick="toggleSol(this)">▶ Ver solucao</button><div class="sol"><div class="sol-hdr">Solucao</div><pre>// Modifique a funcao onMsg() existente para reagir ao topico &quot;cardputer/cmd&quot;:
+void onMsg(char* topic, byte* payload, unsigned int length) {
+  String msg = String((char*)payload).substring(0, length);
+  M5Cardputer.Display.printf(&quot;[%s] %s\n&quot;, topic, msg.c_str());
+  // NOVO: reagir ao comando &quot;beep&quot;
+  if (strcmp(topic,&quot;cardputer/cmd&quot;)==0 &amp;&amp; msg==&quot;beep&quot;) {
+    M5Cardputer.Speaker.tone(1000, 200);
+    delay(250); M5Cardputer.Speaker.mute();
+    M5Cardputer.Display.setTextColor(TFT_GREEN);
+    M5Cardputer.Display.println(&quot;&gt;&gt;&gt; Beep recebido!&quot;);
+    M5Cardputer.Display.setTextColor(WHITE);
+  }
+}
+// No setup(), apos mqtt.subscribe(&quot;cardputer/data&quot;), adicione:
+//   mqtt.subscribe(&quot;cardputer/cmd&quot;);</pre></div></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('m10')">← M10 — HTTP</button><button class="btn-nav nxt" onclick="go('m12')">M12 — IR →</button></div>
       </section>
 
@@ -830,7 +1040,39 @@ IRsend irsend(IR_PIN);
 }</div>
         </div>
         <div class="tip"><div class="tip-t">Dica — Encontrar codigos IR</div><p>Use o site irdb.tk ou o app "IR Remote" no smartphone para encontrar os codigos NEC/Sony do seu aparelho. Tambem e possivel capturar codigos de um controle remoto real usando IRrecv com um receptor IR de 38kHz conectado ao GPIO expansor do Cardputer.</p></div>
-        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie um menu de controle remoto para uma TV especifica (escolha a marca da sua TV). Mapeie pelo menos 6 funcoes (power, vol+, vol-, ch+, ch-, mute) para teclas do teclado e exiba o menu visualmente.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie um menu de controle remoto para uma TV especifica (escolha a marca da sua TV). Mapeie pelo menos 6 funcoes (power, vol+, vol-, ch+, ch-, mute) para teclas do teclado e exiba o menu visualmente.</p><button class="btn-sol" onclick="toggleSol(this)">▶ Ver solucao</button><div class="sol"><div class="sol-hdr">Solucao</div><pre>#include &lt;M5Cardputer.h&gt;
+#include &lt;IRremoteESP8266.h&gt;
+#include &lt;IRsend.h&gt;
+IRsend ir(44);
+struct IRBtn { const char* name; uint32_t code; };
+// Codigos LG NEC — ajuste para sua TV se necessario
+IRBtn tv[] = {
+  {&quot;Power&quot;,0x20DF10EF},{&quot;Vol+&quot;,0x20DF40BF},
+  {&quot;Vol-&quot;,0x20DFC03F},{&quot;Mute&quot;,0x20DF906F},
+  {&quot;CH+&quot;,0x20DF00FF}, {&quot;CH-&quot;,0x20DF807F}
+};
+int sel = 0;
+void draw(String msg=&quot;&quot;) {
+  auto&amp; d = M5Cardputer.Display;
+  d.fillScreen(BLACK); d.setTextColor(CYAN); d.setCursor(3,3);
+  d.print(&quot;TV LG  TAB=nav  ENTER=enviar&quot;);
+  for (int i=0;i&lt;6;i++) {
+    bool s=(i==sel);
+    if(s){d.fillRect(3,16+i*18,129,16,0x1A1A40);d.drawRect(3,16+i*18,129,16,CYAN);}
+    d.setTextColor(s?WHITE:TFT_DARKGREY);
+    d.setCursor(10,20+i*18); d.print(tv[i].name);
+  }
+  if(msg.length()){d.setTextColor(TFT_GREEN);d.setCursor(3,126);d.print(msg);}
+}
+void setup(){auto cfg=M5.config();M5Cardputer.begin(cfg,true);ir.begin();draw();}
+void loop(){
+  M5Cardputer.update();
+  if(M5Cardputer.Keyboard.isChange()&amp;&amp;M5Cardputer.Keyboard.isPressed()){
+    auto st=M5Cardputer.Keyboard.keysState();
+    if(st.tab){sel=(sel+1)%6;draw();}
+    if(st.enter){ir.sendNEC(tv[sel].code,32);M5Cardputer.Speaker.tone(1200,40);draw(&quot;Enviado: &quot;+String(tv[sel].name));}
+  }
+}</pre></div></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('m11')">← M11 — MQTT</button><button class="btn-nav nxt" onclick="go('m13')">M13 — SPIFFS →</button></div>
       </section>
 
@@ -889,7 +1131,38 @@ IRsend irsend(IR_PIN);
 <span class="kw">void</span> <span class="fn">loop</span>() {}</div>
         </div>
         <div class="tip"><div class="tip-t">Dica — NVS para preferencias simples</div><p>Para guardar apenas pares chave-valor (SSID, tokens), use Preferences.h (NVS) em vez de SPIFFS. E mais simples: prefs.begin("app"); prefs.putString("ssid", "rede"); prefs.getString("ssid", "default");</p></div>
-        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie um sistema que salva o volume do speaker (0-255) no SPIFFS. Ao iniciar, leia o volume salvo. Teclas + e - no teclado ajustam o volume e salvam automaticamente o novo valor.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie um sistema que salva o volume do speaker (0-255) no SPIFFS. Ao iniciar, leia o volume salvo. Teclas + e - no teclado ajustam o volume e salvam automaticamente o novo valor.</p><button class="btn-sol" onclick="toggleSol(this)">▶ Ver solucao</button><div class="sol"><div class="sol-hdr">Solucao</div><pre>#include &lt;M5Cardputer.h&gt;
+#include &lt;SPIFFS.h&gt;
+int vol = 128;
+void saveVol() {
+  File f = SPIFFS.open(&quot;/vol.txt&quot;,&quot;w&quot;); f.println(vol); f.close();
+}
+void redraw() {
+  auto&amp; d = M5Cardputer.Display;
+  d.fillScreen(BLACK); d.setTextColor(WHITE); d.setTextSize(1);
+  d.setCursor(5,5); d.printf(&quot;Volume: %d\n+/- para ajustar&quot;,vol);
+  int w = map(vol,0,255,0,125);
+  d.drawRect(5,50,127,16,WHITE); d.fillRect(6,51,w,14,CYAN);
+}
+void setup() {
+  auto cfg = M5.config(); M5Cardputer.begin(cfg, true);
+  SPIFFS.begin(true);
+  if (SPIFFS.exists(&quot;/vol.txt&quot;)) {
+    File f = SPIFFS.open(&quot;/vol.txt&quot;,&quot;r&quot;); vol=f.parseInt(); f.close();
+  }
+  M5Cardputer.Speaker.setVolume(vol); redraw();
+}
+void loop() {
+  M5Cardputer.update();
+  if(M5Cardputer.Keyboard.isChange()&amp;&amp;M5Cardputer.Keyboard.isPressed()){
+    auto st=M5Cardputer.Keyboard.keysState();
+    for(auto c:st.word){
+      if(c==&#x27;+&#x27;) vol=min(255,vol+10);
+      if(c==&#x27;-&#x27;) vol=max(0,vol-10);
+    }
+    M5Cardputer.Speaker.setVolume(vol); saveVol(); redraw();
+  }
+}</pre></div></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('m12')">← M12 — IR</button><button class="btn-nav nxt" onclick="go('m14')">M14 — UI Avancada →</button></div>
       </section>
 
@@ -957,7 +1230,42 @@ Item items[] = {
   }
 }</div>
         </div>
-        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione uma segunda tela (AppState) que e mostrada ao pressionar ENTER em um item do menu. A tela deve mostrar o nome do item selecionado em grande e um botao "Voltar". Implemente com enum AppState { STATE_MENU, STATE_DETAIL }.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione uma segunda tela (AppState) que e mostrada ao pressionar ENTER em um item do menu. A tela deve mostrar o nome do item selecionado em grande e um botao "Voltar". Implemente com enum AppState { STATE_MENU, STATE_DETAIL }.</p><button class="btn-sol" onclick="toggleSol(this)">▶ Ver solucao</button><div class="sol"><div class="sol-hdr">Solucao</div><pre>#include &lt;M5Cardputer.h&gt;
+enum AppState { STATE_MENU, STATE_DETAIL };
+AppState state = STATE_MENU;
+const char* items[] = {&quot;WiFi&quot;,&quot;Bluetooth&quot;,&quot;IR&quot;,&quot;Bateria&quot;};
+int sel = 0;
+void drawMenu() {
+  auto&amp; d = M5Cardputer.Display;
+  d.fillScreen(BLACK); d.setTextColor(CYAN); d.setCursor(3,3);
+  d.println(&quot;Menu:  TAB=nav  ENTER=abre&quot;);
+  for (int i=0;i&lt;4;i++) {
+    bool s=(i==sel);
+    if(s){d.fillRect(3,20+i*24,129,20,0x0D1F3A);d.drawRect(3,20+i*24,129,20,CYAN);}
+    d.setTextColor(s?WHITE:TFT_DARKGREY);
+    d.setCursor(10,25+i*24); d.print(items[i]);
+  }
+}
+void drawDetail() {
+  auto&amp; d = M5Cardputer.Display;
+  d.fillScreen(BLACK); d.setTextColor(YELLOW); d.setTextSize(2);
+  d.setCursor(5,30); d.print(items[sel]);
+  d.setTextSize(1); d.setTextColor(TFT_DARKGREY);
+  d.setCursor(5,80); d.print(&quot;FN = Voltar&quot;);
+}
+void setup(){auto cfg=M5.config();M5Cardputer.begin(cfg,true);drawMenu();}
+void loop(){
+  M5Cardputer.update();
+  if(M5Cardputer.Keyboard.isChange()&amp;&amp;M5Cardputer.Keyboard.isPressed()){
+    auto st=M5Cardputer.Keyboard.keysState();
+    if(state==STATE_MENU){
+      if(st.tab){sel=(sel+1)%4;drawMenu();}
+      if(st.enter){state=STATE_DETAIL;drawDetail();}
+    } else {
+      if(st.fn){state=STATE_MENU;drawMenu();}
+    }
+  }
+}</pre></div></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('m13')">← M13 — SPIFFS</button><button class="btn-nav nxt" onclick="go('m15')">M15 — Deep Sleep →</button></div>
       </section>
 
@@ -1016,7 +1324,32 @@ Item items[] = {
 }
 <span class="kw">void</span> <span class="fn">loop</span>() {}</div>
         </div>
-        <div class="exr"><div class="exr-t">Exercicio</div><p>Implemente um "data logger": a cada 30 segundos o Cardputer acorda via timer, le a bateria, salva no historico (RTC_DATA_ATTR), e volta a dormir. Apos 10 amostras, exibe o grafico completo antes de dormir novamente.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Implemente um "data logger": a cada 30 segundos o Cardputer acorda via timer, le a bateria, salva no historico (RTC_DATA_ATTR), e volta a dormir. Apos 10 amostras, exibe o grafico completo antes de dormir novamente.</p><button class="btn-sol" onclick="toggleSol(this)">▶ Ver solucao</button><div class="sol"><div class="sol-hdr">Solucao</div><pre>#include &lt;M5Cardputer.h&gt;
+#include &lt;esp_sleep.h&gt;
+RTC_DATA_ATTR int count = 0;
+RTC_DATA_ATTR int log10[10] = {0};
+void setup() {
+  auto cfg = M5.config(); M5Cardputer.begin(cfg, true);
+  log10[count % 10] = M5Cardputer.Power.getBatteryLevel();
+  count++;
+  auto&amp; d = M5Cardputer.Display;
+  d.fillScreen(BLACK); d.setTextColor(WHITE); d.setTextSize(1);
+  d.setCursor(0,0); d.printf(&quot;Amostra #%d (%d/10)&quot;, count, min(count,10));
+  int samples = min(count, 10);
+  if (samples == 10) {
+    d.setCursor(0,15); d.setTextColor(CYAN); d.println(&quot;Grafico:&quot;);
+    for (int i=0;i&lt;10;i++) {
+      int idx=(count-10+i)%10;
+      int h=map(log10[idx],0,100,2,60);
+      uint16_t c=log10[idx]&gt;50?TFT_GREEN:log10[idx]&gt;20?TFT_YELLOW:TFT_RED;
+      d.fillRect(5+i*13,95-h,11,h,c);
+    }
+    delay(5000);
+  } else { delay(2000); }
+  esp_sleep_enable_timer_wakeup(30ULL*1000000ULL);
+  d.fillScreen(BLACK); esp_deep_sleep_start();
+}
+void loop() {}</pre></div></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('m14')">← M14 — UI</button><button class="btn-nav nxt" onclick="go('p2')">Projeto — Terminal WiFi →</button></div>
       </section>
 
@@ -1142,7 +1475,36 @@ BLEScan* scanner;
 <span class="kw">void</span> <span class="fn">loop</span>() {}</div>
         </div>
         <div class="tip"><div class="tip-t">Dica — BLE HID Keyboard</div><p>Instale "ESP32 BLE Keyboard" pelo Library Manager. Com ela: BleKeyboard kb("Cardputer"); kb.begin(); e depois kb.print("Texto digitado pelo Cardputer!"). O dispositivo aparece como teclado Bluetooth no PC/celular.</p></div>
-        <div class="exr"><div class="exr-t">Exercicio</div><p>Usando a biblioteca BleKeyboard, crie um "macro pad": o Cardputer se conecta como teclado Bluetooth ao PC. Teclas 1-5 no teclado fisico enviam macros pre-definidas ao computador (ex: tecla 1 digita seu email, tecla 2 digita uma senha comum).</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Usando a biblioteca BleKeyboard, crie um "macro pad": o Cardputer se conecta como teclado Bluetooth ao PC. Teclas 1-5 no teclado fisico enviam macros pre-definidas ao computador (ex: tecla 1 digita seu email, tecla 2 digita uma senha comum).</p><button class="btn-sol" onclick="toggleSol(this)">▶ Ver solucao</button><div class="sol"><div class="sol-hdr">Solucao</div><pre>// Requer: Library Manager &gt; &quot;ESP32 BLE Keyboard&quot; by T-vK
+#include &lt;M5Cardputer.h&gt;
+#include &lt;BleKeyboard.h&gt;
+BleKeyboard kb(&quot;CardputerPad&quot;, &quot;M5Stack&quot;, 100);
+const char* macros[] = {
+  &quot;seu.email@exemplo.com&quot;,
+  &quot;https://github.com&quot;,
+  &quot;git status &amp;&amp; git log --oneline -5&quot;,
+  &quot;ls -la&quot;,
+  &quot;sudo systemctl status&quot;
+};
+void setup() {
+  auto cfg = M5.config(); M5Cardputer.begin(cfg, true);
+  kb.begin();
+  auto&amp; d = M5Cardputer.Display;
+  d.fillScreen(BLACK); d.setTextColor(CYAN); d.setCursor(3,3);
+  d.println(&quot;BLE Macro Pad&quot;);
+}
+void loop() {
+  M5Cardputer.update();
+  if (kb.isConnected()) {
+    if(M5Cardputer.Keyboard.isChange()&amp;&amp;M5Cardputer.Keyboard.isPressed()){
+      auto st=M5Cardputer.Keyboard.keysState();
+      for(auto c:st.word){
+        int idx=c-&#x27;1&#x27;;
+        if(idx&gt;=0&amp;&amp;idx&lt;5){ kb.print(macros[idx]); M5Cardputer.Speaker.tone(1200,50); }
+      }
+    }
+  }
+}</pre></div></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('p2')">← Projeto Terminal</button><button class="btn-nav nxt" onclick="go('m18')">M18 — Scanner WiFi →</button></div>
       </section>
 
@@ -1198,7 +1560,25 @@ BLEScan* scanner;
 }</div>
         </div>
         <div class="warn"><div class="warn-t">Aviso Legal</div><p>Scanner passivo (receber frames) e legal. Deauth, injecao de pacotes ou qualquer interferencia ativa em redes alheias e ilegal em todos os paises. Use apenas em redes proprias ou com autorizacao explicita por escrito.</p></div>
-        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione um modo "historico de canais": exiba um grafico de barras com a contagem de redes por canal (1-13). Isso mostra visualmente quais canais estao congestionados na sua area.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione um modo "historico de canais": exiba um grafico de barras com a contagem de redes por canal (1-13). Isso mostra visualmente quais canais estao congestionados na sua area.</p><button class="btn-sol" onclick="toggleSol(this)">▶ Ver solucao</button><div class="sol"><div class="sol-hdr">Solucao</div><pre>// Adicione ao final do loop() do M18, apos o scan existente:
+int chanCount[14] = {0};
+for (int i=0;i&lt;n;i++) {
+  int ch = WiFi.channel(i);
+  if (ch&gt;=1&amp;&amp;ch&lt;=13) chanCount[ch]++;
+}
+auto&amp; d = M5Cardputer.Display;
+d.fillRect(0,0,135,135,BLACK);
+d.setTextColor(CYAN); d.setCursor(3,3); d.print(&quot;Canais WiFi (1-13):&quot;);
+int maxV = 1;
+for (int i=1;i&lt;=13;i++) maxV=max(maxV,chanCount[i]);
+for (int i=1;i&lt;=13;i++) {
+  int h = chanCount[i]*55/maxV;
+  uint16_t c = chanCount[i]&gt;2?TFT_RED:chanCount[i]&gt;0?TFT_YELLOW:0x1A2A3A;
+  d.fillRect(3+(i-1)*10,78-h,8,h,c);
+  d.setTextColor(0x334455); d.setCursor(4+(i-1)*10,82);
+  d.printf(&quot;%d&quot;,i);
+}
+delay(5000);</pre></div></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('m17')">← M17 — BLE</button><button class="btn-nav nxt" onclick="go('m19')">M19 — IR Blaster →</button></div>
       </section>
 
@@ -1257,7 +1637,43 @@ IRCode TV[] = {
   }
 }</div>
         </div>
-        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione uma segunda "marca" (ex: Samsung) e implemente um seletor de marca com tecla 'B'. Ao pressionar B, alterna entre LG e Samsung e recarrega os codigos correspondentes. Dica: use um array bidimensional ou um indice de marca atual.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione uma segunda "marca" (ex: Samsung) e implemente um seletor de marca com tecla 'B'. Ao pressionar B, alterna entre LG e Samsung e recarrega os codigos correspondentes. Dica: use um array bidimensional ou um indice de marca atual.</p><button class="btn-sol" onclick="toggleSol(this)">▶ Ver solucao</button><div class="sol"><div class="sol-hdr">Solucao</div><pre>#include &lt;M5Cardputer.h&gt;
+#include &lt;IRremoteESP8266.h&gt;
+#include &lt;IRsend.h&gt;
+IRsend ir(44);
+struct IRCode { const char* name; uint32_t code; };
+IRCode brands[2][6] = {
+  // LG (NEC)
+  {{&quot;Power&quot;,0x20DF10EF},{&quot;Vol+&quot;,0x20DF40BF},{&quot;Vol-&quot;,0x20DFC03F},
+   {&quot;Mute&quot;,0x20DF906F}, {&quot;CH+&quot;,0x20DF00FF}, {&quot;CH-&quot;,0x20DF807F}},
+  // Samsung (NEC)
+  {{&quot;Power&quot;,0xE0E040BF},{&quot;Vol+&quot;,0xE0E0E01F},{&quot;Vol-&quot;,0xE0E0D02F},
+   {&quot;Mute&quot;,0xE0E0F00F}, {&quot;CH+&quot;,0xE0E048B7}, {&quot;CH-&quot;,0xE0E008F7}}
+};
+const char* bnames[]={&quot;LG&quot;,&quot;Samsung&quot;};
+int brand=0,sel=0;
+void draw(){
+  auto&amp; d=M5Cardputer.Display;
+  d.fillScreen(BLACK);
+  d.setTextColor(brand==0?CYAN:TFT_ORANGE);
+  d.setCursor(3,3); d.printf(&quot;IR — %s   B=trocar&quot;,bnames[brand]);
+  for(int i=0;i&lt;6;i++){
+    bool s=(i==sel);
+    if(s){d.fillRect(3,16+i*18,129,16,0x1A1A40);d.drawRect(3,16+i*18,129,16,brand==0?CYAN:TFT_ORANGE);}
+    d.setTextColor(s?WHITE:TFT_DARKGREY);
+    d.setCursor(10,20+i*18); d.print(brands[brand][i].name);
+  }
+}
+void setup(){auto cfg=M5.config();M5Cardputer.begin(cfg,true);ir.begin();draw();}
+void loop(){
+  M5Cardputer.update();
+  if(M5Cardputer.Keyboard.isChange()&amp;&amp;M5Cardputer.Keyboard.isPressed()){
+    auto st=M5Cardputer.Keyboard.keysState();
+    if(st.tab){sel=(sel+1)%6;draw();}
+    if(st.enter){ir.sendNEC(brands[brand][sel].code,32);M5Cardputer.Speaker.tone(1200,40);}
+    for(auto c:st.word) if(c==&#x27;b&#x27;||c==&#x27;B&#x27;){brand=(brand+1)%2;sel=0;draw();}
+  }
+}</pre></div></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('m18')">← M18 — Scanner WiFi</button><button class="btn-nav nxt" onclick="go('m20')">M20 — OTA →</button></div>
       </section>
 
@@ -1322,7 +1738,36 @@ IRCode TV[] = {
 }
 <span class="kw">void</span> <span class="fn">loop</span>() { ArduinoOTA.<span class="fn">handle</span>(); } <span class="cm">// OBRIGATORIO no loop</span></div>
         </div>
-        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione um Web Updater: um servidor HTTP simples (WebServer.h) que serve uma pagina HTML com formulario de upload de .bin. Acesse pelo IP do Cardputer no navegador do PC e faca upload de um novo firmware sem o Arduino IDE.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione um Web Updater: um servidor HTTP simples (WebServer.h) que serve uma pagina HTML com formulario de upload de .bin. Acesse pelo IP do Cardputer no navegador do PC e faca upload de um novo firmware sem o Arduino IDE.</p><button class="btn-sol" onclick="toggleSol(this)">▶ Ver solucao</button><div class="sol"><div class="sol-hdr">Solucao</div><pre>// Adicione ao inicio do M20 (apos os includes existentes):
+#include &lt;WebServer.h&gt;
+#include &lt;Update.h&gt;
+WebServer server(80);
+// Adicione ao final do setup(), apos ArduinoOTA.begin():
+server.on(&quot;/&quot;, HTTP_GET, [](){
+  server.send(200,&quot;text/html&quot;,
+    &quot;&lt;h2&gt;Cardputer OTA Web Updater&lt;/h2&gt;&quot;
+    &quot;&lt;form method=&#x27;POST&#x27; action=&#x27;/update&#x27; enctype=&#x27;multipart/form-data&#x27;&gt;&quot;
+    &quot;Firmware (.bin): &lt;input type=&#x27;file&#x27; name=&#x27;fw&#x27;&gt;&lt;br&gt;&lt;br&gt;&quot;
+    &quot;&lt;input type=&#x27;submit&#x27; value=&#x27;Enviar e Atualizar&#x27;&gt;&quot;
+    &quot;&lt;/form&gt;&quot;);
+});
+server.on(&quot;/update&quot;, HTTP_POST,
+  [](){
+    bool ok = !Update.hasError();
+    server.send(200,&quot;text/plain&quot;, ok ? &quot;OK! Reiniciando...&quot; : &quot;ERRO!&quot;);
+    delay(500); ESP.restart();
+  },
+  [](){
+    HTTPUpload&amp; up = server.upload();
+    if(up.status==UPLOAD_FILE_START) Update.begin(UPDATE_SIZE_UNKNOWN);
+    else if(up.status==UPLOAD_FILE_WRITE) Update.write(up.buf,up.currentSize);
+    else if(up.status==UPLOAD_FILE_END) Update.end(true);
+  }
+);
+server.begin();
+d.printf(&quot;Web: http://%s/\n&quot;, WiFi.localIP().toString().c_str());
+// No loop(), adicione apos ArduinoOTA.handle():
+//   server.handleClient();</pre></div></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('m19')">← M19 — IR Blaster</button><button class="btn-nav nxt" onclick="go('m21')">M21 — TLS →</button></div>
       </section>
 
@@ -1384,7 +1829,43 @@ IRCode TV[] = {
 <span class="kw">void</span> <span class="fn">loop</span>() {}</div>
         </div>
         <div class="tip"><div class="tip-t">Dica — NVS para guardar tokens com seguranca</div><p>Use Preferences.h (NVS — Non-Volatile Storage) para guardar tokens e senhas. O NVS e armazenado em particao separada da flash e nao pode ser lido por um simples dump do firmware. Nao guarde segredos em SPIFFS ou em variaveis globais no codigo.</p></div>
-        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie uma ferramenta de verificacao de integridade: o usuario digita uma mensagem pelo teclado, o Cardputer calcula o SHA-256 e exibe o hash. Ao digitar a mesma mensagem novamente, confirma que o hash bate (verificacao de integridade).</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Crie uma ferramenta de verificacao de integridade: o usuario digita uma mensagem pelo teclado, o Cardputer calcula o SHA-256 e exibe o hash. Ao digitar a mesma mensagem novamente, confirma que o hash bate (verificacao de integridade).</p><button class="btn-sol" onclick="toggleSol(this)">▶ Ver solucao</button><div class="sol"><div class="sol-hdr">Solucao</div><pre>#include &lt;M5Cardputer.h&gt;
+#include &quot;mbedtls/sha256.h&quot;
+String input = &quot;&quot;, savedHash = &quot;&quot;;
+String sha256(String s) {
+  uint8_t h[32]; mbedtls_sha256_context ctx;
+  mbedtls_sha256_init(&amp;ctx); mbedtls_sha256_starts(&amp;ctx,0);
+  mbedtls_sha256_update(&amp;ctx,(const uint8_t*)s.c_str(),s.length());
+  mbedtls_sha256_finish(&amp;ctx,h); mbedtls_sha256_free(&amp;ctx);
+  String hex=&quot;&quot;;
+  for(int i=0;i&lt;32;i++){char b[3];sprintf(b,&quot;%02x&quot;,h[i]);hex+=b;}
+  return hex;
+}
+void redraw(String msg=&quot;&quot;){
+  auto&amp; d=M5Cardputer.Display;
+  d.fillScreen(BLACK); d.setTextColor(CYAN); d.setCursor(0,3);
+  d.println(&quot;ENTER=hash  FN=limpar&quot;);
+  d.setTextColor(savedHash.length()?&quot;SALVO&quot;:TFT_DARKGREY);
+  d.setCursor(0,15); d.printf(&quot;[%s]&quot;,savedHash.length()?&quot;hash salvo&quot;:&quot;sem hash&quot;);
+  d.setTextColor(WHITE); d.setCursor(0,30); d.print(input+&quot;|&quot;);
+  if(msg.length()){ d.setCursor(0,100); d.setTextColor(msg.startsWith(&quot;OK&quot;)?TFT_GREEN:TFT_RED); d.print(msg); }
+}
+void setup(){auto cfg=M5.config();M5Cardputer.begin(cfg,true);redraw();}
+void loop(){
+  M5Cardputer.update();
+  if(M5Cardputer.Keyboard.isChange()&amp;&amp;M5Cardputer.Keyboard.isPressed()){
+    auto st=M5Cardputer.Keyboard.keysState();
+    for(auto c:st.word) input+=c;
+    if(st.del&amp;&amp;input.length()&gt;0) input.remove(input.length()-1);
+    if(st.enter&amp;&amp;input.length()&gt;0){
+      String h=sha256(input);
+      if(savedHash.length()==0){savedHash=h;redraw(&quot;Hash salvo: &quot;+h.substring(0,12)+&quot;...&quot;);}
+      else{redraw(h==savedHash?&quot;OK — Hash confere!&quot;:&quot;ERRO — Hash diferente!&quot;);}
+    }
+    if(st.fn){input=&quot;&quot;;savedHash=&quot;&quot;;redraw();}
+    else redraw();
+  }
+}</pre></div></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('m20')">← M20 — OTA</button><button class="btn-nav nxt" onclick="go('m22')">M22 — Microfone →</button></div>
       </section>
 
@@ -1440,7 +1921,44 @@ IRCode TV[] = {
   M5Cardputer.Display.<span class="fn">printf</span>(<span class="str">"RMS:%d Vol:%d"</span>,rms,vol);
 }</div>
         </div>
-        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione deteccao de palmas (clap detection): quando o RMS ultrapassar um limiar (ex: 2000) por pelo menos 2 amostras consecutivas, conte como uma palma e exiba o contador na tela com um flash verde.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione deteccao de palmas (clap detection): quando o RMS ultrapassar um limiar (ex: 2000) por pelo menos 2 amostras consecutivas, conte como uma palma e exiba o contador na tela com um flash verde.</p><button class="btn-sol" onclick="toggleSol(this)">▶ Ver solucao</button><div class="sol"><div class="sol-hdr">Solucao</div><pre>#include &lt;M5Cardputer.h&gt;
+#include &lt;math.h&gt;
+const int RATE=16000, SAMPLES=256;
+int16_t buf[SAMPLES];
+int clapCount=0, hist[130]={0}, histPos=0, lastHigh=0;
+void setup(){
+  auto cfg=M5.config();M5Cardputer.begin(cfg,true);
+  M5Cardputer.Mic.begin();
+  M5Cardputer.Display.fillScreen(BLACK);
+  M5Cardputer.Display.setTextColor(CYAN);M5Cardputer.Display.setCursor(3,3);
+  M5Cardputer.Display.print(&quot;Clap Detection&quot;);
+}
+void loop(){
+  if(!M5Cardputer.Mic.record(buf,SAMPLES,RATE)) return;
+  long sum=0;
+  for(int i=0;i&lt;SAMPLES;i++) sum+=(long)buf[i]*buf[i];
+  int rms=(int)sqrt((double)sum/SAMPLES);
+  int vol=constrain(map(rms,0,4000,0,60),0,60);
+  hist[histPos%130]=vol; histPos++;
+  if(rms&gt;2000){ lastHigh++; }
+  else{
+    if(lastHigh&gt;=2){
+      clapCount++;
+      M5Cardputer.Display.fillRect(0,110,135,25,0x003300);
+      M5Cardputer.Display.setTextColor(TFT_GREEN);
+      M5Cardputer.Display.setCursor(3,115);
+      M5Cardputer.Display.printf(&quot;Palmas detectadas: %d&quot;,clapCount);
+    }
+    lastHigh=0;
+  }
+  M5Cardputer.Display.fillRect(0,15,135,100,BLACK);
+  for(int x=0;x&lt;130;x++){
+    int idx=(histPos-130+x+130)%130;
+    int h=hist[idx];
+    uint16_t c=h&lt;20?TFT_GREEN:h&lt;40?TFT_YELLOW:TFT_RED;
+    M5Cardputer.Display.drawFastVLine(x+3,75-h,h,c);
+  }
+}</pre></div></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('m21')">← M21 — TLS</button><button class="btn-nav nxt" onclick="go('m23')">M23 — FreeRTOS →</button></div>
       </section>
 
@@ -1501,7 +2019,33 @@ QueueHandle_t queue;
 }
 <span class="kw">void</span> <span class="fn">loop</span>() { <span class="fn">vTaskDelay</span>(<span class="fn">pdMS_TO_TICKS</span>(<span class="num">1000</span>)); } <span class="cm">// loop idle</span></div>
         </div>
-        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione uma terceira task (Core 0) que escaneia WiFi a cada 10 segundos e envia o numero de redes encontradas para a fila. A task de display deve mostrar as mensagens de sensor e WiFi em cores diferentes (branco para sensor, ciano para WiFi).</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione uma terceira task (Core 0) que escaneia WiFi a cada 10 segundos e envia o numero de redes encontradas para a fila. A task de display deve mostrar as mensagens de sensor e WiFi em cores diferentes (branco para sensor, ciano para WiFi).</p><button class="btn-sol" onclick="toggleSol(this)">▶ Ver solucao</button><div class="sol"><div class="sol-hdr">Solucao</div><pre>// Adicione ao M23 existente — nova task de scan WiFi:
+void taskWiFiScan(void* p) {
+  WiFi.mode(WIFI_STA);
+  while (true) {
+    int n = WiFi.scanNetworks(false, false);
+    char msg[48];
+    snprintf(msg, sizeof(msg), &quot;WIFI: %d redes encontradas&quot;, n);
+    xQueueSend(queue, msg, 0);
+    vTaskDelay(pdMS_TO_TICKS(10000)); // a cada 10s
+  }
+}
+// Modifique taskDisplay para usar cores diferentes:
+void taskDisplay(void* p) {
+  char msg[48]; int y=20;
+  while (true) {
+    if (xQueueReceive(queue, msg, portMAX_DELAY)) {
+      bool isWiFi = strncmp(msg,&quot;WIFI:&quot;,5)==0;
+      M5Cardputer.Display.setTextColor(isWiFi?CYAN:WHITE, BLACK);
+      M5Cardputer.Display.setCursor(0,y);
+      M5Cardputer.Display.println(msg);
+      y+=12;
+      if(y&gt;120){y=20;M5Cardputer.Display.fillRect(0,20,135,100,BLACK);}
+    }
+  }
+}
+// No setup(), apos criar as outras tasks, adicione:
+// xTaskCreatePinnedToCore(taskWiFiScan,&quot;wifiscan&quot;,4096,NULL,1,NULL,0);</pre></div></div>
         <div class="navbtns"><button class="btn-nav" onclick="go('m22')">← M22 — Microfone</button><button class="btn-nav nxt" onclick="go('p3')">Projeto Final →</button></div>
       </section>
 
@@ -1657,6 +2201,17 @@ document.addEventListener('keydown',e=>{
   if(e.key==='ArrowRight'&&i<IDS.length-1)go(IDS[i+1]);
   if(e.key==='ArrowLeft'&&i>0)go(IDS[i-1]);
 });
+
+function toggleSol(btn){
+  var sol=btn.nextElementSibling;
+  if(sol.classList.contains('open')){
+    sol.classList.remove('open');
+    btn.textContent='▶ Ver solucao';
+  } else {
+    sol.classList.add('open');
+    btn.textContent='▼ Ocultar solucao';
+  }
+}
 </script>
 </body>
 </html>
