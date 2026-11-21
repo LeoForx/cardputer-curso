@@ -155,6 +155,91 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:var
         <p style="color:var(--dim);font-size:13px">24 modulos · Arduino C/C++ · 3 projetos praticos</p>
         <button class="btn-nav nxt" onclick="go('m1')" style="font-size:14px;padding:12px 28px;margin-top:8px">Comecar pelo Modulo 1 &#8594;</button>
       </div>
+      <!-- M1 -->
+      <section id="m1" class="mod">
+        <div class="bc"><span>Fase 1 — Iniciante</span><span class="sep">›</span><span class="cur">Modulo 1</span></div>
+        <div class="mhdr"><span class="mbadge b1">M1</span><div><h1>Conhecendo o Hardware</h1><p class="sub">ESP32-S3, especificacoes, pinout e todos os componentes do Cardputer</p></div></div>
+        <div class="hwcard"><div class="hwico">ESP32<br>S3</div><div><h3>Hardware neste modulo</h3><div class="tags"><span class="tag">ESP32-S3FN8</span><span class="tag">240 MHz Dual-Core</span><span class="tag">8MB PSRAM</span><span class="tag">8MB Flash</span><span class="tag">TFT 135x240</span><span class="tag">56-key QWERTY</span></div></div></div>
+        <div class="sec"><h2>O que e o M5Stack Cardputer-ADV?</h2>
+          <p>O Cardputer e um computador de bolso baseado no microcontrolador ESP32-S3 da Espressif. Ele combina teclado QWERTY completo, tela TFT colorida, speaker, microfone, emissor infravermelho e conectividade WiFi/BLE em um dispositivo do tamanho de um cartao de credito ampliado.</p>
+          <ul style="margin-top:10px">
+            <li><strong style="color:var(--text)">MCU:</strong> ESP32-S3FN8 — dual-core Xtensa LX7 @ 240 MHz</li>
+            <li><strong style="color:var(--text)">Memoria:</strong> 8 MB PSRAM + 8 MB Flash integrada</li>
+            <li><strong style="color:var(--text)">Display:</strong> ST7789V2 TFT 1.14" — 135 x 240 pixels, SPI</li>
+            <li><strong style="color:var(--text)">Teclado:</strong> 56 teclas QWERTY com teclas de funcao</li>
+            <li><strong style="color:var(--text)">Audio:</strong> Speaker 1W + Microfone PDM SPM1423</li>
+            <li><strong style="color:var(--text)">Wireless:</strong> WiFi 802.11 b/g/n + BLE 5.0</li>
+            <li><strong style="color:var(--text)">IR:</strong> Emissor infravermelho 940nm (pino GPIO44)</li>
+            <li><strong style="color:var(--text)">Bateria:</strong> 120mAh interna (slot para bateria externa ate 2000mAh)</li>
+            <li><strong style="color:var(--text)">USB:</strong> USB-C com CH9102F para programacao e carga</li>
+            <li><strong style="color:var(--text)">Expansao:</strong> Conector M5Stack Bus + header GPIO</li>
+          </ul>
+        </div>
+        <div class="sec"><h2>Codigo — Lendo informacoes do sistema</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="cm">// Inicializa todos os perifericos do Cardputer</span>
+  <span class="kw">auto</span> cfg = M5.<span class="fn">config</span>();
+  M5Cardputer.<span class="fn">begin</span>(cfg, <span class="kw">true</span>);
+
+  <span class="cm">// Configura o display</span>
+  M5Cardputer.Display.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>);
+  M5Cardputer.Display.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+  M5Cardputer.Display.<span class="fn">setCursor</span>(<span class="num">5</span>, <span class="num">5</span>);
+
+  <span class="cm">// Exibe informacoes do chip</span>
+  M5Cardputer.Display.<span class="fn">println</span>(<span class="str">"=== Cardputer Info ==="</span>);
+  M5Cardputer.Display.<span class="fn">printf</span>(<span class="str">"CPU: %d MHz\n"</span>, ESP.<span class="fn">getCpuFreqMHz</span>());
+  M5Cardputer.Display.<span class="fn">printf</span>(<span class="str">"Flash: %d KB\n"</span>, ESP.<span class="fn">getFlashChipSize</span>() / <span class="num">1024</span>);
+  M5Cardputer.Display.<span class="fn">printf</span>(<span class="str">"PSRAM: %d KB\n"</span>, ESP.<span class="fn">getPsramSize</span>() / <span class="num">1024</span>);
+  M5Cardputer.Display.<span class="fn">printf</span>(<span class="str">"RAM livre: %d KB\n"</span>, ESP.<span class="fn">getFreeHeap</span>() / <span class="num">1024</span>);
+  M5Cardputer.Display.<span class="fn">printf</span>(<span class="str">"Bat: %d%%\n"</span>, M5Cardputer.Power.<span class="fn">getBatteryLevel</span>());
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {}</div>
+        </div>
+        <div class="tip"><div class="tip-t">Dica</div><p>O metodo M5Cardputer.begin(cfg, true) inicializa o display com orientacao correta para o Cardputer. O segundo parametro 'true' ativa a rotacao automatica. Sem ele, o display aparece de lado.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Modifique o codigo para tambem exibir o endereco MAC WiFi do dispositivo. Dica: use <code style="color:var(--accent1)">WiFi.macAddress()</code> apos incluir <code style="color:var(--accent1)">&lt;WiFi.h&gt;</code>.</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('p3')" style="visibility:hidden">←</button><button class="btn-nav nxt" onclick="go('m2')">M2 — Configurando Ambiente →</button></div>
+      </section>
+
+      <!-- M2 -->
+      <section id="m2" class="mod">
+        <div class="bc"><span>Fase 1 — Iniciante</span><span class="sep">›</span><span class="cur">Modulo 2</span></div>
+        <div class="mhdr"><span class="mbadge b1">M2</span><div><h1>Configurando o Ambiente</h1><p class="sub">Arduino IDE 2.x, driver USB, suporte ESP32 e bibliotecas M5Stack</p></div></div>
+        <div class="hwcard"><div class="hwico">USB<br>CDC</div><div><h3>Requisitos do ambiente</h3><div class="tags"><span class="tag">Arduino IDE 2.x</span><span class="tag">ESP32 Board Package 3.x</span><span class="tag">M5Cardputer lib</span><span class="tag">CH9102F driver</span></div></div></div>
+        <div class="sec"><h2>Passo a Passo de Instalacao</h2>
+          <ul>
+            <li><strong style="color:var(--text)">1. Arduino IDE 2.x</strong> — Baixe em arduino.cc/en/software. Instale a versao 2.x (nao a 1.8).</li>
+            <li><strong style="color:var(--text)">2. Driver USB</strong> — O Cardputer usa CH9102F. No Windows, baixe em wch.cn. No macOS/Linux e automatico.</li>
+            <li><strong style="color:var(--text)">3. Board Package ESP32</strong> — Em Preferences, adicione a URL: <code style="color:var(--accent1)">https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json</code>. Em Boards Manager, instale "esp32 by Espressif Systems" versao 3.x.</li>
+            <li><strong style="color:var(--text)">4. Biblioteca M5Cardputer</strong> — Em Library Manager, busque "M5Cardputer" e instale a versao mais recente da M5Stack.</li>
+            <li><strong style="color:var(--text)">5. Configurar board</strong> — Tools > Board > esp32 > M5Stack-Cardputer</li>
+            <li><strong style="color:var(--text)">6. Configurar porta</strong> — Tools > Port > selecione a porta COM (Windows) ou /dev/cu.* (macOS)</li>
+            <li><strong style="color:var(--text)">7. Upload speed</strong> — Tools > Upload Speed > 921600</li>
+          </ul>
+        </div>
+        <div class="sec"><h2>Codigo de Teste — Blink do Display</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="kw">auto</span> cfg = M5.<span class="fn">config</span>();
+  M5Cardputer.<span class="fn">begin</span>(cfg, <span class="kw">true</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="cm">// Alterna entre preto e azul a cada 500ms</span>
+  M5Cardputer.Display.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>);
+  <span class="fn">delay</span>(<span class="num">500</span>);
+  M5Cardputer.Display.<span class="fn">fillScreen</span>(<span class="cls">BLUE</span>);
+  <span class="fn">delay</span>(<span class="num">500</span>);
+}</div>
+        </div>
+        <div class="warn"><div class="warn-t">Aviso Comum</div><p>Se o upload falhar com "Failed to connect", mantenha pressionada a tecla 'G' (GPIO0) no Cardputer enquanto clica em Upload no Arduino IDE. Isso coloca o ESP32-S3 em modo de boot forcado.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Apos o upload bem-sucedido do blink, modifique o codigo para o display alternar entre 3 cores diferentes (vermelho, verde, azul) com 300ms de intervalo cada.</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('m1')">← M1 — Hardware</button><button class="btn-nav nxt" onclick="go('m3')">M3 — Hello World →</button></div>
+      </section>
       <!-- MODULOS INSERIDOS AQUI -->
     </main>
   </div>
