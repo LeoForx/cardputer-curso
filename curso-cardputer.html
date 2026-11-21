@@ -1096,6 +1096,236 @@ Item items[] = {
         <div class="navbtns"><button class="btn-nav" onclick="go('m15')">← M15 — Deep Sleep</button><button class="btn-nav nxt" onclick="go('m17')">Fase 3 — M17 BLE →</button></div>
       </section>
 
+      <!-- M17 -->
+      <section id="m17" class="mod">
+        <div class="bc"><span>Fase 3 — Avancado</span><span class="sep">›</span><span class="cur">Modulo 17</span></div>
+        <div class="mhdr"><span class="mbadge b3">M17</span><div><h1>BLE e Bluetooth</h1><p class="sub">Scanner BLE, anunciar dispositivo, HID keyboard emulation e BLE UART</p></div></div>
+        <div class="hwcard"><div class="hwico">BLE<br>5.0</div><div><h3>Hardware neste modulo</h3><div class="tags"><span class="tag">ESP32-S3 BLE 5.0</span><span class="tag">BLEDevice.h</span><span class="tag">BLEScan</span><span class="tag">BLE HID</span></div></div></div>
+        <div class="sec"><h2>Conceito</h2><p>O ESP32-S3 tem BLE 5.0 integrado. As classes BLEDevice, BLEScan e BLEAdvertisedDevice fazem o scan. Para HID (emular teclado/mouse Bluetooth), use a biblioteca "ESP32 BLE Keyboard" do Arduino Library Manager — o Cardputer pode se conectar ao PC/celular e digitar texto remotamente.</p></div>
+        <div class="sec"><h2>Codigo — Scanner BLE</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;BLEDevice.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;BLEAdvertisedDevice.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;BLEScan.h&gt;</span>
+
+BLEScan* scanner;
+<span class="kw">int</span> count = <span class="num">0</span>;
+
+<span class="kw">class</span> <span class="cls">ScanCB</span> : <span class="kw">public</span> <span class="cls">BLEAdvertisedDeviceCallbacks</span> {
+  <span class="kw">void</span> <span class="fn">onResult</span>(<span class="cls">BLEAdvertisedDevice</span> dev) <span class="kw">override</span> {
+    <span class="kw">if</span>(count++ >= <span class="num">5</span>) <span class="kw">return</span>; <span class="cm">// limita a 5 itens na tela</span>
+    <span class="cls">String</span> name = dev.<span class="fn">getName</span>().<span class="fn">length</span>()&gt;0 ? dev.<span class="fn">getName</span>().<span class="fn">c_str</span>() : <span class="str">"[?]"</span>;
+    <span class="kw">uint16_t</span> col = dev.<span class="fn">getRSSI</span>()&gt;-<span class="num">60</span>?<span class="cls">TFT_GREEN</span>:dev.<span class="fn">getRSSI</span>()&gt;-<span class="num">80</span>?<span class="cls">TFT_YELLOW</span>:<span class="cls">TFT_DARKGREY</span>;
+    M5Cardputer.Display.<span class="fn">setTextColor</span>(col);
+    M5Cardputer.Display.<span class="fn">printf</span>(<span class="str">"%-16s %ddBm\n"</span>, name.<span class="fn">substring</span>(<span class="num">0</span>,<span class="num">14</span>).<span class="fn">c_str</span>(), dev.<span class="fn">getRSSI</span>());
+  }
+};
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="kw">auto</span> cfg=M5.<span class="fn">config</span>(); M5Cardputer.<span class="fn">begin</span>(cfg,<span class="kw">true</span>);
+  <span class="kw">auto</span>&amp; d=M5Cardputer.Display;
+  d.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>); d.<span class="fn">setTextColor</span>(<span class="cls">CYAN</span>); d.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+  d.<span class="fn">println</span>(<span class="str">"BLE Scanner (5s)...\n"</span>);
+
+  <span class="cls">BLEDevice</span>::<span class="fn">init</span>(<span class="str">"Cardputer"</span>);
+  scanner = <span class="cls">BLEDevice</span>::<span class="fn">getScan</span>();
+  scanner-&gt;<span class="fn">setAdvertisedDeviceCallbacks</span>(<span class="kw">new</span> <span class="cls">ScanCB</span>());
+  scanner-&gt;<span class="fn">setActiveScan</span>(<span class="kw">true</span>);
+  scanner-&gt;<span class="fn">setInterval</span>(<span class="num">100</span>);
+  scanner-&gt;<span class="fn">setWindow</span>(<span class="num">99</span>);
+
+  d.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>);
+  <span class="cls">BLEScanResults</span> res = scanner-&gt;<span class="fn">start</span>(<span class="num">5</span>, <span class="kw">false</span>);
+  d.<span class="fn">printf</span>(<span class="str">"\nTotal: %d dispositivos", res.<span class="fn">getCount</span>());
+  scanner-&gt;<span class="fn">clearResults</span>();
+}
+<span class="kw">void</span> <span class="fn">loop</span>() {}</div>
+        </div>
+        <div class="tip"><div class="tip-t">Dica — BLE HID Keyboard</div><p>Instale "ESP32 BLE Keyboard" pelo Library Manager. Com ela: BleKeyboard kb("Cardputer"); kb.begin(); e depois kb.print("Texto digitado pelo Cardputer!"). O dispositivo aparece como teclado Bluetooth no PC/celular.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Usando a biblioteca BleKeyboard, crie um "macro pad": o Cardputer se conecta como teclado Bluetooth ao PC. Teclas 1-5 no teclado fisico enviam macros pre-definidas ao computador (ex: tecla 1 digita seu email, tecla 2 digita uma senha comum).</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('p2')">← Projeto Terminal</button><button class="btn-nav nxt" onclick="go('m18')">M18 — Scanner WiFi →</button></div>
+      </section>
+
+      <!-- M18 -->
+      <section id="m18" class="mod">
+        <div class="bc"><span>Fase 3 — Avancado</span><span class="sep">›</span><span class="cur">Modulo 18</span></div>
+        <div class="mhdr"><span class="mbadge b3">M18</span><div><h1>Scanner WiFi Avancado</h1><p class="sub">RSSI detalhado, canais, redes ocultas, wardriving basico e mapeamento</p></div></div>
+        <div class="hwcard"><div class="hwico">RF<br>SCAN</div><div><h3>Hardware neste modulo</h3><div class="tags"><span class="tag">ESP32 WiFi</span><span class="tag">Promiscuous mode</span><span class="tag">RSSI</span><span class="tag">Redes ocultas</span></div></div></div>
+        <div class="sec"><h2>Conceito</h2><p>WiFi.scanNetworks(async, show_hidden) com show_hidden=true lista tambem redes que nao divulgam SSID. WiFi.channel(i) e WiFi.encryptionType(i) dao informacoes de seguranca. O modo promiscuo (esp_wifi_set_promiscuous) permite capturar todos os frames 802.11 do ar — base do wardriving.</p></div>
+        <div class="sec"><h2>Codigo — Scanner com visualizacao por canal</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;WiFi.h&gt;</span>
+
+<span class="kw">const char</span>* <span class="fn">encType</span>(<span class="kw">wifi_auth_mode_t</span> t) {
+  <span class="kw">switch</span>(t){
+    <span class="kw">case</span> WIFI_AUTH_OPEN: <span class="kw">return</span> <span class="str">"OPEN"</span>;
+    <span class="kw">case</span> WIFI_AUTH_WEP: <span class="kw">return</span> <span class="str">"WEP"</span>;
+    <span class="kw">case</span> WIFI_AUTH_WPA_PSK: <span class="kw">return</span> <span class="str">"WPA"</span>;
+    <span class="kw">case</span> WIFI_AUTH_WPA2_PSK: <span class="kw">return</span> <span class="str">"WPA2"</span>;
+    <span class="kw">case</span> WIFI_AUTH_WPA3_PSK: <span class="kw">return</span> <span class="str">"WPA3"</span>;
+    <span class="kw">default</span>: <span class="kw">return</span> <span class="str">"???"</span>;
+  }
+}
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="kw">auto</span> cfg=M5.<span class="fn">config</span>(); M5Cardputer.<span class="fn">begin</span>(cfg,<span class="kw">true</span>);
+  WiFi.<span class="fn">mode</span>(WIFI_STA); WiFi.<span class="fn">disconnect</span>(); <span class="fn">delay</span>(<span class="num">100</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="kw">auto</span>&amp; d=M5Cardputer.Display;
+  d.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>);
+  d.<span class="fn">fillRect</span>(<span class="num">0</span>,<span class="num">0</span>,<span class="num">135</span>,<span class="num">14</span>,<span class="num">0x0D1526</span>);
+  d.<span class="fn">setTextColor</span>(<span class="cls">CYAN</span>); d.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+  d.<span class="fn">setCursor</span>(<span class="num">3</span>,<span class="num">3</span>); d.<span class="fn">print</span>(<span class="str">"WiFi Scanner Pro"</span>);
+
+  <span class="kw">int</span> n=WiFi.<span class="fn">scanNetworks</span>(<span class="kw">false</span>,<span class="kw">true</span>); <span class="cm">// inclui redes ocultas</span>
+  <span class="kw">int</span> y=<span class="num">16</span>;
+  <span class="kw">for</span>(<span class="kw">int</span> i=<span class="num">0</span>;i&lt;<span class="fn">min</span>(n,<span class="num">6</span>)&amp;&amp;y&lt;<span class="num">115</span>;i++){
+    <span class="kw">int</span> rssi=WiFi.<span class="fn">RSSI</span>(i);
+    <span class="kw">int</span> bars=<span class="fn">constrain</span>(<span class="fn">map</span>(rssi,-<span class="num">90</span>,-<span class="num">30</span>,<span class="num">0</span>,<span class="num">5</span>),<span class="num">0</span>,<span class="num">5</span>);
+    <span class="kw">uint16_t</span> col=rssi&gt;-<span class="num">50</span>?<span class="cls">TFT_GREEN</span>:rssi&gt;-<span class="num">70</span>?<span class="cls">TFT_YELLOW</span>:<span class="cls">TFT_RED</span>;
+    <span class="cls">String</span> ssid=WiFi.<span class="fn">SSID</span>(i).<span class="fn">length</span>()&gt;<span class="num">0</span>?WiFi.<span class="fn">SSID</span>(i):<span class="str">"[oculta]"</span>;
+    d.<span class="fn">setTextColor</span>(col); d.<span class="fn">setCursor</span>(<span class="num">3</span>,y);
+    d.<span class="fn">printf</span>(<span class="str">"%-14s ch%02d %s\n"</span>,ssid.<span class="fn">substring</span>(<span class="num">0</span>,<span class="num">12</span>).<span class="fn">c_str</span>(),WiFi.<span class="fn">channel</span>(i),<span class="fn">encType</span>(WiFi.<span class="fn">encryptionType</span>(i)));
+    <span class="cm">// Barra de sinal</span>
+    <span class="kw">for</span>(<span class="kw">int</span> b=<span class="num">0</span>;b&lt;<span class="num">5</span>;b++) d.<span class="fn">fillRect</span>(<span class="num">115</span>+b*<span class="num">4</span>,y+<span class="num">2</span>-b,<span class="num">3</span>,b+<span class="num">1</span>,b&lt;bars?col:<span class="num">0x1A2A3A</span>);
+    y+=<span class="num">16</span>;
+  }
+  d.<span class="fn">setTextColor</span>(<span class="num">0x2A3A4A</span>); d.<span class="fn">setCursor</span>(<span class="num">3</span>,<span class="num">120</span>);
+  d.<span class="fn">printf</span>(<span class="str">"%d redes. Aguardando 5s..."</span>, n);
+  <span class="fn">delay</span>(<span class="num">5000</span>);
+}</div>
+        </div>
+        <div class="warn"><div class="warn-t">Aviso Legal</div><p>Scanner passivo (receber frames) e legal. Deauth, injecao de pacotes ou qualquer interferencia ativa em redes alheias e ilegal em todos os paises. Use apenas em redes proprias ou com autorizacao explicita por escrito.</p></div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione um modo "historico de canais": exiba um grafico de barras com a contagem de redes por canal (1-13). Isso mostra visualmente quais canais estao congestionados na sua area.</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('m17')">← M17 — BLE</button><button class="btn-nav nxt" onclick="go('m19')">M19 — IR Blaster →</button></div>
+      </section>
+
+      <!-- M19 -->
+      <section id="m19" class="mod">
+        <div class="bc"><span>Fase 3 — Avancado</span><span class="sep">›</span><span class="cur">Modulo 19</span></div>
+        <div class="mhdr"><span class="mbadge b3">M19</span><div><h1>IR Blaster Universal</h1><p class="sub">Menu de controle remoto, multiplos protocolos e banco de codigos</p></div></div>
+        <div class="hwcard"><div class="hwico">IR<br>UNIV</div><div><h3>Hardware neste modulo</h3><div class="tags"><span class="tag">IR LED GPIO44</span><span class="tag">NEC/Sony/RC5</span><span class="tag">IRsend</span><span class="tag">Banco de codigos</span></div></div></div>
+        <div class="sec"><h2>Conceito</h2><p>Este modulo expande o M12 com um menu completo e banco de codigos para multiplas marcas. A estrutura de dados usa arrays de structs com nome, codigo e protocolo. O menu permite selecionar marca e funcao. Este e o modulo mais proximo de um "controle remoto universal" real.</p></div>
+        <div class="sec"><h2>Codigo — IR Blaster com Menu</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;IRremoteESP8266.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;IRsend.h&gt;</span>
+
+IRsend irsend(<span class="num">44</span>);
+
+<span class="kw">struct</span> IRCode { <span class="kw">const char</span>* name; <span class="kw">uint32_t</span> code; <span class="kw">uint16_t</span> bits; };
+IRCode TV[] = {
+  {<span class="str">"Power"</span>,<span class="num">0x20DF10EF</span>,<span class="num">32</span>},{<span class="str">"Vol+"</span>,<span class="num">0x20DF40BF</span>,<span class="num">32</span>},
+  {<span class="str">"Vol-"</span>,<span class="num">0x20DFC03F</span>,<span class="num">32</span>},{<span class="str">"Mute"</span>,<span class="num">0x20DF906F</span>,<span class="num">32</span>},
+  {<span class="str">"Ch+"</span>,<span class="num">0x20DF00FF</span>,<span class="num">32</span>},{<span class="str">"Ch-"</span>,<span class="num">0x20DF807F</span>,<span class="num">32</span>},
+  {<span class="str">"Fonte"</span>,<span class="num">0x20DFD02F</span>,<span class="num">32</span>},{<span class="str">"Menu"</span>,<span class="num">0x20DFC23D</span>,<span class="num">32</span>}
+};
+<span class="kw">const int</span> N=<span class="num">8</span>; <span class="kw">int</span> sel=<span class="num">0</span>;
+
+<span class="kw">void</span> <span class="fn">draw</span>(<span class="cls">String</span> msg=<span class="str">""</span>) {
+  <span class="kw">auto</span>&amp; d=M5Cardputer.Display;
+  d.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>);
+  d.<span class="fn">fillRect</span>(<span class="num">0</span>,<span class="num">0</span>,<span class="num">135</span>,<span class="num">16</span>,<span class="num">0x2A1000</span>);
+  d.<span class="fn">setTextColor</span>(<span class="cls">TFT_ORANGE</span>); d.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+  d.<span class="fn">setCursor</span>(<span class="num">3</span>,<span class="num">4</span>); d.<span class="fn">print</span>(<span class="str">"IR Blaster — TV LG"</span>);
+  <span class="kw">for</span>(<span class="kw">int</span> i=<span class="num">0</span>;i&lt;<span class="fn">min</span>(N,<span class="num">6</span>);i++) {
+    <span class="kw">int</span> y=<span class="num">20</span>+i*<span class="num">18</span>;
+    <span class="kw">bool</span> s=(i==sel);
+    <span class="kw">if</span>(s){d.<span class="fn">fillRect</span>(<span class="num">3</span>,y,<span class="num">129</span>,<span class="num">16</span>,<span class="num">0x3A2000</span>);d.<span class="fn">drawRect</span>(<span class="num">3</span>,y,<span class="num">129</span>,<span class="num">16</span>,<span class="cls">TFT_ORANGE</span>);}
+    d.<span class="fn">setTextColor</span>(s?<span class="cls">TFT_WHITE</span>:<span class="cls">TFT_LIGHTGREY</span>);
+    d.<span class="fn">setCursor</span>(<span class="num">10</span>,y+<span class="num">4</span>); d.<span class="fn">print</span>(TV[i].name);
+  }
+  <span class="kw">if</span>(msg.<span class="fn">length</span>()&gt;0){d.<span class="fn">setTextColor</span>(<span class="cls">TFT_GREEN</span>);d.<span class="fn">setCursor</span>(<span class="num">3</span>,<span class="num">126</span>);d.<span class="fn">print</span>(msg);}
+  <span class="kw">else</span>{d.<span class="fn">setTextColor</span>(<span class="num">0x2A3A4A</span>);d.<span class="fn">setCursor</span>(<span class="num">3</span>,<span class="num">126</span>);d.<span class="fn">print</span>(<span class="str">"TAB=nav ENTER=enviar"</span>);}
+}
+
+<span class="kw">void</span> <span class="fn">setup</span>(){
+  <span class="kw">auto</span> cfg=M5.<span class="fn">config</span>(); M5Cardputer.<span class="fn">begin</span>(cfg,<span class="kw">true</span>); irsend.<span class="fn">begin</span>(); <span class="fn">draw</span>();
+}
+<span class="kw">void</span> <span class="fn">loop</span>(){
+  M5Cardputer.<span class="fn">update</span>();
+  <span class="kw">if</span>(M5Cardputer.Keyboard.<span class="fn">isChange</span>()&amp;&amp;M5Cardputer.Keyboard.<span class="fn">isPressed</span>()){
+    <span class="kw">auto</span> st=M5Cardputer.Keyboard.<span class="fn">keysState</span>();
+    <span class="kw">if</span>(st.tab){sel=(sel+<span class="num">1</span>)%N; <span class="fn">draw</span>();}
+    <span class="kw">if</span>(st.enter){
+      irsend.<span class="fn">sendNEC</span>(TV[sel].code,TV[sel].bits);
+      M5Cardputer.Speaker.<span class="fn">tone</span>(<span class="num">1200</span>,<span class="num">40</span>);
+      <span class="fn">draw</span>(<span class="str">"Enviado: "</span>+<span class="cls">String</span>(TV[sel].name));
+    }
+  }
+}</div>
+        </div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione uma segunda "marca" (ex: Samsung) e implemente um seletor de marca com tecla 'B'. Ao pressionar B, alterna entre LG e Samsung e recarrega os codigos correspondentes. Dica: use um array bidimensional ou um indice de marca atual.</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('m18')">← M18 — Scanner WiFi</button><button class="btn-nav nxt" onclick="go('m20')">M20 — OTA →</button></div>
+      </section>
+
+      <!-- M20 -->
+      <section id="m20" class="mod">
+        <div class="bc"><span>Fase 3 — Avancado</span><span class="sep">›</span><span class="cur">Modulo 20</span></div>
+        <div class="mhdr"><span class="mbadge b3">M20</span><div><h1>OTA Updates</h1><p class="sub">Over-the-Air firmware update via ArduinoOTA e Web Updater</p></div></div>
+        <div class="hwcard"><div class="hwico">OTA<br>WiFi</div><div><h3>Bibliotecas necessarias</h3><div class="tags"><span class="tag">ArduinoOTA.h</span><span class="tag">mDNS</span><span class="tag">cardputer.local</span><span class="tag">port 3232</span></div></div></div>
+        <div class="sec"><h2>Conceito</h2><p>OTA (Over-the-Air) permite atualizar o firmware sem cabo USB. O Cardputer se anuncia na rede local via mDNS como "cardputer.local". No Arduino IDE 2.x, apos o primeiro upload com cabo, o dispositivo aparece em Tools > Port > Network como "cardputer.local". Uploads subsequentes sao feitos pelo WiFi.</p></div>
+        <div class="sec"><h2>Codigo</h2>
+          <div class="cb"><span class="pp">#include</span> <span class="str">&lt;M5Cardputer.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;WiFi.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;ArduinoOTA.h&gt;</span>
+
+<span class="kw">const char</span>* SSID=<span class="str">"SUA_REDE"</span>, *PASS=<span class="str">"SUA_SENHA"</span>;
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="kw">auto</span> cfg=M5.<span class="fn">config</span>(); M5Cardputer.<span class="fn">begin</span>(cfg,<span class="kw">true</span>);
+  <span class="kw">auto</span>&amp; d=M5Cardputer.Display;
+  d.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>); d.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>); d.<span class="fn">setTextSize</span>(<span class="num">1</span>);
+
+  WiFi.<span class="fn">begin</span>(SSID,PASS);
+  <span class="kw">while</span>(WiFi.<span class="fn">status</span>()!=WL_CONNECTED){<span class="fn">delay</span>(<span class="num">500</span>);d.<span class="fn">print</span>(<span class="str">"."</span>);}
+  d.<span class="fn">println</span>(<span class="str">"\nWiFi OK!"</span>);
+
+  ArduinoOTA.<span class="fn">setHostname</span>(<span class="str">"cardputer"</span>);    <span class="cm">// cardputer.local</span>
+  ArduinoOTA.<span class="fn">setPassword</span>(<span class="str">"cardputer123"</span>); <span class="cm">// senha de upload</span>
+
+  ArduinoOTA.<span class="fn">onStart</span>([](){
+    M5Cardputer.Display.<span class="fn">fillScreen</span>(<span class="num">0x001040</span>);
+    M5Cardputer.Display.<span class="fn">setTextColor</span>(<span class="cls">CYAN</span>);
+    M5Cardputer.Display.<span class="fn">setCursor</span>(<span class="num">10</span>,<span class="num">50</span>);
+    M5Cardputer.Display.<span class="fn">println</span>(<span class="str">"OTA: Recebendo..."</span>);
+  });
+  ArduinoOTA.<span class="fn">onProgress</span>([](<span class="kw">unsigned int</span> prog, <span class="kw">unsigned int</span> total){
+    <span class="kw">int</span> pct=prog*<span class="num">100</span>/total;
+    <span class="kw">int</span> w=prog*<span class="num">120</span>/total;
+    M5Cardputer.Display.<span class="fn">fillRect</span>(<span class="num">7</span>,<span class="num">75</span>,<span class="num">120</span>,<span class="num">12</span>,<span class="num">0x001040</span>);
+    M5Cardputer.Display.<span class="fn">fillRect</span>(<span class="num">7</span>,<span class="num">75</span>,w,<span class="num">12</span>,<span class="cls">CYAN</span>);
+    M5Cardputer.Display.<span class="fn">drawRect</span>(<span class="num">7</span>,<span class="num">75</span>,<span class="num">120</span>,<span class="num">12</span>,<span class="cls">WHITE</span>);
+    M5Cardputer.Display.<span class="fn">setCursor</span>(<span class="num">55</span>,<span class="num">92</span>);
+    M5Cardputer.Display.<span class="fn">printf</span>(<span class="str">"%d%%"</span>,pct);
+  });
+  ArduinoOTA.<span class="fn">onEnd</span>([](){
+    M5Cardputer.Display.<span class="fn">fillScreen</span>(<span class="num">0x003300</span>);
+    M5Cardputer.Display.<span class="fn">setTextColor</span>(<span class="cls">GREEN</span>);
+    M5Cardputer.Display.<span class="fn">setCursor</span>(<span class="num">20</span>,<span class="num">60</span>);
+    M5Cardputer.Display.<span class="fn">println</span>(<span class="str">"OTA Concluido!"</span>);
+  });
+  ArduinoOTA.<span class="fn">onError</span>([](<span class="kw">ota_error_t</span> err){
+    M5Cardputer.Display.<span class="fn">printf</span>(<span class="str">"Erro OTA[%d]"</span>,err);
+  });
+
+  ArduinoOTA.<span class="fn">begin</span>();
+  d.<span class="fn">fillScreen</span>(<span class="cls">BLACK</span>); d.<span class="fn">setCursor</span>(<span class="num">0</span>,<span class="num">0</span>);
+  d.<span class="fn">setTextColor</span>(<span class="cls">GREEN</span>); d.<span class="fn">println</span>(<span class="str">"OTA Pronto!"</span>);
+  d.<span class="fn">setTextColor</span>(<span class="cls">WHITE</span>);
+  d.<span class="fn">println</span>(WiFi.<span class="fn">localIP</span>().<span class="fn">toString</span>());
+  d.<span class="fn">println</span>(<span class="str">"Arduino IDE:"</span>);
+  d.<span class="fn">setTextColor</span>(<span class="cls">CYAN</span>);
+  d.<span class="fn">println</span>(<span class="str">"Port > cardputer.local"</span>);
+}
+<span class="kw">void</span> <span class="fn">loop</span>() { ArduinoOTA.<span class="fn">handle</span>(); } <span class="cm">// OBRIGATORIO no loop</span></div>
+        </div>
+        <div class="exr"><div class="exr-t">Exercicio</div><p>Adicione um Web Updater: um servidor HTTP simples (WebServer.h) que serve uma pagina HTML com formulario de upload de .bin. Acesse pelo IP do Cardputer no navegador do PC e faca upload de um novo firmware sem o Arduino IDE.</p></div>
+        <div class="navbtns"><button class="btn-nav" onclick="go('m19')">← M19 — IR Blaster</button><button class="btn-nav nxt" onclick="go('m21')">M21 — TLS →</button></div>
+      </section>
+
       <!-- MODULOS INSERIDOS AQUI -->
     </main>
   </div>
