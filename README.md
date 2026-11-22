@@ -5,6 +5,32 @@ Entregue como dois arquivos HTML auto-contidos — funciona offline, sem depend�
 
 ---
 
+## O que é o Cardputer-ADV?
+
+O **M5Stack Cardputer-ADV** é um mini computador programável que cabe no bolso.
+
+Pense nele como um **smartphone sem tela de toque** — tem teclado físico, tela colorida, WiFi, Bluetooth e bateria. A diferença é que você programa ele do zero para fazer o que quiser.
+
+**O que você consegue fazer com ele:**
+
+🌐 **Conectar na internet** — busca informações em sites e APIs. Por exemplo: mostrar a previsão do tempo, cotação do dólar ou qualquer dado em tempo real na telinha.
+
+📡 **Virar um controle remoto** — tem um emissor infravermelho embutido. Você programa ele para ligar/desligar sua TV, ar-condicionado ou qualquer aparelho que use controle remoto.
+
+⌨️ **Digitar no computador sem fio** — via Bluetooth ele se conecta ao seu PC ou celular e funciona como um teclado — você digita no Cardputer e o texto aparece no computador.
+
+💬 **Enviar dados para a nuvem** — manda informações para plataformas IoT como Node-RED, Home Assistant ou qualquer dashboard. Útil para monitorar sensores, temperatura, etc.
+
+🔍 **Explorar redes WiFi** — varre as redes ao redor e mostra nome, sinal e canal de cada uma — como um scanner de rede portátil.
+
+🗂️ **Salvar arquivos** — armazena configurações, histórico ou qualquer dado diretamente na memória interna.
+
+⚡ **Durar dias na bateria** — entra em modo de economia profunda quando não está em uso e acorda sozinho no horário programado.
+
+> É como ter um canivete suíço digital — compacto, programável e conectado. Você decide o que ele faz.
+
+---
+
 ## Acesso rápido
 
 | Arquivo | Descrição | Link |
