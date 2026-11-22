@@ -184,12 +184,73 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:var
       </div>
     </nav>
     <main id="main">
-      <div id="welcome" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;gap:12px">
-        <span class="logo-badge" style="font-size:24px;padding:10px 18px">M5</span>
-        <h1 style="font-size:24px">M5Stack Cardputer-ADV</h1>
-        <h2 style="font-size:16px;color:var(--muted);font-weight:normal">Curso Completo — Do Zero ao Avancado</h2>
-        <p style="color:var(--dim);font-size:13px">24 modulos · Arduino C/C++ · 3 projetos praticos</p>
-        <button class="btn-nav nxt" onclick="go('m1')" style="font-size:14px;padding:12px 28px;margin-top:8px">Comecar pelo Modulo 1 &#8594;</button>
+      <div id="welcome" style="max-width:720px;margin:0 auto;padding:32px 16px 48px">
+
+        <!-- Hero -->
+        <div style="text-align:center;margin-bottom:36px">
+          <span class="logo-badge" style="font-size:24px;padding:10px 18px">M5</span>
+          <h1 style="font-size:26px;margin:16px 0 6px">M5Stack Cardputer-ADV</h1>
+          <h2 style="font-size:15px;color:var(--muted);font-weight:normal;margin-bottom:6px">Curso Completo — Do Zero ao Avancado</h2>
+          <p style="color:var(--dim);font-size:12px">24 modulos &middot; Arduino C/C++ &middot; 3 projetos praticos</p>
+        </div>
+
+        <!-- O que e -->
+        <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:20px 24px;margin-bottom:24px;text-align:left">
+          <div style="color:var(--accent1);font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">O que e o Cardputer-ADV?</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:10px">
+            O <strong style="color:var(--text)">M5Stack Cardputer-ADV</strong> e um mini computador programavel que cabe no bolso. Pense nele como um <strong style="color:var(--text)">smartphone sem tela de toque</strong> — tem teclado fisico, tela colorida, WiFi, Bluetooth e bateria. A diferenca e que voce <strong style="color:var(--text)">programa ele do zero</strong> para fazer o que quiser.
+          </p>
+          <div style="background:rgba(14,165,233,.08);border-left:3px solid var(--phase1);border-radius:0 5px 5px 0;padding:10px 14px;font-size:12px;color:var(--accent1);font-style:italic">
+            "E como ter um canivete suico digital no bolso. Compacto, conectado e totalmente programavel — voce decide o que ele faz."
+          </div>
+        </div>
+
+        <!-- Cards de capacidades -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:28px">
+
+          <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px">
+            <div style="font-size:20px;margin-bottom:8px">🌐</div>
+            <div style="font-size:12px;font-weight:bold;color:var(--text);margin-bottom:5px">Conectar na internet</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">Busca dados em sites e APIs. Exibe previsao do tempo, cotacao do dolar ou qualquer informacao em tempo real na tela.</div>
+          </div>
+
+          <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px">
+            <div style="font-size:20px;margin-bottom:8px">📡</div>
+            <div style="font-size:12px;font-weight:bold;color:var(--text);margin-bottom:5px">Virar um controle remoto</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">Emissor infravermelho embutido. Programa pra ligar TV, ar-condicionado ou qualquer aparelho com controle remoto.</div>
+          </div>
+
+          <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px">
+            <div style="font-size:20px;margin-bottom:8px">⌨️</div>
+            <div style="font-size:12px;font-weight:bold;color:var(--text);margin-bottom:5px">Teclado sem fio</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">Via Bluetooth aparece pro PC como teclado. Voce digita no Cardputer e o texto aparece no computador.</div>
+          </div>
+
+          <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px">
+            <div style="font-size:20px;margin-bottom:8px">💬</div>
+            <div style="font-size:12px;font-weight:bold;color:var(--text);margin-bottom:5px">Enviar dados para a nuvem</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">Manda leituras para Home Assistant, Node-RED ou qualquer painel IoT. Monitore sensores de qualquer lugar.</div>
+          </div>
+
+          <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px">
+            <div style="font-size:20px;margin-bottom:8px">🔍</div>
+            <div style="font-size:12px;font-weight:bold;color:var(--text);margin-bottom:5px">Scanner de redes WiFi</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">Varre o ambiente e lista todas as redes WiFi ao redor com nome, sinal e canal. Scanner de rede portátil.</div>
+          </div>
+
+          <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px">
+            <div style="font-size:20px;margin-bottom:8px">⚡</div>
+            <div style="font-size:12px;font-weight:bold;color:var(--text);margin-bottom:5px">Bateria de longa duracao</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">Entra em modo de economia profunda quando ocioso e acorda sozinho no horario programado.</div>
+          </div>
+
+        </div>
+
+        <!-- CTA -->
+        <div style="text-align:center">
+          <button class="btn-nav nxt" onclick="go('m1')" style="font-size:14px;padding:13px 32px">Comecar pelo Modulo 1 &#8594;</button>
+        </div>
+
       </div>
       <!-- M1 -->
       <section id="m1" class="mod">
